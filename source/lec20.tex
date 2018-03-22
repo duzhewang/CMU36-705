@@ -1,0 +1,525 @@
+\documentclass[twoside,12pt]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+\newcommand{\inprod}[2]{\ensuremath{\langle #1 , \, #2 \rangle}}
+
+
+\usepackage{amsmath,amsfonts,graphicx}
+\newcommand{\V}{\mbox{${\sf Var}$}}
+
+
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf 36-705: Intermediate Statistics		\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+\newcommand{\cdist}{\overset{d}{\rightarrow}}
+\newcommand{\edist}{\overset{d}{=}}
+
+\newcommand{\cprob}{\overset{p}{\rightarrow}}
+
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+
+\begin{document}
+%FILL IN THE RIGHT INFO.
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{20}{October 17}{Siva Balakrishnan}{Siva Balakrishnan}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+In the last class we showed that the Neyman-Pearson test is optimal for testing simple versus simple hypothesis tests. Today we will develop some generalizations and tests that are useful in other more complex settings.
+
+\section{The Wald Test}
+When we are testing a simple null hypothesis against a possibly composite alternative, the NP test is no longer applicable and a general alternative is to use the Wald test.
+
+We are interested in testing the hypotheses in a parametric model:
+\begin{align*}
+H_0: &~~~\theta = \theta_0 \\
+H_1: &~~~\theta \neq \theta_0.
+\end{align*}
+
+The Wald test most generally is based on an asymptotically normal estimator, i.e. we suppose that we have access to an estimator $\widehat{\theta}$ which under the null satisfies the property that:
+\begin{align*}
+\widehat{\theta} \cdist N(\theta_0, \sigma_0^2),
+\end{align*}
+where $\sigma_0^2$ is the variance of the estimator under the null. The canonical example is when $\widehat{\theta}$ is taken to be the MLE.
+
+In this case, we could consider the statistic:
+\begin{align*}
+T_n = \frac{ \widehat{\theta} - \theta_0} {\sigma_0},
+\end{align*}
+or if $\sigma_0$ is not known we can plug-in an estimate to obtain the statistic,
+\begin{align*}
+T_n = \frac{ \widehat{\theta} - \theta_0} {\widehat{\sigma_0}}.
+\end{align*}
+Under the null $T_n \cdist N(0,1)$, so we simply reject the null if: $T_n \geq z_{\alpha/2}$.
+This controls the Type-I error only asymptotically (i.e. only if $n \rightarrow \infty$) but this is relatively standard in applications. 
+
+{\bf Example: } Suppose we considered the problem of testing the parameter of a Bernoulli, i.e. we observe $X_1,\ldots,X_n \sim \text{Ber}(p)$, and the null is that $p = p_0$.
+Defining $\widehat{p} = \frac{1}{n} \sum_{i=1}^n X_i.$
+A Wald test could be constructed based on the statistic:
+\begin{align*}
+T_n = \frac{ \widehat{p} - p_0} { \sqrt{\frac{p_0(1-p_0)}{n}}},
+\end{align*}
+which has an asymptotic $N(0,1)$ distribution. An alternative would be to use a slightly different estimated standard deviation, i.e. to define,
+\begin{align*}
+T_n = \frac{\widehat{p} - p_0} { \sqrt{\frac{\widehat{p}(1-\widehat{p})}{n}}}.
+\end{align*}
+Observe that this alternative test statistic also has an asymptotically standard normal distribution under the null. Its behaviour under the alternate is a bit more pleasant as we will see.
+
+\subsection{Power of the Wald Test}
+To get some idea of what happens under the alternate, suppose we are in some situation where the MLE has ``standard asymptotics'', i.e. $\widehat{\theta} - \theta \cdist N(0,1/(nI_1(\theta)))$.
+Suppose that we use the statistic: 
+\begin{align*}
+T_n = \sqrt{n I_1(\widehat{\theta})} (\widehat{\theta} - \theta_0),
+\end{align*}
+and that the true value of the parameter is $\theta_1 \neq \theta_0$. Let us define:
+\begin{align*}
+\Delta = \sqrt{n I_1(\theta_1)} (\theta_0 - \theta_1),
+\end{align*}
+then the probability that the Wald test rejects the null hypothesis is asymptotically:
+\begin{align*}
+1 - \Phi\left( \Delta + z_{\alpha/2} \right) + \Phi\left(\Delta - z_{\alpha/2}  \right).
+\end{align*}
+You will prove this on your HW (it is some simple re-arrangement, similar to what we have done previously when computing the power function in a Gaussian model).
+There are some aspects to notice:
+\begin{enumerate}
+\item If the difference between $\theta_0$ and $\theta_1$ is very small the power will tend to $\alpha$, i.e. if $\Delta \approx 0$ then the test will have trivial power. 
+\item As $n \rightarrow \infty$ the two $\Phi$ terms will approach either 0 or 1, and so the power will approach 1.
+\item As a rule of thumb the Wald test will have non-trivial power if $|\theta_0 - \theta_1| \gg \frac{1}{\sqrt{n I_1(\theta_1)}}$.
+\end{enumerate}
+
+
+\section{Likelihood Ratio Test (LRT)}
+To test composite versus composite hypotheses the general method is to use something called the (generalized) likelihood ratio test. 
+
+We want to test:
+\begin{align*}
+H_0: &~~~\theta \in \Theta_0 \\
+H_1: &~~~\theta \notin \Theta_0.
+\end{align*}
+
+This test is simple: reject $H_0$ if
+$\lambda(X_1,\ldots, X_n) \leq c$ where
+$$
+\lambda(X_1,\ldots, X_n) =
+\frac{\sup_{\theta\in\Theta_0}L(\theta)}{\sup_{\theta\in\Theta}L(\theta)} =
+\frac{L(\widehat\theta_0)}{L(\widehat\theta)}
+$$
+where $\widehat\theta_0$ maximizes $L(\theta)$ subject to
+$\theta\in\Theta_0$.
+
+
+\begin{example}
+$X_1,\ldots, X_n \sim N(\theta,1)$.
+Suppose
+$$
+H_0: \theta = \theta_0,\ \ \ \ \ 
+H_1: \theta \neq \theta_0.
+$$
+After some algebra,
+$$
+\lambda = \exp\left\{ - \frac{n}{2} (\overline{X}_n - \theta_0)^2\right\}.
+$$
+So
+$$
+R =\{x:\ \lambda \leq c\} = 
+\{x :\ |\overline{X}-\theta_0| \geq c'\}
+$$
+where
+$c' = \sqrt{-2 \log c /n}$.
+Choosing $c'$ to make this level $\alpha$ gives:
+reject if $|T_n| > z_{\alpha/2}$ where
+$T_n = \sqrt{n}(\overline{X}-\theta_0)$
+which is the test we constructed before.
+\end{example}
+
+
+
+\begin{example}
+$X_1,\ldots, X_n \sim N(\theta,\sigma^2)$.
+Suppose
+$$
+H_0: \theta = \theta_0,\ \ \ \ \ 
+H_1: \theta \neq \theta_0.
+$$
+Then
+$$
+\lambda(x_1,\ldots, x_n) = \frac{ L(\theta_0,\widehat\sigma_0)}{ L(\widehat\theta,\widehat\sigma)}
+$$
+where $\widehat\sigma_0$ maximizes the likelihood subject to
+$\theta=\theta_0$.
+
+{\bf Exercise:} Show that
+$\lambda(x_1,\ldots, x_n) < c$ corresponds to rejecting when
+$|T_n| > k$ for some constant $k$ where
+$$
+T_n = \frac{\overline{X}_n-\theta_0}{S/\sqrt{n}}.
+$$
+
+Under $H_0$, $T_n$ has a t-distribution with $n-1$ degrees of freedom.
+So the final test is: reject $H_0$ if
+$$
+|T_n| > t_{n-1,\alpha/2}.
+$$
+This is called Student's t-test.
+It was invented by William Gosset working at Guiness Breweries
+and writing under the pseudonym Student.
+\end{example}
+
+We can simplify the LRT by using an asymptotic approximation.
+This fact that the LRT generally has a simple asymptotic approximation is known as \emph{Wilks' phenomenon.}
+First, some notation:
+
+\vspace{1cm}
+
+{\bf Notation:} Let $W\sim \chi^2_p$.
+Define $\chi^2_{p,\alpha}$ by
+$$
+P(W > \chi^2_{p,\alpha}) = \alpha.
+$$
+
+\vspace{1cm}
+
+We let $\ell(\theta)$ denote the log-likelihood in what follows.
+\begin{theorem}
+Consider testing
+$H_0:\theta=\theta_0$ versus
+$H_1:\theta \neq \theta_0$ 
+where $\theta\in\mathbb{R}$.
+Under $H_0$,
+$$
+-2\log \lambda(X_1,\ldots, X_n) \rightsquigarrow \chi_1^2.
+$$
+Hence, if we let $T_n = -2\log \lambda(X^n)$
+then
+$$
+P_{\theta_0} (T_n > \chi^2_{1,\alpha}) \to \alpha
+$$
+as $n\to\infty$.
+\end{theorem}
+
+
+
+\begin{proof}
+Using a Taylor expansion:
+$$
+\ell(\theta) \approx \ell(\widehat\theta) + \ell'(\widehat\theta)(\theta-\widehat\theta) + 
+\ell''(\widehat\theta) \frac{(\theta-\widehat\theta)^2}{2} =
+\ell(\widehat\theta) +  \ell''(\widehat\theta) \frac{(\theta-\widehat\theta)^2}{2}
+$$
+and so
+\begin{eqnarray*}
+-2\log \lambda(x_1,\ldots, x_n) &=& 2\ell(\widehat\theta) - 2\ell(\theta_0)\\
+& \approx &
+2\ell(\widehat\theta)
+-2\ell(\widehat\theta) -  \ell''(\widehat\theta) (\theta_0-\widehat\theta)^2 =
+-  \ell''(\widehat\theta) (\theta_0-\widehat\theta)^2 \\
+&=&
+\frac{-\frac{1}{n} \ell''(\widehat\theta)}{I_1(\theta_0)}
+ (\sqrt{n I_1(\theta_0)}(\widehat\theta-\theta_0))^2 = A_n \times B_n.
+\end{eqnarray*}
+Now $A_n\cprob 1$ by the WLLN and
+$\sqrt{B_n}\rightsquigarrow N(0,1)$.
+The result follows by Slutsky's theorem.
+\end{proof}
+
+\begin{example}
+$X_1,\ldots, X_n \sim {\rm Poisson}(\lambda)$.
+We want to test
+$H_0:\lambda = \lambda_0$ versus
+$H_1:\lambda \neq \lambda_0$.
+Then
+$$
+-2\log \lambda(x^n) = 2n[(\lambda_0 - \widehat\lambda) - \widehat\lambda \log(\lambda_0/\widehat\lambda)].
+$$
+We reject $H_0$ when
+$-2\log \lambda(x^n) > \chi^2_{1,\alpha}$.
+\end{example}
+
+Now suppose that
+$\theta=(\theta_1,\ldots, \theta_k)$.
+Suppose that $H_0: \theta\in\Theta_0$ fixes some of the parameters.
+Then, under conditions,
+$$
+T_n = -2\log \lambda(X_1,\ldots, X_n) \rightsquigarrow \chi^2_{\nu}
+$$
+where
+$$
+\nu = {\rm dim}(\Theta) - {\rm dim}(\Theta_0).
+$$
+Therefore,
+an asymptotic level $\alpha$ test is: reject $H_0$ when
+$T_n > \chi^2_{\nu,\alpha}$.
+
+
+\begin{example}
+Consider a multinomial with
+$\theta = (p_1,\ldots, p_5)$.
+So
+$$
+L(\theta) = p_1^{y_1}\cdots p_5^{y_5}.
+$$
+Suppose we want to test
+$$
+H_0: p_1=p_2=p_3 \ \ {\rm and}\ \ p_4 = p_5
+$$
+versus the alternative that $H_0$ is false.
+In this case
+$$
+\nu = 4 - 1 = 3.
+$$
+The LRT test statistic is
+$$
+\lambda(x_1,\ldots, x_n) =
+\frac{ \prod_{j=1}^5 \widehat{p}_{0j}^{Y_j}}{ \prod_{j=1}^5 \widehat{p}_{j}^{Y_j}}
+$$
+where
+$\widehat{p}_j = Y_j/n$,
+$\widehat{p}_{01} = \widehat{p}_{02} = \widehat{p}_{03}  = (Y_1+Y_2+Y_3)/n$,
+$\widehat{p}_{04} = \widehat{p}_{05} = (1-3\widehat{p}_{01})/2$.
+Now we reject $H_0$ if
+$-2\lambda (X_1,\ldots, X_n) > \chi^2_{3,\alpha}$. $\Box$
+\end{example}
+
+
+\section{p-values}
+
+When we test at a given level $\alpha$ we will reject
+or not reject.
+It is useful to summarize what levels we would reject at and what levels we would not reject at.
+
+\vspace{1cm}
+
+\noindent
+{\bf The p-value is the smallest $\alpha$ at which we would reject $H_0$.}
+
+\vspace{1cm}
+
+\noindent
+In other words, we reject at all $\alpha \geq p$.
+So, if the pvalue is 0.03, then
+we would reject at $\alpha =0.05$ but not at
+$\alpha =0.01$.
+
+Hence, to test at level $\alpha$, we reject when $p < \alpha$.
+
+
+\begin{theorem}
+Suppose we have a test of the form: reject when
+$T(X_1,\ldots, X_n) > c$. Then
+the p-value is
+$$
+p = \sup_{\theta\in\Theta_0}P_\theta(T_n(X_1,\ldots, X_n)\geq T_n(x_1,\ldots,x_n))
+$$
+where $x_1,\ldots, x_n$ are the observed data and
+$X_1,\ldots,X_n \sim p_{\theta_0}$.
+\end{theorem}
+
+\begin{example}
+$X_1,\ldots, X_n \sim N(\theta,1)$.
+Test that $H_0:\theta = \theta_0$ versus
+$H_1:\theta \neq \theta_0$.
+We reject when $|T_n|$ is large, where
+$T_n = \sqrt{n}(\overline{X}_n - \theta_0)$.
+Let $t_n$ be the obsrved value of $T_n$.
+Let $Z\sim N(0,1)$.
+Then,
+$$
+p = P_{\theta_0}\left( |\sqrt{n}(\overline{X}_n - \theta_0)| > t_n\right) =
+P( |Z| > t_n) = 2\Phi(-|t_n|).
+$$
+\end{example}
+
+
+\begin{theorem}
+Under $H_0$,
+$p\sim {\rm Unif}(0,1)$.
+\end{theorem}
+
+{\bf Important.}
+Note that $p$ is NOT equal to $P(H_0|X_1,\ldots, X_n)$.
+The latter is a Bayesian quantity which we will discuss later.
+\section{Goodness-of-fit testing}
+There are many testing problems that go beyond the usual parameteric testing problems we have formulated so far. Since we may not get a chance to cover these in detail later on, I thought it might be useful to discuss them briefly here.
+
+The most canonical non-parametric testing problem is called goodness-of-fit testing. Here given samples $X_1,\ldots,X_n \sim P$, we want to test:
+\begin{align*}
+H_0: &~~~P = P_0 \\
+H_1: &~~~P \neq P_0,
+\end{align*}
+for some fixed, known distribution $P_0$. 
+
+As a hypothetical example, you collect some measurements from a light source, you believe that the number of particles per unit time should have a Poisson distribution with a certain rate parameter (the intensity), and want to test this hypothesis.
+
+\subsection{The $\chi^2$ test}
+In the simplest setting, $P_0$ and $P$ are multinomials on $k$ categories, i.e. the null distribution just a vector of probabilities $(p_{01},\ldots,p_{0k})$, with $p_{0i} \geq 0$, $\sum_i p_{0i} = 1$.
+
+Given a sample $X_1,\ldots,X_n$ you can reduce it to a vector of counts $(Z_1,\ldots,Z_k)$ where $Z_i$ is the number of times you observed the $i$-th category.
+
+A natural test statistic in this case (you could also do the likelihood ratio test) is to consider:
+\begin{align*}
+T(X_1,\ldots,X_n) = \sum_{i=1}^k \frac{(Z_i - np_{0i})^2 - np_{0i}}{ np_{0i}}. 
+\end{align*}
+On your HW you will show that asymptotically this test statistic, under the null, has a $\chi^2_{k-1}$ distribution. 
+This is called Pearson's $\chi^2$ test.
+
+More generally, you could do perform any goodness-of-fit test by reducing to a multinomial test by binning, i.e. you define a sufficiently find partition of the domain, this induces a multinomial $p_0$ under the null which you then test using Pearson's test.
+
+\section{Two-sample Testing}
+Another popular hypothesis testing problem is the following: you observe $X_1,\ldots,X_{n_1} \sim P$ and $Y_1,\ldots,Y_{n_2} \sim Q$, and want to test if:
+\begin{align*}
+H_0: &~~~P = Q \\
+H_1: &~~~P \neq Q.
+\end{align*}
+There are many popular ways of testing this (for instance, in the ML literature kernel-based tests are quite popular -- search for ``Maximum Mean Discrepancy'' if you are curious).
+
+Suppose again we considered the multinomial setting where $P$ and $Q$ are multinomials on $k$ categories. Then there is a version of the $\chi^2$ test that is commonly used. Let us define $(Z_1,\ldots,Z_k)$ and $(Z_1^{\prime}, \ldots, Z_k^{\prime})$ to be the counts in the $X$ and $Y$ sample respectively. We can define for $i \in \{1,\ldots,k\}$,
+\begin{align*}
+\widehat{c}_i = \frac{Z_i + Z_i^{\prime}}{n_1 + n_2}.
+\end{align*}
+The two-sample $\chi^2$ test is then:
+\begin{align*}
+T_n = \sum_{i=1}^k \left[ \frac{ (Z_i - n_1 \widehat{c}_i)^2}{n_1 \widehat{c}_i} +  \frac{ (Z_i^{\prime} - n_2 \widehat{c}_i)^2}{n_2 \widehat{c}_i} \right].
+\end{align*}
+This is a bit harder to see but under the null this statistic also has a $\chi^2_{k-1}$ distribution.
+For two-sample testing we can determine the cutoff in a different way without resorting to asymptotics. 
+This is called a permutation test. We will explore this in the general (not multinomial) setting.
+
+\subsection{The Permutation Test}
+Suppose we have data
+$$
+X_1, \ldots, X_n \sim F
+$$
+and
+$$
+Y_1, \ldots, Y_m \sim G.
+$$
+We want to test:
+$$
+H_0: F=G \ \ \ {\rm versus}\ \ \ H_1: F\neq G.
+$$
+Let
+$$
+Z = (X_1,\ldots,X_n,Y_1,\ldots, Y_m).
+$$
+Create labels
+$$
+L = (\underbrace{1,\ldots, 1}_{n\ {\rm values}},
+     \underbrace{2,\ldots, 2}_{m\ {\rm values}}).
+$$
+A test statistic can be written as a function of
+$Z$ and $L$.
+For example, if
+$$
+T = |\overline{X}_n - \overline{Y}_m|
+$$
+then we can write
+$$
+T = \left| \frac{\sum_{i=1}^{N} Z_i I(L_i=1)}{\sum_{i=1}^{N} I(L_i=1)} - 
+\frac{\sum_{i=1}^{N} Z_i I(L_i=2)}{\sum_{i=1}^{N} I(L_i=2)} \right|
+$$
+where $N = n+m$.
+So we write $T = g(L,Z)$.
+
+Define
+$$
+p = \frac{1}{N!}\sum_{\pi} I( g(L_\pi,Z) > g(L,Z))
+$$
+where
+$L_\pi$ is a permutation of the labels and the sum is over all permutations.
+Under $H_0$, permuting the labels does not change the distribution.
+In other words, $g(L,Z)$ has an equal chance of having any rank
+among all the permuted values.
+That is, under $H_0$,
+$\approx {\rm Unif}(0,1)$ and
+if we reject when $p < \alpha$,
+then we have a level $\alpha$ test.
+
+Summing over all permutations is infeasible.
+But it suffices to use a random sample of permutations.
+So we do this:
+\begin{enumerate}
+\item Compute a random permutation of the labels and compute $W$.
+Do this $K$ times giving values $T^{(1)}, \ldots, T^{(K)}$.
+\item Compute the p-value
+$$
+\frac{1}{K}\sum_{j=1}^K I(T^{(j)} > T).
+$$
+\end{enumerate}
+
+
+
+
+\end{document}
+
+
+
+
+

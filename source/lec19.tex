@@ -1,0 +1,825 @@
+\documentclass[twoside,12pt]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+\newcommand{\inprod}[2]{\ensuremath{\langle #1 , \, #2 \rangle}}
+
+
+\usepackage{amsmath,amsfonts,graphicx}
+\newcommand{\V}{\mbox{${\sf Var}$}}
+
+
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf 36-705: Intermediate Statistics		\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+\newcommand{\cdist}{\overset{d}{\rightarrow}}
+\newcommand{\edist}{\overset{d}{=}}
+
+\newcommand{\cprob}{\overset{p}{\rightarrow}}
+
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+
+\begin{document}
+%FILL IN THE RIGHT INFO.
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{19}{October 14}{Siva Balakrishnan}{Siva Balakrishnan}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+The classical statistical hypothesis testing framework (as with much of statistics) originated with Fisher. 
+
+
+{\bf Example 1: } The story goes that a colleague of Fisher claimed to be able to distinguish if in an English tea, milk was added before water (or the other way around). 
+
+Fisher proposed to give her 8 cups of tea, 4 of which had milk first, and 4 of which had tea first in a random order. The point was roughly, that if she was ``labeling'' at random then she would have a small chance (1 in 70) of getting every cup right.
+
+In his description, the null hypothesis was that she had no ability to distinguish. She actually got them all correct, which would have happened by chance with probability 0.014. He concluded that since this probability was less that $0.05$ that it was ``statistically significant''.
+
+Notice the asymmetries/arbitrary-ness in this description: only a null hypothesis is actually specified (i.e. there is no alternative hypothesis -- it is in some sense implicit), i.e. the null hypothesis is often special. Furthermore, there is an arbitrary choice of a cut-off $0.05$ below which we declare something is significant.
+
+Hypothesis testing is really everywhere. It would probably alarm you to know how many policy decisions, nutrition decisions, scientific results live or die on the basis of hypothesis tests. 
+
+{\bf Example 2: } A couple of typical examples to emphasize again why the null might really be special. 
+A common example is in forensics. Things like fingerprint matches, DNA matches, deciding whether pieces of glass match in their chemical composition etc. are actually problems of a statistical nature. 
+Here perhaps following the ``innocent till proven guilty'' adage, the null hypothesis is that the defendant is innocent. We then need to review evidence and choose to either reject or fail to reject (i.e. acquit) the defendant. It is perhaps clear that there in many cases is a heavier price for false convictions and so it makes sense to control this error. Indeed, deciding how to choose a significance level in this context is a huge debate.
+
+{\bf Example 3: } Another common example is in epidemiology. A drug company has new drug and wishes to compare it with current standard treatment. Federal regulators tell the company that they must demonstrate that new drug is better than current treatment to receive approval. The firm runs clinical trial where some patients receive new drug, and others receive standard treatment. There is some numeric response of the ``treatment effect'' (say higher is better). The null hypothesis is that the new drug is no better than the current standard. Again false positives (where we falsely declare the new drug as better when it is actually harmful) are potentially much worse than false negatives, so we would like to protect against this.
+
+\section{The formal framework}
+
+Let
+$X_1,\ldots, X_n \sim p(x;\theta)$.
+Suppose we we want to know if $\theta=\theta_0$ or not,
+where $\theta_0$ is a specific value of $\theta$.
+For example, if we are flipping a coin, we may want to know if the coin is fair;
+this corresponds to $p=1/2$.
+If we are testing the effect of two drugs ---
+whose means effects are $\theta_1$ and $\theta_2$ ---
+we may be interested to know if there is no difference,
+which corresponds to $\theta_1 - \theta_2 = 0$.
+
+We formalize this by stating a {\em null hypothesis} $H_0$
+and an alternative hypothesis $H_1$.
+For example:
+$$
+H_0: \theta = \theta_0 \ \ \ {\rm versus}\ \ \ \theta \neq \theta_0.
+$$
+More generally,
+consider a parameter space $\Theta$.
+We consider
+$$
+H_0: \theta \in \Theta_0\ \ \ {\rm versus}\ \ \ 
+H_1: \theta \in \Theta_1
+$$
+where $\Theta_0 \cap \Theta_1 = \emptyset$.
+If $\Theta_0$ consists of a single point, we call this a {\em simple null hypothesis}.
+If $\Theta_0$ consists of more than one point, we call this a {\em composite null hypothesis}.
+
+
+\begin{example}
+$X_1,\ldots, X_n \sim {\rm Bernoulli}(p)$.
+$$
+H_0: p= \frac{1}{2}\ \ \ {\rm }\ \ \ H_1: p\neq \frac{1}{2}.\ \ \ \Box
+$$
+\end{example}
+
+
+\vspace{1cm}
+
+
+The question is not whether $H_0$ is true or false.
+The question is whether there is sufficient evidence
+to reject $H_0$, much like a court case.
+Our possible actions are:
+reject $H_0$ or retain (don't reject) $H_0$.
+
+\vspace{1cm}
+
+\begin{center}
+\begin{tabular}{|c|c|c|} \hline
+ & \multicolumn{2}{c}{Decision} \\
+ & Retain $H_0$ & Reject $H_0$\\ \hline
+$H_0$ true & $\surd$ & Type I error \\
+           &         & (false positive)\\ \hline
+$H_1$ true & Type II error & $\surd$\\
+           & (false negative) & \\ \hline
+\end{tabular}
+\end{center}    
+
+\vspace{1cm}
+
+{\bf Warning: Hypothesis testing should only be used when it is appropriate.
+Often times, people use hypothesis testing when it would be much more
+appropriate to use confidence intervals (which is the next topic).}
+
+\subsection{Normal Quantiles}
+I almost always confuse these so this is mostly for my own reference.
+Let $\Phi$ be the cdf of a standard Normal random variable $Z$.
+For $0 < \alpha < 1$, let
+$$
+z_\alpha = \Phi^{-1}(1-\alpha).
+$$
+Hence,
+$$
+P(Z > z_\alpha) = \alpha.
+$$
+Also,
+$P(Z < - z_\alpha) = \alpha$.
+
+
+
+\section{Constructing Tests}
+
+Hypothesis testing involves the following steps:
+
+\begin{enumerate}
+\item Choose a {\em test statistic} $T_n = T_n(X_1,\ldots, X_n)$.
+\item Choose a rejection region $R$.
+\item If $T_n\in R$ we reject $H_0$ otherwise we retain $H_0$.
+\end{enumerate}
+
+\begin{example}
+Let $X_1,\ldots, X_n \sim {\rm Bernoulli}(p)$.
+Suppose we test
+$$
+H_0: p= \frac{1}{2}\ \ \ {\rm }\ \ \ H_1: p\neq \frac{1}{2}.
+$$
+Let $T_n = n^{-1}\sum_{i=1}^n X_i$ and
+$R = \{ x_1,\ldots,x_n:\ |T_n(x_1,\ldots, x_n)-1/2| > \delta\}$.
+So we reject $H_0$ if
+$|T_n-1/2| > \delta$.
+\end{example}
+
+We need to choose $T$ and $R$
+so that the test has good statistical properties.
+We will consider the following tests:
+\begin{enumerate}
+\item The Neyman-Pearson Test
+\item The Wald test
+\item The Likelihood Ratio Test (LRT)
+\item The permutation test.
+\end{enumerate}
+
+Before we discuss these methods, we first need to talk about 
+how we evaluate tests.
+
+
+
+\section{Error Rates and Power}
+
+
+Suppose we reject $H_0$ when $(X_1,\ldots, X_n)\in R$.
+Define the {\em power function} by
+$$
+\beta(\theta) = P_\theta(X_1,\ldots, X_n\in R).
+$$
+{\bf We want $\beta(\theta)$ to be small when $\theta\in\Theta_0$ and
+we want $\beta(\theta)$ to be large when $\theta\in\Theta_1$.}
+The general strategy is: 
+\begin{enumerate}
+\item Fix $\alpha\in[0,1]$. 
+\item Now try to maximize
+$\beta(\theta)$ for $\theta\in \Theta_1$ subject to
+$\beta(\theta)\leq \alpha$ for $\theta\in \Theta_0$.
+\end{enumerate}
+Notice the asymmetry that we always favor the null hypothesis and only consider tests that control the Type-I error.
+
+We need the following definitions.
+A test is {\em size $\alpha$} if
+$$
+\sup_{\theta\in\Theta_0}\beta(\theta) = \alpha.
+$$
+A test is {\em level $\alpha$} if
+$$
+\sup_{\theta\in\Theta_0}\beta(\theta) \leq \alpha.
+$$
+A size $\alpha$ test and a level $\alpha$ test are almost the same thing.
+The distinction is made bcause sometimes we want a size $\alpha$ test
+and we cannot construct a test with exact size $\alpha$ but we can
+construct one with a smaller error rate.
+
+\begin{example}
+$X_1,\ldots, X_n \sim N(\theta,\sigma^2)$ with $\sigma^2$ known.
+Suppose we test
+$$
+H_0: \theta = \theta_0,\ \ \ \ \ 
+H_1: \theta > \theta_0.
+$$
+This is called a {\bf one-sided alternative}.
+Suppose we reject $H_0$ if
+$T_n> c$ where
+$$
+T_n = \frac{\overline{X}_n - \theta_0}{\sigma/\sqrt{n}}.
+$$
+Then
+\begin{eqnarray*}
+\beta(\theta) &=& 
+P_\theta\left( \frac{\overline{X}_n - \theta_0}{\sigma/\sqrt{n}} > c \right)=
+P_\theta\left( \frac{\overline{X}_n - \theta}{\sigma/\sqrt{n}} > c + 
+\frac{\theta_0-\theta}{\sigma/\sqrt{n}} \right)\\
+&=& P\left( Z > c+\frac{\theta_0-\theta}{\sigma/\sqrt{n}} \right) \\
+&=& 1-\Phi\left( c+ \frac{\theta_0-\theta}{\sigma/\sqrt{n}} \right),
+\end{eqnarray*}
+where $\Phi$ is the cdf of a standard Normal and $Z\sim \Phi$.
+Now
+$$
+\sup_{\theta\in\Theta_0}\beta(\theta) = \beta(\theta_0) = 1- \Phi(c).
+$$
+To get a size $\alpha$ test, set
+$1-\Phi(c) = \alpha$ so that
+$$
+c = z_\alpha
+$$
+where $z_\alpha = \Phi^{-1}(1-\alpha)$.
+Our test is: reject $H_0$ when
+$$
+T_n = \frac{\overline{X}_n - \theta_0}{\sigma/\sqrt{n}} > z_\alpha.
+$$
+\end{example}
+
+\begin{example}
+$X_1,\ldots, X_n \sim N(\theta,\sigma^2)$ with $\sigma^2$ known.
+Suppose
+$$
+H_0: \theta = \theta_0,\ \ \ \ \ 
+H_1: \theta \neq \theta_0.
+$$
+This is called a {\bf two-sided} alternative.
+We will reject $H_0$ if
+$|T_n|> c$ where
+$T_n$ is defined as before.
+Now
+\begin{eqnarray*}
+\beta(\theta) &=& 
+P_\theta(T_n < -c) + P_\theta(T_n > c)\\
+&=& 
+P_\theta\left( \frac{\overline{X}_n - \theta_0}{\sigma/\sqrt{n}} < -c \right) +
+P_\theta\left( \frac{\overline{X}_n - \theta_0}{\sigma/\sqrt{n}} > c \right)\\
+&=& P\left( Z < -c+\frac{\theta_0-\theta}{\sigma/\sqrt{n}} \right) +
+P\left( Z > c+\frac{\theta_0-\theta}{\sigma/\sqrt{n}} \right)\\
+&=& 
+\Phi\left( -c+ \frac{\theta_0-\theta}{\sigma/\sqrt{n}} \right) + 
+1-\Phi\left( c+ \frac{\theta_0-\theta}{\sigma/\sqrt{n}} \right)\\
+&=&
+\Phi\left( -c+ \frac{\theta_0-\theta}{\sigma/\sqrt{n}} \right) + 
+\Phi\left( -c- \frac{\theta_0-\theta}{\sigma/\sqrt{n}} \right)
+\end{eqnarray*}
+since $\Phi(-x) = 1 - \Phi(x)$.
+The size is
+$$
+\beta(\theta_0) = 2\Phi(-c).
+$$
+To get a size $\alpha$ test we set
+$2\Phi(-c) = \alpha$ so that
+$c = -\Phi^{-1}(\alpha/2) = \Phi^{-1}(1-\alpha/2) = z_{\alpha/2}$.
+The test is:
+reject $H_0$ when
+$$
+|T| = \left|\frac{\overline{X}_n - \theta_0}{\sigma/\sqrt{n}}\right| > z_{\alpha/2}.
+$$
+\end{example}
+
+
+
+\section{The Neyman-Pearson Test}
+Let ${\cal C}_\alpha$ denote all level $\alpha$ tests.
+A test in ${\cal C}_\alpha$ with power function $\beta$ is
+{\bf uniformly most powerful (UMP)} if the following holds:
+if $\beta'$ is the power function of any other test in ${\cal C}_\alpha$ then
+$\beta(\theta) \leq \beta'(\theta)$ for all $\theta\in\Theta_1$.
+
+Consider testing
+$H_0: \theta = \theta_0$ versus
+$H_1: \theta = \theta_1$.
+(Simple null and simple alternative.)
+
+\begin{theorem}
+Let
+$L(\theta) = p(X_1,\ldots, X_n;\theta)$
+and
+$$
+T_n = \frac{L(\theta_1)}{L(\theta_0)}.
+$$
+Suppose we reject $H_0$ if
+$T_n > k$ 
+where $k$ is chosen so that
+$$
+P_{\theta_0}(X^n \in R) = \alpha.
+$$
+This test is a UMP level $\alpha$ test.
+\end{theorem}
+
+%The Neyman-Pearson test is quite limited
+%because it can be used
+%only for testing a simple null versus a simple alternative.
+%So it does not get used in practice very often.
+%But it is important from a conceptual point of view.
+%
+%
+%The Neyman Pearson test statistic is to take the likelihood ratio:
+%\begin{align*}
+%\Lambda(x) = \frac{L(x ; \theta_0)}{L(x; \theta_1)} = \frac{f_0(x)}{f_1(x)}
+%\end{align*}
+%and to reject if this value is small. Again, we will compute the precise cut-off by controlling the 
+%probability of making a 
+%Type I error. That is we select a threshold $t^*$ such that:
+%\begin{align*}
+%\mathbb{P}_0(\Lambda(x) \leq t^*) = \alpha.
+%\end{align*}
+
+One nice thing about this is that it is a ``general recipe'' for doing a hypothesis test. The drawback
+of course is that it only applies to the restricted class of simple versus simple tests.
+
+The Neyman-Pearson test, despite its restricted applicability is a very important conceptual contribution. When it is applicable it is an optimal test. This is often called the Neyman-Pearson Lemma,
+and we will prove this today.
+
+\subsection{The Neyman-Pearson Lemma}
+%The Neyman-Pearson Lemma says that the NP test, is the most powerful test of size $\alpha$.
+%This means that if we have \emph{any other test} that controls the Type I error rate at $\alpha$,
+%then its power is at most the power of the NP test.
+
+{\bf Proof: } Let us denote the test function of the NP test as $\phi_{NP}$ and the test function
+of any other test we want to compare against as $\phi_A$. The test function simply takes the value $1$ if the test rejects and $0$ otherwise. Since the parameters $\theta_0$ and $\theta_1$ are fixed we will be thinking of the likelihood as $X^n$ is varied. To easy notation we will assume that one sample is observed (nothing changes more generally) and denote $f_0(x) = L(\theta_0; x)$ and $f_1(x) = L(\theta_1;x)$. So with this notation we simply reject if:
+\begin{align*}
+\frac{f_1(x)}{f_0(x)} \geq k.
+\end{align*}
+
+To prove the NP Lemma, we will first argue that the following is true:
+\begin{align*}
+\int_x \underbrace{(\phi_{NP}(x) - \phi_{A}(x))}_{T_1} \underbrace{\left(f_1(x) - k f_0(x) \right)}_{T_2}  dx \geq 0.
+\end{align*}
+To see this we can just consider some cases:
+\begin{enumerate}
+\item If both tests reject or if both tests accept then the inequality is clearly true since the LHS is 0.
+\item If NP rejects, and the test A accepts then $\phi_{NP}(x) = 1$, and $\phi_A(x) = 0$, so $T_1 \geq 0$. Since the NP test rejected the null we know that:
+\begin{align*}
+\frac{f_1(x)}{f_0(x)} \geq k,
+\end{align*}
+so that $T_2 \geq 0$. So the inequality is true in this case. 
+\item If NP accepts and the test A rejects then both $T_1$ and $T_2$ are negative so the inequality is also true in this case.
+\end{enumerate}
+So we can see that for every $x$, $T_1 \times T_2 \geq 0$ so it is true when we integrate over $x$.
+Now, we can rearrange this inequality to see that:
+\begin{align*}
+\int_x (\phi_{NP}(x) - \phi_{A}(x)) f_1(x) dx& \geq k \int_x (\phi_{NP}(x) - \phi_{A}(x)) f_0(x) dx \\
+&= k  \left(\underbrace{\int_x \phi_{NP}(x) f_0(x) dx}_{= \alpha}  - \underbrace{ \int_x \phi_{A}(x) f_0(x) dx}_{\leq \alpha} \right) \\
+&\geq 0.
+\end{align*}
+This proves the NP lemma, i.e. that the power of the NP test is larger than the power of any other test.
+
+
+%
+%\section{The Wald Test}
+%
+%Let
+%$$
+%T_n  = \frac{\widehat\theta_n - \theta_0}{{\rm se}}
+%$$
+%where $\widehat\theta$ is an asymptotically Normal estimator
+%and ${\rm se}$ is the estimated standard error of $\widehat\theta$
+%(or the standard error under $H_0$).
+%Under $H_0$,
+%$T_n\rightsquigarrow N(0,1)$.
+%Hence, an asymptotic level $\alpha$ test is to reject when
+%$|T_n| > z_{\alpha/2}$.
+%That is
+%$$
+%P_{\theta_0}(|T_n|> z_\alpha)\rightarrow \alpha.
+%$$
+%
+%
+%For example, with Bernoulli data, to test
+%$H_0:p=p_0$, 
+%$$
+%T_n = \frac{\widehat p - p_0}{\sqrt{\frac{\widehat p (1-\widehat p)}{n}}}.
+%$$
+%You can also use
+%$$
+%T_n = \frac{\widehat p - p_0}{\sqrt{\frac{p_0 (1- p_0)}{n}}}.
+%$$
+%In other words, to compute the standard error, you can replace $\theta$
+%with an estimate $\widehat\theta$ or by the null value $\theta_0$.
+%
+%
+%
+%\section{The Likelihood Ratio Test (LRT)}
+%
+%This test is simple: reject $H_0$ if
+%$\lambda(x_1,\ldots, x_n) \leq c$ where
+%$$
+%\lambda(x_1,\ldots, x_n) =
+%\frac{\sup_{\theta\in\Theta_0}L(\theta)}{\sup_{\theta\in\Theta}L(\theta)} =
+%\frac{L(\widehat\theta_0)}{L(\widehat\theta)}
+%$$
+%where $\widehat\theta_0$ maximizes $L(\theta)$ subject to
+%$\theta\in\Theta_0$.
+%
+%
+%\begin{example}
+%$X_1,\ldots, X_n \sim N(\theta,1)$.
+%Suppose
+%$$
+%H_0: \theta = \theta_0,\ \ \ \ \ 
+%H_1: \theta \neq \theta_0.
+%$$
+%After some algebra,
+%$$
+%\lambda = \exp\left\{ - \frac{n}{2} (\overline{X}_n - \theta_0)^2\right\}.
+%$$
+%So
+%$$
+%R =\{x:\ \lambda \leq c\} = 
+%\{x :\ |\overline{X}-\theta_0| \geq c'\}
+%$$
+%where
+%$c' = \sqrt{-2 \log c /n}$.
+%Choosing $c'$ to make this level $\alpha$ gives:
+%reject if $|T_n| > z_{\alpha/2}$ where
+%$T_n = \sqrt{n}(\overline{X}-\theta_0)$
+%which is the test we constructed before.
+%\end{example}
+%
+%
+%
+%\begin{example}
+%$X_1,\ldots, X_n \sim N(\theta,\sigma^2)$.
+%Suppose
+%$$
+%H_0: \theta = \theta_0,\ \ \ \ \ 
+%H_1: \theta \neq \theta_0.
+%$$
+%Then
+%$$
+%\lambda(x_1,\ldots, x_n) = \frac{ L(\theta_0,\widehat\sigma_0)}{ L(\widehat\theta,\widehat\sigma)}
+%$$
+%where $\widehat\sigma_0$ maximizes the likelihood subject to
+%$\theta=\theta_0$.
+%
+%{\bf Exercise:} Show that
+%$\lambda(x_1,\ldots, x_n) < c$ corresponds to rejecting when
+%$|T_n| > k$ for some constant $k$ where
+%$$
+%T_n = \frac{\overline{X}_n-\theta_0}{S/\sqrt{n}}.
+%$$
+%
+%Under $H_0$, $T_n$ has a t-distribution with $n-1$ degrees of freedom.
+%So the final test is: reject $H_0$ if
+%$$
+%|T_n| > t_{n-1,\alpha/2}.
+%$$
+%This is called Student's t-test.
+%It was invented by William Gosset working at Guiness Breweries
+%and writing under the pseudonym Student.
+%\end{example}
+%
+%We can simplify the LRT by using an asymptotic approximation.
+%First, some notation:
+%
+%\vspace{1cm}
+%
+%{\bf Notation:} Let $W\sim \chi^2_p$.
+%Define $\chi^2_{p,\alpha}$ by
+%$$
+%P(W > \chi^2_{p,\alpha}) = \alpha.
+%$$
+%
+%\vspace{1cm}
+%
+%\begin{theorem}
+%Consider testing
+%$H_0:\theta=\theta_0$ versus
+%$H_1:\theta \neq \theta_0$ 
+%where $\theta\in\mathbb{R}$.
+%Under $H_0$,
+%$$
+%-2\log \lambda(X_1,\ldots, X_n) \rightsquigarrow \chi_1^2.
+%$$
+%Hence, if we let $T_n = -2\log \lambda(X^n)$
+%then
+%$$
+%P_{\theta_0} (T_n > \chi^2_{1,\alpha}) \to \alpha
+%$$
+%as $n\to\infty$.
+%\end{theorem}
+%
+%
+%
+%\begin{proof}
+%Using a Taylor expansion:
+%$$
+%\ell(\theta) \approx \ell(\widehat\theta) + \ell'(\widehat\theta)(\theta-\widehat\theta) + 
+%\ell''(\widehat\theta) \frac{(\theta-\widehat\theta)^2}{2} =
+%\ell(\widehat\theta) +  \ell''(\widehat\theta) \frac{(\theta-\widehat\theta)^2}{2}
+%$$
+%and so
+%\begin{eqnarray*}
+%-2\log \lambda(x_1,\ldots, x_n) &=& 2\ell(\widehat\theta) - 2\ell(\theta_0)\\
+%& \approx &
+%2\ell(\widehat\theta)
+%-2\ell(\widehat\theta) -  \ell''(\widehat\theta) (\theta-\widehat\theta)^2 =
+%-  \ell''(\widehat\theta) (\theta-\widehat\theta)^2 \\
+%&=&
+%\frac{-\ell''(\widehat\theta)}{I_n(\theta_0)}
+%I_n(\theta_0) (\sqrt{n}(\widehat\theta-\theta_0))^2 = A_n \times B_n.
+%\end{eqnarray*}
+%Now $A_n\cprob 1$ by the WLLN and
+%$\sqrt{B_n}\rightsquigarrow N(0,1)$.
+%The result follows by Slutsky's theorem.
+%\end{proof}
+%
+%\begin{example}
+%$X_1,\ldots, X_n \sim {\rm Poisson}(\lambda)$.
+%We want to test
+%$H_0:\lambda = \lambda_0$ versus
+%$H_1:\lambda \neq \lambda_0$.
+%Then
+%$$
+%-2\log \lambda(x^n) = 2n[(\lambda_0 - \widehat\lambda) - \widehat\lambda \log(\lambda_0/\widehat\lambda)].
+%$$
+%We reject $H_0$ when
+%$-2\log \lambda(x^n) > \chi^2_{1,\alpha}$.
+%\end{example}
+%
+%Now suppose that
+%$\theta=(\theta_1,\ldots, \theta_k)$.
+%Suppose that $H_0: \theta\in\Theta_0$ fixes some of the parameters.
+%Then, under conditions,
+%$$
+%T_n = -2\log \lambda(X_1,\ldots, X_n) \rightsquigarrow \chi^2_{\nu}
+%$$
+%where
+%$$
+%\nu = {\rm dim}(\Theta) - {\rm dim}(\Theta_0).
+%$$
+%Therefore,
+%an asymptotic level $\alpha$ test is: reject $H_0$ when
+%$T_n > \chi^2_{\nu,\alpha}$.
+%
+%
+%\begin{example}
+%Consider a multinomial with
+%$\theta = (p_1,\ldots, p_5)$.
+%So
+%$$
+%L(\theta) = p_1^{y_1}\cdots p_5^{y_5}.
+%$$
+%Suppose we want to test
+%$$
+%H_0: p_1=p_2=p_3 \ \ {\rm and}\ \ p_4 = p_5
+%$$
+%versus the alternative that $H_0$ is false.
+%In this case
+%$$
+%\nu = 4 - 1 = 3.
+%$$
+%The LRT test statistic is
+%$$
+%\lambda(x_1,\ldots, x_n) =
+%\frac{ \prod_{i=1}^5 \widehat{p}_{0j}^{Y_j}}{ \prod_{i=1}^5 \widehat{p}_{j}^{Y_j}}
+%$$
+%where
+%$\widehat{p}_j = Y_j/n$,
+%$\widehat{p}_{10} = \widehat{p}_{20} = \widehat{p}_{30}  = (Y_1+Y_2+Y_3)/n$,
+%$\widehat{p}_{40} = \widehat{p}_{50} = (1-3\widehat{p}_{10})/2$.
+%These calculations are on p 491.
+%Make sure you understand them.
+%Now we reject $H_0$ if
+%$-2\lambda (X_1,\ldots, X_n) > \chi^2_{3,\alpha}$. $\Box$
+%\end{example}
+%
+%
+%\section{p-values}
+%
+%When we test at a given level $\alpha$ we will reject
+%or not reject.
+%It is useful to summarize what levels we would reject at and what levels we woud not reject at.
+%
+%\vspace{1cm}
+%
+%\noindent
+%{\bf The p-value is the smallest $\alpha$ at which we would reject $H_0$.}
+%
+%\vspace{1cm}
+%
+%\noindent
+%In other words, we reject at all $\alpha \geq p$.
+%So, if the pvalue is 0.03, then
+%we would reject at $\alpha =0.05$ but not at
+%$\alpha =0.01$.
+%
+%Hence, to test at level $\alpha$ when $p < \alpha$.
+%
+%
+%\begin{theorem}
+%Suppose we have a test of the form: reject when
+%$T(X_1,\ldots, X_n) > c$. Then
+%the p-value is
+%$$
+%p = \sup_{\theta\in\Theta_0}P_\theta(T_n(X_1,\ldots, X_n)\geq T_n(x_1,\ldots,x_n))
+%$$
+%where $x_1,\ldots, x_n$ are the observed data and
+%$X_1,\ldots,X_n \sim p_{\theta_0}$.
+%\end{theorem}
+%
+%\begin{example}
+%$X_1,\ldots, X_n \sim N(\theta,1)$.
+%Test that $H_0:\theta = \theta_0$ versus
+%$H_1:\theta \neq \theta_0$.
+%We reject when $|T_n|$ is large, where
+%$T_n = \sqrt{n}(\overline{X}_n - \theta_0)$.
+%Let $t_n$ be the obsrved value of $T_n$.
+%Let $Z\sim N(0,1)$.
+%Then,
+%$$
+%p = P_{\theta_0}\left( |\sqrt{n}(\overline{X}_n - \theta_0)| > t_n\right) =
+%P( |Z| > t_n) = 2\Phi(-|t_n|).
+%$$
+%\end{example}
+%
+%
+%\begin{theorem}
+%Under $H_0$,
+%$p\sim {\rm Unif}(0,1)$.
+%\end{theorem}
+%
+%{\bf Important.}
+%Note that $p$ is NOT equal to $P(H_0|X_1,\ldots, X_n)$.
+%The latter is a Bayesian quantity which we will discuss later.
+%
+%
+%
+%
+%\section{The Permutation Test}
+%
+%This is a very cool test.
+%It is distribution free and it does not involve
+%any asymptotic approximations.
+%
+%Suppose we have data
+%$$
+%X_1, \ldots, X_n \sim F
+%$$
+%and
+%$$
+%Y_1, \ldots, Y_m \sim G.
+%$$
+%We want to test:
+%$$
+%H_0: F=G \ \ \ {\rm versus}\ \ \ H_1: F\neq G.
+%$$
+%Let
+%$$
+%Z = (X_1,\ldots,X_n,Y_1,\ldots, Y_m).
+%$$
+%Create labels
+%$$
+%L = (\underbrace{1,\ldots, 1}_{n\ {\rm values}},
+%     \underbrace{2,\ldots, 2}_{m\ {\rm values}}).
+%$$
+%A test statistic can be written as a function of
+%$Z$ and $L$.
+%For example, if
+%$$
+%T = |\overline{X}_n - \overline{Y}_m|
+%$$
+%then we can write
+%$$
+%T = \left| \frac{\sum_{i=1}^{N} Z_i I(L_i=1)}{\sum_{i=1}^{N} I(L_i=1)} - 
+%\frac{\sum_{i=1}^{N} Z_i I(L_i=2)}{\sum_{i=1}^{N} I(L_i=2)} \right|
+%$$
+%where $N = n+m$.
+%So we write $T = g(L,Z)$.
+%
+%Define
+%$$
+%p = \frac{1}{N!}\sum_{\pi} I( g(L_\pi,Z) > g(L,Z))
+%$$
+%where
+%$L_\pi$ is a permutation of the labels and the sum is over all permutations.
+%Under $H_0$, permuting the labels does not change the distribution.
+%In other words, $g(L,Z)$ has an equal chance of having any rank
+%among all the permuted values.
+%That is, under $H_0$,
+%$\approx {\rm Unif}(0,1)$ and
+%if we reject when $p < \alpha$,
+%then we have a level $\alpha$ test.
+%
+%Summing over all permutations is infeasible.
+%But it suffices to use a random sample of permutations.
+%So we do this:
+%\begin{enumerate}
+%\item Compute a random permutation of the labels and compute $W$.
+%Do this $K$ times giving values $T^{(1)}, \ldots, T^{(K)}$.
+%\item Compute the p-value
+%$$
+%\frac{1}{K}\sum_{j=1}^K I(T^{(j)} > T).
+%$$
+%\end{enumerate}
+%
+%\section{The Score Test}
+%
+%Recall that the score statistic is
+%$$
+%S(\theta) = \frac{\partial}{\partial \theta} log f(X_1, \ldots, X_n;\theta) =
+%\sum_{i=1}^n \frac{\partial}{\partial \theta} log f(X_i\theta).
+%$$
+%Recall that
+%$E_\theta S(\theta)=0$ and
+%$V_\theta S(\theta)= I_n(\theta)$.
+%By the CLT,
+%$$
+%Z = \frac{S(\theta_0)}{\sqrt{I_n(\theta_0)}} \rightsquigarrow N(0,1)
+%$$
+%under $H_0$.
+%So we reject if
+%$|Z| > z_{\alpha/2}$.
+%The advantage of the score test is that it does not
+%require maximizing the likelihood function.
+%
+%\begin{example}
+%For the Binomial,
+%$$
+%S(p) = \frac{n(\widehat{p}_n - p)}{p(1-p)},\ \ \ 
+%I_n(p) = \frac{n}{p(1-p)}
+%$$
+%and so
+%$$
+%Z = \frac{\widehat p - p_0}{\sqrt{\frac{p_0 (1- p_0)}{n}}}.
+%$$
+%This is the same as the Wald test in this case.
+%\end{example}
+
+
+
+\end{document}
+
+
+
+
+

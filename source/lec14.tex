@@ -1,0 +1,523 @@
+\documentclass[twoside,12pt]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+\newcommand{\inprod}[2]{\ensuremath{\langle #1 , \, #2 \rangle}}
+
+
+\usepackage{amsmath,amsfonts,graphicx}
+
+
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf 36-705: Intermediate Statistics		\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+\newcommand{\cdist}{\overset{d}{\rightarrow}}
+\newcommand{\edist}{\overset{d}{=}}
+
+\newcommand{\cprob}{\overset{p}{\rightarrow}}
+
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+
+\begin{document}
+%FILL IN THE RIGHT INFO.
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{14}{October 2}{Siva Balakrishnan}{Siva Balakrishnan}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+We continue our discussion of point estimation. We will follow Larry's notes very closely for the next few lectures. We focus on the parametric setting where we observe $X_1,\ldots,X_n \sim p(X;\theta)$ and would like to estimate $\theta$.
+
+Roughly, the questions we are trying to answer are:
+\begin{enumerate}
+\item Are there general purpose methods to come up with estimators of $\theta$?
+\item Given two (or more) estimators is there a general framework in which we can compare estimators?
+\item Finally, are there general purpose ways to analyze complex estimators (say estimators that are not simple averages)?
+\end{enumerate}
+
+
+$X_1,\ldots, X_n\sim p(x;\theta)$.
+Want to estimate
+$\theta = (\theta_1,\ldots, \theta_k)$.
+An {\em estimator}
+$$
+\widehat\theta =\widehat\theta_n = w(X_1, \ldots, X_n)
+$$
+is a function of the data.
+Keep in mind that the parameter is a fixed, unknown constant.
+The estimator is a random variable.
+
+For now, we will discuss three methods
+of constructing estimators:
+\begin{enumerate}
+\item The Method of Moments (MOM)
+\item Maximum likelihood (MLE)
+\item Bayesian estimators.
+\end{enumerate}
+Later we will discuss some other methods.
+We will also discuss several methods for evaluating estimators
+including:
+\begin{enumerate}
+\item Bias and Variance
+\item Mean squared error (MSE)
+\item Minimax Theory
+\item Large sample theory.
+\end{enumerate}
+
+
+
+\textsf{\textbf{Some Terminology.}}
+Throughout these notes, we will use the following terminology:
+
+\begin{enumerate}
+\item $\mathbb{E}_\theta(\widehat\theta) =
+\int\cdots \int \widehat\theta(x_1,\ldots, x_n) p(x_1;\theta)\cdots p(x_n;\theta) dx_1 \cdots dx_n$.
+\item Bias: $\mathbb{E}_\theta(\widehat\theta) - \theta$.
+\item The distribution of $\widehat\theta_n$ is called its {\em sampling distribution}.
+\item The standard deviation of $\widehat\theta_n$ is called the
+{\em standard error} denoted by ${\rm se}(\widehat\theta_n)$.
+\item $\widehat\theta_n$ is {\em consistent} if $\widehat\theta_n\cprob \theta$.
+\item Later we will see that if
+${\rm bias}\to 0$ and ${\rm Var}(\widehat\theta_n)\to 0$ as $n\to \infty$ then
+$\widehat\theta_n$ is consistent.
+\end{enumerate}
+
+\section{The Method of Moments}
+
+Suppose that
+$\theta = (\theta_1,\ldots, \theta_k)$.
+Define
+\begin{eqnarray*}
+m_1 = \frac{1}{n}\sum_{i=1}^n X_i , \ \ &&\ \ \mu_1(\theta) = \mathbb{E}(X_i)\\
+m_2 = \frac{1}{n}\sum_{i=1}^n X_i^2 , \ \ &&\ \ \mu_2(\theta) = \mathbb{E}(X_i^2)\\
+\vdots && \vdots\\
+m_k = \frac{1}{n}\sum_{i=1}^n X_i^k , \ \ &&\ \ \mu_k(\theta) = \mathbb{E}(X_i^k).
+\end{eqnarray*}
+Let $\widehat\theta = (\widehat\theta_1,\ldots,\widehat\theta_k)$ solve:
+$$
+m_j = \mu_j(\widehat\theta),\ \ \ j=1,\ldots, k.
+$$
+In other words, we equate the first $k$ sample moments
+with the first $k$ theoretical moments.
+This defines $k$ equations with $k$ unknowns.
+
+\vspace{1cm}
+
+\begin{example}
+$N(\beta,\sigma^2)$ with
+$\theta = (\beta,\sigma^2)$.
+Then
+$\mu_1 = \beta$ and $\mu_2 = \sigma^2 + \beta^2$.
+Equate:
+$$
+\frac{1}{n}\sum_{i=1}^n X_i = \widehat\beta,\ \ \ 
+\frac{1}{n}\sum_{i=1}^n X_i^2 = \widehat\sigma^2 + \widehat\beta^2
+$$
+to get
+$$
+\widehat\beta = \overline{X}_n,\ \ \ 
+\widehat\sigma^2 = \frac{1}{n}\sum_{i=1}^n (X_i - \overline{X}_n)^2.
+$$
+\end{example}
+
+\vspace{1cm}
+
+\begin{example}
+Suppose
+$$
+X_1, \ldots, X_n \sim {\rm Binomial}(k,p)
+$$
+where both $k$ and $p$ are unknown.
+We get
+$$
+kp = \overline{X}_n,\ \ \ 
+\frac{1}{n}\sum_{i=1}^n X_i^2 = kp (1-p) + k^2 p^2
+$$
+giving
+$$
+\widehat{p} = \frac{\overline{X}_n}{k},\ \ \ 
+\widehat{k} = \frac{\overline{X}_n^2}{\overline{X}_n- \frac{1}{n}\sum_i (X_i-\overline{X}_n)^2}.
+$$
+\end{example}
+
+
+The method of moments was popular many years ago
+because it is often easy to compute.
+Lately, it has attracted attention again.
+For example, there is a large linterature on estimating
+``mixtures of Gaussians'' using the method of moments.
+
+
+\section{Maximum Likelihood}
+
+The most popular method for estimating parameters
+is {\rm maximum likelihood.}
+The reason is that, under certain conditions,
+the maximum likelihood estimator is optimal.
+This result was established by Sir Ronald Fisher and Lucian LeCam.
+We'll discuss optimality later.
+
+The maximum likelihood estimator (mle)
+$\widehat\theta$ is defined as the maximizer of
+$$
+\mathcal{L}(\theta) = p(X_1,\ldots, X_n;\theta) \stackrel{iid}{=} \prod_i p(X_i;\theta).
+$$
+This is the same as maximizing the log-likelihood
+$$
+\mathcal{LL}(\theta) = \log \mathcal{L}(\theta).
+$$
+Often it suffices to solve
+$$
+\frac{\partial \mathcal{LL} (\theta)}{\partial \theta_j} = 0,\ \ \ \ j=1,\ldots, k.
+$$
+
+\vspace{1cm}
+
+
+\begin{example}
+Binomial.
+$ \mathcal{L}(p) = \prod_i p^{X_i} (1-p)^{1-X_i} = p^S (1-p)^{n-S}$
+where $S = \sum_i X_i$. So
+$$
+ \mathcal{LL}(p) = S \log p + (n-S)\log(1-p)
+$$
+and $\widehat{p}= \overline{X}_n$.
+\end{example}
+
+\begin{example}
+$X_1,\ldots, X_n \sim N(\mu,1)$.
+$$
+ \mathcal{L}(\mu)\propto \prod_i e^{-(X_i-\mu)^2/2} \propto e^{-n(\overline{X}_n-\mu)^2},\ \ \ 
+ \mathcal{LL}(\mu) =- \frac{n}{2} (\overline{X}_n-\mu)^2
+$$
+and
+$\widehat\mu = \overline{X}_n$.
+For $N(\mu,\sigma^2)$ we have
+$$
+ \mathcal{L}(\mu,\sigma^2) \propto \prod_i \frac{1}{\sigma} \exp\left\{ - \frac{1}{2\sigma^2} \sum_{i=1}^n (X_i-\mu)^2 \right\}
+$$
+and
+$$
+ \mathcal{LL}(\mu,\sigma^2) = -n \log \sigma  - \frac{1}{2\sigma^2} \sum_{i=1}^n (X_i-\mu)^2 .
+$$
+Set
+$$
+\frac{\partial  \mathcal{LL}}{\partial \mu} =0,\ \ \ 
+\frac{\partial  \mathcal{LL}}{\partial \sigma^2} =0
+$$
+to get
+$$
+\widehat\mu = \frac{1}{n}\sum_{i=1}^n X_i,\ \ \ 
+\widehat\sigma^2 = \frac{1}{n}\sum_{i=1}^n (X_i-\overline{X})^2.
+$$
+\end{example}
+
+
+
+\begin{example}
+Let $X_1,\ldots, X_n \sim {\rm Uniform}(0,\theta)$.
+Then
+$$
+ \mathcal{L}(\theta) = \frac{1}{\theta^n} I(\theta > X_{(n)})
+$$
+and so
+$\widehat\theta = X_{(n)}$.
+\end{example}
+
+\vspace{1cm}
+
+\subsection{MLE and MoM for exponential families}
+The log-likelihood in an exponential family is concave and given by
+\begin{align*}
+\mathcal{L}\mathcal{L}(\theta;x_1,\ldots,x_n) \propto \left[ \sum_{i=1}^s \theta_i \sum_{j=1}^n T_i(x_j) - n A(\theta)\right],
+\end{align*}
+so we can simply take the derivative with respect to $\theta$ and set this equal to $0$. Using the facts we have seen in the last lecture about the derivative of $A$, we can see that this amounts to solving the following system of equations for $\theta$:
+\begin{align*}
+\mathbb{E}_{p(X;\theta)} [T_i(X)] = \frac{1}{n} \sum_{j=1}^n T_i(x_j)~~~~\text{for}~~~i \in \{1,\ldots,s\}.
+\end{align*}
+So the maximum likelihood estimator simply picks the parameters $\theta$ to match the empirical expectations of the sufficient statistics to the expected value of the sufficient statistics under the distribution.
+
+Usually we cannot compute this estimator in closed form so we use an iterative algorithm (like gradient ascent) to maximize the likelihood. However, you should remember that exponential families have concave likelihoods so this is usually a tractable endeavour (at least for simple enough families).
+
+For exponential families as we can see above the method of moments coincides with the MLE (if we chose the sufficient statistics to direct which moments to compute).
+
+
+\subsection{Equivariance and the profile likelihood}
+
+Suppose that
+$\theta = (\eta,\xi)$.
+The {\em profile likelihood} for $\eta$ is defined by
+$$
+ \mathcal{L}(\eta) = \sup_\xi  \mathcal{L}(\eta,\xi).
+$$
+To find the mle of $\eta$ we can proceed in two ways.
+We could find the overall mle $\widehat\theta = (\widehat\eta,\widehat\xi)$.
+The mle for $\eta$ is just the first coordinate of 
+$(\widehat\eta,\widehat\xi)$.
+Alternatively, we could find the maximizer of the
+profile likelihood.
+These give the same answer.
+Do you see why?
+
+
+
+\vspace{1cm}
+
+
+
+The mle is {\em equivariant}.
+if $\eta = g(\theta)$ then
+$\widehat\eta = g(\widehat\theta)$.
+Suppose $g$ is invertible so
+$\eta = g(\theta)$ and
+$\theta = g^{-1}(\eta)$.
+Define
+$ \mathcal{L}^*(\eta) =  \mathcal{L}(\theta)$ where
+$\theta = g^{-1}(\eta)$.
+So, for any $\eta$,
+$$
+ \mathcal{L}^*(\widehat\eta) =  \mathcal{L}(\widehat\theta) \geq  \mathcal{L}(\theta) =  \mathcal{L}^*(\eta)
+$$
+and hence
+$\widehat\eta = g(\widehat\theta)$ maximizes $ \mathcal{L}^*(\eta)$.
+For non invertible functions this is still true if we define
+$$
+ \mathcal{L}^*(\eta) = \sup_{\theta: g(\theta)=\eta}  \mathcal{L}(\theta).
+$$
+(In other words, the profile likelihood.)
+
+\begin{example}
+Binomial.
+The mle is $\widehat p = \overline{X}_n$.
+Let $\psi = \log (p/(1-p))$.
+Then
+$\widehat\psi = \log (\widehat p/(1-\widehat p))$.
+\end{example}
+
+
+
+\section{Bayes Estimator}
+
+To define the Bayes estimator,
+we begin by treating $\theta$ as a random variable.
+This point requires much discussion (which we will have later).
+For now, just tentatively think of $\theta$ as random.
+We start with a {\em prior distribution} $p(\theta)$ on $\theta$.
+Note that
+$$
+p(x_1,\ldots, x_n |\theta)p(\theta)=p(x_1,\ldots, x_n,\theta).
+$$
+Now
+compute the {\em posterior distribution} by Bayes' theorem:
+$$
+p(\theta|x_1,\ldots, x_n) = \frac{p(x_1,\ldots, x_n|\theta)p(\theta)}{p(x_1,\ldots, x_n)}
+$$
+where
+$$
+p(x_1,\ldots, x_n) = \int p(x_1,\ldots, x_n|\theta)p(\theta) d\theta.
+$$
+This can be written as
+$$
+p(\theta|x_1,\ldots, x_n) \propto  \mathcal{L}(\theta)p(\theta) = 
+{\rm Likelihood}\ \times \ {\rm prior}.
+$$
+Now compute a point estimator from the posterior.
+For example:
+$$
+\widehat\theta = \mathbb{E}(\theta|x_1,\ldots,x_n) = 
+\int \theta p(\theta|x_1,\ldots, x_n) d\theta =
+\frac{\int \theta p(x_1,\ldots, x_n|\theta)p(\theta) d\theta}
+{\int p(x_1,\ldots, x_n|\theta)p(\theta) d\theta}.
+$$
+
+\begin{example}
+Let $X_1,\ldots, X_n \sim {\rm Bernoulli}(\theta)$.
+Let the prior be
+$\theta\sim {\rm Beta}(\alpha,\beta)$.
+Hence
+$$
+p(\theta) = \frac{\Gamma(\alpha + \beta)}{\Gamma(\alpha )\Gamma(\beta)} \theta^{\alpha -1 }(1- \theta)^{\beta -1 },
+$$
+and
+$$
+\Gamma(\alpha) = \int_0^\infty t^{\alpha-1}e^{-t} dt.
+$$
+Set $Y=\sum_i X_i$. Then
+$$
+p(\theta|X)\propto \underbrace{\theta^{Y}{(1-\theta)}^{n-Y}}_{\rm likelihood}\times
+\underbrace{\theta^{\alpha-1}{(1-\theta)}^{\beta-1}}_{\rm prior} \propto
+\theta^{Y+\alpha-1}{(1-\theta)}^{n-Y+\beta-1}.
+$$
+Therefore,
+$\theta|X \sim {\rm Beta}(Y+\alpha,n-Y+\beta)$.
+The Bayes estimator is
+$$
+\widetilde{\theta} = \frac{Y+\alpha}{(Y+\alpha)+(n-Y+\beta)} = 
+\frac{Y+\alpha}{\alpha+\beta+n} = (1-\lambda) \widehat{\theta}_{mle} + \lambda \ \overline{\theta}
+$$
+where
+$$
+\overline{\theta}=\frac{\alpha}{\alpha+\beta},\ \ \ 
+\lambda = \frac{\alpha+\beta}{\alpha+\beta+n}.
+$$
+This is an example of a {\em conjugate prior.}
+\end{example}
+
+
+
+\begin{example}
+Let $X_1,\ldots, X_n \sim N(\mu,\sigma^2)$ with
+$\sigma^2$ known.
+Let
+$\mu\sim N(m,\tau^2)$.
+Then
+$$
+\mathbb{E}(\mu|X) = \frac{\tau^2}{\tau^2 + \frac{\sigma^2}{n}}\overline{X}_n +
+ \frac{\frac{\sigma^2}{n}}{\tau^2 + \frac{\sigma^2}{n}}m
+$$
+and
+$$
+{\rm Var}(\mu|X) = \frac{\sigma^2\tau^2/n}{\tau^2 + \frac{\sigma^2}{n}}.
+$$
+\end{example}
+
+
+
+\section{MSE}
+
+Now we discuss the evaluation of estimators.
+The mean squared error (MSE) is
+$$
+\E_\theta( \widehat\theta - \theta)^2 =
+\int \cdots \int
+( \widehat\theta(x_1,\ldots, x_n) - \theta)^2  p(x_1;\theta) \cdots p(x_n;\theta) dx_1 \ldots dx_n.
+$$
+The bias is
+$$
+B = \E_\theta( \widehat\theta) - \theta
+$$
+and the variance is
+$$
+V = {\rm Var}_\theta (\widehat\theta).
+$$
+
+\begin{theorem}
+We have
+$$
+MSE = B^2 + V.
+$$
+\end{theorem}
+
+\begin{proof}
+Let $m = \E_\theta (\widehat\theta)$.
+Then
+\begin{eqnarray*}
+MSE &=& \E_\theta( \widehat\theta - \theta)^2 = 
+\E_\theta( \widehat\theta - m+m-\theta)^2\\
+&=& \E_\theta( \widehat\theta - m)^2 + (m-\theta)^2 +
+2 \E_\theta( \widehat\theta - m) (m-\theta) \\
+&=& \E_\theta( \widehat\theta - m)^2 + (m-\theta)^2 = V + B^2.
+\end{eqnarray*}
+\end{proof}
+
+An estimator is {\em unbiased} if
+the bias is 0.
+In that case,
+the MSE = Variance.
+There is often a tradeoff between bias and variance.
+So low bias can imply high variance and vice versa.
+
+\begin{example}
+Let $X_1,\ldots, X_n \sim N(\mu,\sigma^2)$.
+Then
+$$
+\E(\overline{X}) = \mu,\ \ \ 
+\E(S^2) = \sigma^2.
+$$
+The MSE's are
+$$
+\E(\overline{X}-\mu)^2 = \frac{\sigma^2}{n},\ \ \ 
+\E(S^2-\sigma^2)^2 = \frac{2\sigma^4}{n-1}.
+$$
+\end{example}
+
+We would like to choose an estimator with small MSE.
+However, the MSE is a function of $\theta$.
+Later, we shall discuss minimax estimators,
+that use the maximum of the MSE over $\theta$
+as a way to compare estimators.
+
+
+
+\end{document}
+
+
+
+
+

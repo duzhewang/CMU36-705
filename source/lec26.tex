@@ -1,0 +1,322 @@
+\documentclass[twoside,12pt]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+\newcommand{\inprod}[2]{\ensuremath{\langle #1 , \, #2 \rangle}}
+
+
+\usepackage{amsmath,amsfonts,graphicx}
+\newcommand{\V}{\mbox{${\sf Var}$}}
+
+
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf 36-705: Intermediate Statistics		\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+\newcommand{\cdist}{\overset{d}{\rightarrow}}
+\newcommand{\edist}{\overset{d}{=}}
+
+\newcommand{\cprob}{\overset{p}{\rightarrow}}
+\newcommand{\tobs}{T(Z_{\text{obs}})}
+\newcommand{\zobs}{Z_{\text{obs}}}
+\newcommand{\permtest}{\phi_{\text{perm}}}
+
+
+
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+
+\begin{document}
+%FILL IN THE RIGHT INFO.
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{26}{November 3}{Siva Balakrishnan}{Siva Balakrishnan}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+\section{Causal Review}
+In the simplest setting we are interested in understanding if there is a causal link between a binary treatment $W$ and an outcome $Y$. For a particular unit, if $W_i=1$ we say that the unit is treated and if $W_i = 0$ then the unit is in the control group.
+
+
+There are many ways to measure causal associations. The one we will adopt is to say there are two potential outcomes $Y(0)$ and $Y(1)$ which are respectively the outcomes if a unit is in the control group and if it is treated. We will then measure the casual association by some function of the potential outcomes: a typical one is the average treatment effect, i.e.
+\begin{align*}
+\tau = \mathbb{E}[Y(1) - Y(0)],
+\end{align*}
+which is the difference in outcomes if all units were treated versus all were in the control group.
+If we are dealing with a finite population we might instead define:
+\begin{align*}
+\tau = \frac{1}{n} \sum_{i=1}^n [Y_i(1) - Y_i(0)].
+\end{align*}
+The main problem in causal inference is that each unit is either treated or in the control group so we never observe both potential outcomes. What we do observe is:
+\begin{align*}
+Y^{\text{obs}}_i = Y_i(1) W_i + Y_i(0) (1 - W_i).
+\end{align*}
+
+Suppose that $m$ individuals are treated. A quantity we can estimate is:
+\begin{align*}
+\alpha &= \mathbb{E}[Y(1) | W = 1] - \mathbb{E}[Y(0) | W = 0] 
+\end{align*}
+where we use the estimator
+\begin{align}
+\label{eqn:aa}
+\widehat{\alpha}&= \frac{1}{m} \sum_{i: W_i = 1} Y^{\text{obs}}_i - \frac{1}{n - m}  \sum_{i: W_i = 0} Y^{\text{obs}}_i,
+\end{align}
+since this only depends on the observed data. In general, $\alpha \neq \tau$ since in a typical setting we have selection bias, i.e. people can choose treatment or control based on their knowledge of their potential outcomes so that $W$ and $(Y(0),Y(1))$ are not independent. One formal way of defining selection bias in this context is simply as the difference between $\tau$ and $\alpha.$
+A basic question is then: when are $\alpha$ and $\tau$ the same?
+
+{\bf Correlation is not causation: } You often hear this phrase. Perhaps, one way to think about this statement is that it is simply saying $\alpha \neq \tau$. Suppose we temporarily defined $W_i = -1$ if a unit is in control (this does not change anything), then,
+\begin{align*}
+\alpha &=  \mathbb{E}[Y(1) | W = 1] - \mathbb{E}[Y(0) | W = -1] \\
+&= \mathbb{E} [Y^{\text{obs}}W],
+\end{align*}
+is roughly (upto some standardization) the \emph{correlation} between the observed outcomes and the treatment $W$. 
+
+\newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
+\def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}}
+
+If we can ensure that
+$$W \independent (Y(0),Y(1))$$
+then we indeed have that,
+\begin{align*}
+\alpha &= \mathbb{E}[Y(1) | W = 1] - \mathbb{E}[Y(0) | W = 0] \\
+&= \mathbb{E}[Y(1)] - \mathbb{E}[Y(0)] = \tau.
+\end{align*}
+The general way to ensure this is via a randomized trial. In this case, we \emph{randomly} assign people to take the treatment or control and this ensures the above independence.
+
+We will consider the case for the next couple of sections of a completely randomized trial, i.e. we select $m$ individuals uniformly at random assign them treatment and the remaining are assigned control. We use the estimator in~\eqref{eqn:aa}.
+
+Now, we can see that this is an unbiased estimator of the average treatment effect.
+It is worth noting that the only thing that is surely random here is our treatment assignment, the potential outcomes can be fixed or random (it does not matter which). 
+\begin{align*}
+\mathbb{E} [\widehat{\tau}] &= \sum_{i=1}^n \frac{ \mathbb{E} \left(W_i\right) }{m} Y_i(1) - 
+\frac{\mathbb{E} \left( (1 - W_i) \right)}{n - m} Y_i(0). \\
+\end{align*}
+The mean of $W_i$ is given by:
+\begin{align*}
+\mathbb{E}(W_i) = \frac{{n-1 \choose m-1}}{{n \choose m}} = \frac{m}{n},
+\end{align*}
+and 
+\begin{align*}
+\mathbb{E}(1 - W_i) = \frac{n - m}{n}.
+\end{align*}
+This gives us that:
+\begin{align*}
+\mathbb{E} [\widehat{\tau}] &= \tau.
+\end{align*}
+In general, constructing p-values or confidence intervals for $\tau$ can be challenging. We will consider one special case when we can use a permutation test to construct a p-value.
+
+
+\section{Hypothesis testing: Fisher's Exact p-values}
+Fisher was one of the first statisticians to understand the power of a randomized trial. In agricultural experiments, he advocated randomized experiments in order to draw rigorous causal conclusions. 
+
+A natural subsequent problem is: given an estimate of the causal effect, assess its significance (or  construct confidence intervals for it).
+
+Fisher gave a way to construct valid p-values under what is called the \emph{sharp null}, i.e. the null hypothesis that for every unit $i$ the potential outcomes are the same under the treatment and control, i.e. the treatment has no effect.  The method is reminiscent of the permutation method we used for two-sample testing.
+
+Suppose for simplicity that we are using the estimator described in the previous section and we reject the null hypothesis if $|\widehat{\tau}|$ is large.
+Under the null hypothesis, we can determine both potential outcomes $Y_i(0)$ and $Y_i(1)$ for all the units. 
+
+We can now use the permutation method, suppose a different set $T^\prime$ of $m$ units were to receive treatment: then our estimate would be:
+\begin{align*}
+\widehat{\tau}_{T^\prime} = \frac{1}{m} \sum_{i \in T^\prime} Y_i(1) - \frac{1}{n - m} \sum_{i \notin T^\prime} Y_i(0),
+\end{align*}
+where we can use the sharp null hypothesis to ``fill in'' the potential outcomes we do not observe. We can repeat this many times (say $B$) and compute the p-value:
+\begin{align*}
+\text{p-value} = \frac{1}{B} \sum_{b = 1}^B \mathbb{I} (|\widehat{\tau}_{T_b}| \geq |\widehat{\tau}|).
+\end{align*}
+It is easy to verify that this is a valid p-value.
+
+The intuition is identical to the permutation test, if there was in fact a different in outcomes under treatment and controls (say treatment potential outcomes were much higher than control potential outcomes) then we would expect the p-value to be small, since the difference in means will get smaller when we randomly swap some of the treatment and control outcomes.
+
+
+\section{Confounding}
+For most interesting policy questions, we cannot actually do a randomized trial. For instance, if I wanted to know if smoking caused lung cancer, there are ethical issues with trying to run a randomized trial. In this case, we have to use what is called \emph{observational data}, i.e. we have information about many people who are smokers and not, and whether they have lung cancer or not. 
+
+It is clear that we can measure the correlation between smoking and lung cancer: the main question is when, if ever, can we claim a causal relationship?
+
+The main problem is again selection bias. 
+
+Here is a motivating example: Suppose that our population has two kinds of people, those who are always healthy ($Y_i(1) = Y_i(0) = 1$) irrespective of whether they take the treatment or not, and those who are always unhealthy ($Y_i(1) = Y_i(0) = 0$) irrespective of whether they take the treatment or not. Suppose further that mostly healthy people take the treatment, while the unhealthy ones do not take the treatment.
+
+The causal effect $\tau = 0$, but the estimator above would yield, $\widehat{\tau} \approx 1$, and we might incorrectly conclude that the treatment is beneficial.
+
+Suppose however, that we knew who the healthy people were and who the unhealthy people were (we could gather such information by asking people questions about their lifestyle and other things). Then we could try to compare healthy people who took the treatment with healthy people who did not and similarly compare unhealthy people who took the treatment with unhealthy people who did not (and then try to combine these two estimates in some way). In this case, when we compared two healthy people who took the treatment and who did not we would see the treatment had no effect, and similarly for the unhealthy ones. We would likely correctly conclude that the treatment has no effect.
+
+
+The key assumption that makes causal inference from observational data possible is the assumption of \emph{no unmeasured confounding} or \emph{selection on observables} or \emph{ignorability}. Formally, we suppose that we have access to covariates $X$ (think demographic information) such that,
+\begin{align*}
+W \independent (Y(1),Y(0)) | X.
+\end{align*}
+This is an assumption. Roughly the assumption is is plausible in settings where we believe we can measure all of the covariates that explain the decision to take the treatment. We also need some other assumptions (SUTVA from the previous lecture, and the assumption that $\mathbb{P}(W = 1| X = x)$ is bounded away from $0$ and $1$, i.e. every individual has some non-zero chance of being either treated or in the control group) but we will ignore these and focus on no unmeasured confounding.
+
+One way to think about this assumption, is that conditional on $X$ we have a randomized trial, i.e. the treatment is independent of the potential outcomes. So if we condition on $X$ (they are the confounders) we no longer have any selection bias. Alternatively, within levels of the covariate treatment is decided by (a biased) coin flip.
+
+The other way to think about it is to think about a procedure called \emph{matching}, i.e. suppose temporarily that $X$ is discrete as it was in the healthy/unhealthy example. Then we could \emph{match} people who had the same covariates but different treatments (i.e. some of them received treatment and some of them received control), and take the difference in their outcomes. For these matched people, under the assumption of no unmeasured confounding we are effectively observing \emph{both potential outcomes}.
+
+{\bf Setup and Notational Comments: } In what follows we will assume we observe triplets from some distribution $(X,W,Y^{\text{obs}}) \sim F$, where as usual
+\begin{align*}
+Y^{\text{obs}} = WY(1) + (1-W)Y(0).
+\end{align*}
+We will assume all of these are stochastic. Sometimes we will use the subscript $\mathbb{E}_X$ to denote taking an expectation with respect to the randomness of $X$.
+
+\section{Identification under no unmeasured confounding}
+We want to estimate:
+\begin{align*}
+\tau = \mathbb{E}[Y(1) - Y(0)],
+\end{align*}
+and to do this (as we did previously) we need to be able to write it in terms of observable quantities. Notice that by the law of total expectation,
+\begin{align*}
+\tau &= \mathbb{E}_X[\mathbb{E} [Y(1) - Y(0) | X ]].
+\end{align*}
+Furthermore,
+\begin{align*}
+\tau &=  \mathbb{E}_X[\mathbb{E} [Y(1) | X, W = 1]] -  \mathbb{E}_X[\mathbb{E} [ Y(0) | X, W = 0]],
+\end{align*}
+since we have that $W \independent (Y(1),Y(0)) | X.$ This can we written as:
+\begin{align*}
+\tau &=   \mathbb{E}_X[\mathbb{E} [Y^{\text{obs}} | X, W = 1]] -  \mathbb{E}_X[\mathbb{E} [Y^{\text{obs}}  | X, W = 0]],
+\end{align*}
+which is just a function of the observed data, and so we can turn our attention to estimating this quantity.
+
+\section{Estimation under no unmeasured confounding}
+The most direct way to estimate $\tau$ is to estimate:
+\begin{align*}
+\mu_0(x) &= \mathbb{E} [Y^{\text{obs}} | X = x, W = 0] \\
+\mu_1(x) &=  \mathbb{E} [Y^{\text{obs}} | X = x, W = 1]. \\
+\end{align*}
+These are two functions of the covariates $X$, one of them is the average outcome of the treatment group as a function of the covariates, and the other is the average outcome of the control group as a function of the covariates.
+
+Estimating a conditional expectation is a problem is probably the most common problem in statistics -- it is known as \emph{regression}. We will delve into this formally in the next few lectures but for now let us suppose that someone hands us estimators $\widehat{\mu}_0$ and $\widehat{\mu}_1$ of these two 
+functions. 
+
+Then we can compute the plug-in estimator:
+\begin{align*}
+\widehat{\tau} &= \widehat{\mathbb{E}}_X \left[ \widehat{\mu}_1(X) - \widehat{\mu}_0(X)\right], \\
+&= \frac{1}{n} \sum_{i=1}^n \left[\widehat{\mu}_1(X_i) - \widehat{\mu}_0(X_i)\right]
+\end{align*}
+which is just the average of the difference between two regression functions. One approximately correct way to think about this is that we are using regression to impute the missing potential outcomes for each individual.
+
+There are other ways to try to estimate $\tau$. The other popular estimator is called the Horvitz-Thompson estimator or the inverse propensity score estimator. I will explain the basic idea here and leave the rest to the causal inference course you will all take next semester!
+
+First let us define a quantity, known as the \emph{propensity score}:
+\begin{align*}
+\pi(x) = \mathbb{P}(W = 1 | X = x),
+\end{align*}
+which represents the probability that a unit with covariates $x$ receives treatment. Note that,
+\begin{align*}
+\mathbb{E}[W | X = x] &= \pi(x) \\
+\mathbb{E}[1 - W | X = x] &= 1 - \pi(x).
+\end{align*}
+
+Returning to the average treatment effect, 
+\begin{align*}
+\tau &= \mathbb{E}[Y(1) - Y(0)] \\
+&= \mathbb{E}_X [ \mathbb{E}[Y(1) - Y(0) | X = x] ] \\
+&= \mathbb{E}_X \left( \mathbb{E}_{W}\left[ \mathbb{E}\left[ \frac{Y(1) W}{ \pi(x) } | X = x\right] \right]  - 
+\mathbb{E}_{W}\left[ \mathbb{E}\left[ \frac{Y(0) (1 - W)}{ 1 - \pi(x) } | X = x\right] \right] \right).
+\end{align*}
+This in turn can be written in terms of only observed quantities:
+\begin{align*}
+\tau &= \mathbb{E}_X \left( \mathbb{E}_{W}\left[ \mathbb{E}\left[ \frac{Y^{\text{obs}}W}{ \pi(x) } | X = x\right] \right]  - 
+\mathbb{E}_{W}\left[ \mathbb{E}\left[ \frac{Y^{\text{obs}} (1 - W)}{ 1 - \pi(x) } | X = x\right] \right] \right) \\
+&= \mathbb{E}\left[ \frac{Y^{\text{obs}}W}{ \pi(x) }  \right] -  \mathbb{E}\left[ \frac{Y^{\text{obs}}(1-W)}{(1- \pi(x)) }  \right] 
+\end{align*}
+which we can estimate as:
+\begin{align*}
+\widehat{\tau} = \frac{1}{n} \sum_{i=1}^n  \left[\frac{Y_i^{\text{obs}} W_i}{\pi(X_i)} - \frac{Y_i^{\text{obs}} (1- W_i)}{1-\pi(X_i)}\right].
+\end{align*}
+This is called the Horvitz-Thompson estimator or the inverse propensity score estimator. In practice, we do not know the propensity score so we would estimate it from the data: this is again a problem of regression except the outcome is binary (i.e. since $\pi(X)$ is simply a conditional expectation we can estimate it by regressing $W$ on $X$). 
+
+\section{Advanced topics}
+This is just the tip of the iceberg. If you take a course in Causal Inference (next semester!) you will see many other neat things (here is just a small subset):
+\begin{enumerate}
+\item No unmeasured confounding is just one assumption that leads to identification of a causal effect. More broadly, in economics, political science and other fields people look for what are called natural experiments, i.e. roughly some subset of the population for which the assignment to treatment/control is nearly random.
+
+\item Even in a randomized trial you might have something called non-compliance, i.e. some people don't do what they are told. In this case, you need to adjust your estimates. This is a canonical example of something called an instrumental variable problem. 
+
+
+\item There are many things beyond the average treatment effect that you might want to estimate. They all have different assumptions under which they are identified (i.e. can be written in terms of observable quantities) and there are different strategies to estimate them. 
+
+\item There is a very nice/simple way to combine the regression-based and propensity-score based estimators from above to construct what are called \emph{doubly robust} estimators. These have the property that they are consistent if you can estimate either the regression function or the propensity score well (i.e. you do not need to estimate both well).
+
+\item From a purely statistical standpoint, the average treatment effect under no unmeasured confounding:
+\begin{align*}
+\tau =  \mathbb{E}_X[\mathbb{E} [Y^{\text{obs}} | X, W = 1]] -  \mathbb{E}_X[\mathbb{E} [Y^{\text{obs}}  | X, W = 0]],
+\end{align*}
+is an example of a functional. The regression method we used is basically the plug-in estimator of the functional. Plug-in estimators for functionals are usually not optimal. Optimally estimating functionals is a challenging statistical problem and there is an analog of the Cramer-Rao, efficiency, score functions, Fisher information etc. for functional estimation problems. This is known as semi-parametric efficiency theory.
+
+\item There are many different languages for talking about causality and causal inference. We used potential outcomes. Many people (including many people in Philosophy here) use a language pioneered by Judea Pearl based on (causal) directed graphs. Most things can be translated from one language to another. People who work on causal graphs often focus effort on a much harder problem of \emph{causal discovery}. We considered the case where there was a treatment and an outcome and we wanted to know if the treatment had a causal effect on the outcome. In causal discovery we have a 
+collection of variables and want to discover causal relationships between them. This requires even stronger assumptions.
+
+\end{enumerate}
+
+\end{document}
+
+
+
+
+

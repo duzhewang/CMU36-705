@@ -1,0 +1,402 @@
+\documentclass[twoside,12pt]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+\newcommand{\inprod}[2]{\ensuremath{\langle #1 , \, #2 \rangle}}
+
+
+\usepackage{amsmath,amsfonts,graphicx,amssymb}
+\newcommand{\V}{\mbox{${\sf Var}$}}
+
+
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf 36-705: Intermediate Statistics		\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+\newcommand{\cdist}{\overset{d}{\rightarrow}}
+\newcommand{\edist}{\overset{d}{=}}
+
+\newcommand{\cprob}{\overset{p}{\rightarrow}}
+\newcommand{\tobs}{T(Z_{\text{obs}})}
+\newcommand{\zobs}{Z_{\text{obs}}}
+\newcommand{\permtest}{\phi_{\text{perm}}}
+
+
+
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+
+\begin{document}
+%FILL IN THE RIGHT INFO.
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{29}{November 13}{Siva Balakrishnan}{Siva Balakrishnan}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+We first go back and analyze hard-thresholding in the Gaussian sequence model. We will then re-visit the consequences from the end of last class and then talk about regression.
+
+A basic question is then: what is the risk of the hard/soft thresholding estimators? They will turn out to be nearly identical for appropriate choices of the penalty so we will analyze the hard-thresholding estimator here.
+
+{\bf Maximum of Gaussians: } Before we continue we take another detour to study the maximum of Gaussian RVs. Here is a lemma:
+\begin{lemma}
+Suppose that, $\epsilon_1, \ldots, \epsilon_d \sim N(0,\sigma^2)$ then with probability at least $1 - \delta$,
+\begin{align*}
+\max_{i=1}^d |\epsilon_i| \leq \sigma \sqrt{ 2 \log (2d/\delta) }.
+\end{align*}
+\end{lemma}
+
+\begin{proof}
+One can slightly improve constants by a more refined proof. Recall, our Gaussian tail bound, if $\epsilon \sim N(0,\sigma^2)$: 
+\begin{align*}
+\mathbb{P}(|\epsilon| \geq t) \leq 2 \exp (- t^2/ (2\sigma^2)),
+\end{align*}
+so by the union bound we obtain that,
+\begin{align*}
+\mathbb{P}(\max_i |\epsilon_i| \geq t) \leq 2d \exp (- t^2/ (2\sigma^2)),
+\end{align*}
+which implies the desired lemma.
+\end{proof}
+
+
+With this lemma we can analyze the hard-thresholding estimator, and obtain the following theorem. Once again one can improve the constant factors (and some other minor things) by a more careful analysis. 
+\begin{theorem}
+Suppose we choose the threshold:
+\begin{align*}
+t = 2\sigma \sqrt{ \frac{2 \log(2d/\delta)}{n} },
+\end{align*}
+then with probability at least $1 - \delta$, 
+\begin{align*}
+\|\widehat{\theta} - \theta\|_2^2 \leq 9 \sum_{i=1}^d \min\left\{\theta_i^2,\frac{t^2}{4}\right\}.
+\end{align*}
+\end{theorem}
+
+\begin{proof}
+We condition on the event from the previous lemma, i.e. that (recalling that in the sequence model the noise variance is $\sigma^2/n$),
+\begin{align*}\max_{i=1}^d |\epsilon_i| \leq \sigma \sqrt{ 2 \log (2d/\delta)/n } \leq \frac{t}{2}.
+\end{align*}
+Now, observe that,
+\begin{align*}
+\|\widehat{\theta} - \theta\|_2^2 &= \sum_{i=1}^d (\widehat{\theta}_i - \theta_i)^2, \\
+\end{align*}
+so we can consider each co-ordinate separately. 
+Let us consider some cases:
+\begin{enumerate}
+\item If for any co-ordinate $|\theta_i| \leq \frac{t}{2}$ our estimate is 0, so our risk for that coordinate is simply $\theta_i^2$. 
+\item If $|\theta_i| \geq \frac{3t}{2}$ our estimate is simply $\widehat{\theta}_i = y_i$ so our risk is simply $\epsilon_i^2 \leq \frac{t^2}{4}$.
+\item If $\frac{t}{2} \leq |\theta_i| \leq \frac{3t}{2}$, then our risk,
+\begin{align*}
+(\widehat{\theta}_i - \theta_i)^2 = (y_i \mathbb{I}(|y_i| \geq t) - \theta_i)^2 = \theta_i^2 \mathbb{I}(|y_i| < t) + \epsilon_i^2 \mathbb{I}(|y_i| \geq t) \leq \max\{\epsilon_i^2,\theta_i^2\} \leq \frac{9t^2}{4}.
+\end{align*}
+\end{enumerate}
+Putting these together we see that,
+\begin{align*}
+\|\widehat{\theta} - \theta\|_2^2 \leq 9 \sum_{i=1}^d \min\left\{\theta_i^2,\frac{t^2}{4}\right\}.
+\end{align*}
+\end{proof}
+
+{\bf Corollary (optional): } To bound the actual risk we need the expected loss. One can use the high-probability bound. For instance note that with probability at least $1 - 1/d^2$ we have that for some big constant $C > 0$,
+\begin{align*}
+\|\widehat{\theta} - \theta\|_2^2 \leq  C \sum_{i=1}^d \min\left\{\theta_i^2, \frac{\sigma^2 \log(d)}{n}\right\},
+\end{align*}
+and that we can always trivially upper bound the loss as,
+\begin{align*}
+\|\widehat{\theta} - \theta\|_2^2 \leq \frac{C \sigma^2 d \log(d)}{n}.
+\end{align*}
+Putting these together with the law of total expectation you will obtain the bound that for some constant $C > 0$,
+\begin{align*}
+\mathbb{E} \|\widehat{\theta} - \theta\|_2^2 \leq  C \sum_{i=1}^d \min\left\{\theta_i^2, \frac{\sigma^2 \log(d)}{n} \right\}.
+\end{align*}
+
+\section{Interpreting the bound}
+We have seen that the risk of the hard-thresholding estimator is upper bounded by, 
+\begin{align*}
+R(\widehat{\theta},\theta) \lesssim \sum_{i=1}^d \min\left\{\theta_i^2, \frac{\sigma^2 \log(d)}{n} \right\}.
+\end{align*}
+In the worst case, all of the $\theta_i$s are non-zero or large, and we obtain that the risk is upper bounded by $\sigma^2 d \log d/n$, which is almost the same as that of the classical estimator (except for the log-factor which you can eliminate by a more careful analysis).
+
+On the other hand if $\theta$ is $s$-sparse, i.e. only $s$ of its entries are non-zero then you observe that the risk looks like:
+\begin{align*}
+R(\widehat{\theta},\theta) \lesssim \frac{\sigma^2 s \log(d)}{n},
+\end{align*}
+which means that the hard-thresholding estimator is consistent even if $d \gg n$, so long as $s \log(d)/n \rightarrow 0$. In fact you can obtain non-trivial estimates even when $d$ is exponentially larger than $n$. This is quite miraculous: we can avoid the curse of dimensionality in a parametric problem if the target parameter $\theta$ is sufficiently structured.
+
+Perhaps one might not expect the vector $\theta$ to be exactly sparse but only approximately so, i.e. in some meaningful sense most of its entries are small. There are various ways to measure sparsity and these will all lead to different, interesting bounds on the risk. Just to get a flavor of this idea, suppose we considered $\ell_1$ sparsity, i.e. 
+\begin{align*}
+\sum_{i=1}^d |\theta_i| \leq R,
+\end{align*}
+for some radius $R$. Then we can see that, the number of entries of $\theta$ larger than $R/k$ is at most $k$, for any $k$. 
+%Suppose without loss of generality we sorted the entries of the vector, 
+So for any $k$, we can use the previous risk bound to obtain:
+\begin{align*}
+R(\widehat{\theta},\theta) &\lesssim \sum_{i=1}^d \min\left\{\theta_i^2, \frac{\sigma^2 \log(d)}{n} \right\} \\
+&\lesssim  \sum_{i: \theta_i^2 \geq \sigma^2 \log(d)/n} \frac{\sigma^2 \log(d)}{n} + \sum_{i: \theta_i^2 \leq \sigma^2 \log(d)/n} \theta_i^2.
+\end{align*}
+Since the number of entries of the vector $\theta$ that can exceed $\sigma \sqrt{\log(d)/n}$ is at most $\sqrt{n}R/\sigma \sqrt{\log(d)}$, we obtain that bound that,
+\begin{align*}
+R(\widehat{\theta},\theta) &\lesssim  R \sigma  \sqrt{ \frac{\log(d)}{n}}+ \sum_{i: \theta_i^2 \leq \sigma^2 \log(d)/n} \theta_i^2 \\
+&\lesssim   R \sigma \sqrt{ \frac{\log(d)}{n}} +  \sigma \sqrt{\frac{\log(d)}{n}}\sum_{i: \theta_i^2 \leq \sigma^2 \log(d)/n} |\theta_i| \\
+&\lesssim  2R \sigma  \sqrt{ \frac{\log(d)}{n}}.
+\end{align*}
+Notice that the rate of convergence is different from the $s$-sparse case, roughly behaving as $1/\sqrt{n}$ instead of $1/n$. Ignoring this distinction however, the 
+result should again surprise you -- we are not even assuming that the unknown vector $\theta$ is sparse, just that is has $\ell_1$-norm that is controlled, and once again we can obtain consistent estimators when $d \gg n$.  More generally, there are many ways in which we can measure sparsity or impose structure on the unknown parameter, and depending on the structural assumption we might obtain improved rates of convergence.
+
+While all of this might seem extremely contrived, we will see in the next lecture that similar things happen in high-dimensional regression (under appropriate assumptions), and are well-understood now to happen in many other interesting models. Roughly, this is the area of high-dimensional statistics: the main features are we do not assume the dimension of the model, i.e. the number of parameters is fixed as $n \rightarrow \infty$, and often we use structural assumptions of various kinds (typically variants of sparsity) to obtain fast rates of convergence.
+
+\section{Low Dimensional Linear Regression -- Review} 
+We will now review some basic facts about linear regression. We will not go into much detail here -- if you have not seen this all before I recommend reading Chapter 13 of the Wasserman book. 
+
+Linear regression is a tool to approximate the conditional expectation of $Y|X$ by a linear function of $X$. If you take a class on linear regression you will learn in Lecture 1 not to assume the true regression function is linear. We will assume the true regression function is linear, i.e. we assume we observe pairs $\{(x_1,y_1), \ldots,(x_n,y_n)\}$ where $(x,y)$ are linked via the linear model:
+\begin{align*}
+y_i = \inprod{x_i}{\beta^*} + \epsilon_i,
+\end{align*}
+where $y_i \in \mathbb{R}, x_i \in \mathbb{R}^d$ and $\epsilon_i \sim N(0,\sigma^2)$. We let 
+\begin{align*}
+\widehat{\Sigma} = \frac{1}{n} \sum_{i=1}^n x_i x_i^T. 
+\end{align*}
+Its population counterpart is the covariance matrix of the design, i.e. $\Sigma = \mathbb{E}[xx^T].$
+
+{\bf Least Squares: } We will assume throughout that $\widehat{\Sigma}$ is invertible. In the setting where $\widehat{\Sigma}$ is invertible a natural approach to estimating $\beta^*$ is to use least squares, i.e. we consider the estimator:
+\begin{align*}
+\widehat{\beta} = \arg \min_{\beta} \frac{1}{2} \sum_{i=1}^n (y_i - \inprod{x_i}{\beta})^2.
+\end{align*}
+In this setting the least squares estimator can be written in closed form as:
+\begin{align*}
+\widehat{\beta} = \widehat{\Sigma}^{-1} \left[ \frac{1}{n} \sum_{i=1}^n x_i y_i\right]. 
+\end{align*}
+It should be straightforward to convince yourself that under the model we wrote down (with Gaussian errors) the MLE is the same as the least squares estimator.
+
+In general, we will often assume that the covariates $x_i$ are random, i.e. are drawn from some distribution -- this is known as random design regression. Some people alternatively assume that the $x_i$s are fixed, and the only thing that is stochastic is the noise. This is known as fixed design regression. We often write the \emph{design matrix} $X \in \mathbb{R}^{n \times d}$ as the matrix with rows equal to the data samples, then we can write the least squares estimator as:
+\begin{align*}
+\widehat{\beta} = (X^T X)^{-1} X^T y.
+\end{align*}
+You can verify that,
+\begin{align*}
+\widehat{\beta} &= (X^T X)^{-1} X^T y = (X^T X)^{-1} X^T (X \beta^* + \epsilon) \\
+&= \beta^* +  (X^T X)^{-1} X^T \epsilon \\
+&\sim N(\beta^*, \sigma^2 (X^T X)^{-1}).
+\end{align*}
+
+There are several possible quantities of interest in linear regression. 
+\begin{enumerate}
+\item The in-sample prediction error, i.e.:
+\begin{align*}
+\mathbb{E} \left[ \frac{\|X \widehat{\beta} - X \beta^*\|_2^2}{n}\right].
+\end{align*}
+%\item The out-of-sample prediction error, i.e.:
+%\begin{align*}
+%\mathbb{E} \left[  \inprod{x}{\widehat{\beta}} - \inprod{x}{\beta^*} \right]^2,
+%\end{align*}
+%where the expectation is over both the randomness in $\widehat{\beta}$ and in the new sample $x$. 
+\item $\ell_2$ error in estimating $\beta^*$, i.e. $\mathbb{E}[ \|\widehat{\beta} - \beta^*\|_2^2].$
+\item The support recovery error (makes most sense when $\beta^*$ is sparse): 
+\begin{align*}
+\mathbb{P}( \text{supp}(\widehat{\beta}) \neq \text{supp}(\beta^*)).
+\end{align*}
+\end{enumerate}
+Let us quickly review some of these quantities for low-dimensional regression.
+
+\subsection{In-sample prediction error}
+Since under our assumptions:
+\begin{align*}
+\widehat{\beta} \sim N(\beta^*, \sigma^2 (X^T X)^{-1}).
+\end{align*}
+We can see that:
+\begin{align*}
+X\widehat{\beta} \sim N(X\beta^*, \sigma^2 X(X^T X)^{-1} X^T),
+\end{align*}
+(if this is not clear to you, see Wikipedia - multivariate normal distribution, the section on affine transformation).
+This yields,
+\begin{align*}
+\mathbb{E} \|X\widehat{\beta} - X\beta^*\|_2^2 &= \sigma^2 \mathbb{E} \left[\mathrm{tr}(X(X^T X)^{-1} X^T)\right] \\
+&= \sigma^2 d,
+\end{align*}
+since the matrix $P = X(X^TX)^{-1}X^{T}$ is a (full-rank) projection matrix (i.e. $P^2 = P$) all of its eigenvalues are 1. This gives us that,
+\begin{align*}
+\mathbb{E} \left[ \frac{\|X\widehat{\beta} - X\beta^*\|_2^2}{n} \right] = \frac{\sigma^2 d}{n}.
+\end{align*}
+
+\subsection{$\ell_2$ error}
+Again, under our assumptions we know that,
+\begin{align*}
+\widehat{\beta} \sim N(\beta^*, \sigma^2 (X^T X)^{-1}).
+\end{align*}
+So we obtain that,
+%\begin{align*}
+%\mathbb{E} \|\widehat{\beta} - \beta^*\|_2^2 = \sigma^2 \mathrm{tr}((X^T X)^{-1}),
+%\end{align*}
+%and 
+\begin{align*}
+\mathbb{E}\|\widehat{\beta} - \beta^*\|_2^2 = \sigma^2 \mathbb{E}\left[\mathrm{tr}((X^T X)^{-1})\right].
+\end{align*}
+There are various ways to understand this quantity, and we will just provide some rough heuristics. First, notice that,
+\begin{align*}
+\mathbb{E}\|\widehat{\beta} - \beta^*\|_2^2 = \frac{\sigma^2}{n} \mathbb{E}\left[\mathrm{tr}((X^T X/n)^{-1})\right] = \frac{\sigma^2}{n} \mathbb{E}\left[\mathrm{tr}(\widehat{\Sigma}^{-1})\right].
+\end{align*}
+Assuming that $\widehat{\Sigma}$ has eigenvalues that are lower bounded by some small constant $c > 0$, then we will have that,
+\begin{align*}
+\mathbb{E}\|\widehat{\beta} - \beta^*\|_2^2 \leq \frac{\sigma^2 d}{c n},
+\end{align*}
+which is the usual parametric rate. This result can be as related to our general result on the MLE, $\widehat{\beta}$ is the MLE, and the Fisher information is the expected Hessian of the log-likelihood, and is just,
+\begin{align*}
+I_n(\beta) =n \mathbb{E}\left[\frac{X^T X}{n \sigma^2}\right] = \frac{n \Sigma}{\sigma^2}.
+\end{align*}
+independent of $\beta$. So we can conclude that,
+\begin{align*}
+\sqrt{n} (\widehat{\beta} - \beta^*) \cdist N\left(0, \sigma^2 \Sigma^{-1}\right).
+\end{align*}
+%In low dimensions, it will be the case that $\|\widehat{\Sigma}^{-1} - \Sigma\|_{\text{op}}$ will be quite small.
+
+\section{High-dimensional Regression}
+In high-dimensional regression, we are interested in the setting where the covariate distribution has dimension $d \gg n$. The first thing to observe is that even if our old analysis worked (it does not) the prediction error and $\ell_2$ error both scale as $\sigma^2 d/n$ which does not go to $0$ as we increase the sample-size, which would mean that our methods are inconsistent. From a minimax perspective, it turns out that this is unavoidable, i.e. it is impossible to consistently estimate the regression vector $\beta^*$, when $d \gg n$, and we need to turn to structural assumptions to make progress.
+
+A perhaps even more alarming aspect of high-dimensional regression is that the least-squares estimator is no longer well-defined. To see this, observe that the assumption that $\widehat{\Sigma}$ is invertible (which is completely benign in low-dimensions) can never hold in high-dimensions. In particular the matrix,
+\begin{align*}
+\widehat{\Sigma} = \frac{1}{n} \sum_{i=1}^n x_i x_i^T,
+\end{align*}
+has rank at most $n$ (it is a sum of rank 1 matrices) and is a $(d \times d)$ matrix, so is clearly not invertible if $d > n$. The way to picture this is that in high-dimensions there will be many vectors $\beta$ such that, $y = X\beta$ which have least squares error of 0 (i.e. exactly pass through all the samples).
+
+This is a form of over-fitting, and one way to avoid this is to use regularization. This is roughly equivalent to imposing some type of structure on the unknown $\beta^*$ and then attempting to recover $\beta^*$ by leveraging this structure. We will again focus on versions of sparsity, i.e. settings where $\beta^*$ is either exactly sparse (i.e. has $s$ non-zero entries) or is approximately sparse (i.e. has bounded $\ell_1$ norm).
+
+Analogous to the Gaussian sequence model there are two estimators that one might consider:
+\begin{enumerate}
+\item {\bf Hard-Thresholding type estimator: } The analog of hard thresholding is:
+\begin{align*}
+\widehat{\beta} = \arg \min_{\beta} \frac{1}{2} \| y - X\beta\|_2^2 + \frac{t^2}{2} \sum_{i=1}^d \mathbb{I}(\beta_i \neq 0).
+\end{align*}
+This is usually called best-subset regression. The best way to think about the nomenclature is to consider a closely related estimator:
+\begin{align*}
+\widehat{\beta} &= \arg \min_{\beta} \frac{1}{2} \| y - X\beta\|_2^2, \\
+&~~~~~~\text{subject~to}~\sum_{i=1}^d \mathbb{I}(\beta_i \neq 0) \leq k,
+\end{align*}
+where now we have a different tuning parameter $k > 0$ (instead of $t$). You should be able to (with some effort) convince yourself of the fact that these two programs are exactly equivalent, i.e. if you fix any $t > 0$ and solve the first program, then there is some $k$ for which you obtain exactly the same solution. The first form is sometimes called the penalized-form and the second is called the constrained-form.
+
+
+
+The natural way to implement the second estimator would be to enumerate all subsets of size $k$, fit a regression on this subset and then pick the subset, and estimate $\beta$ that has lowest mean -squared error. Hence the name, ``best-subset regression''.
+
+\item {\bf Soft-Thresholding type estimator: } The analog of soft thresholding is known as the LASSO, i.e. the Least Absolute Selection and Shrinkage Operator,
+\begin{align*}
+\widehat{\beta} = \arg \min_{\beta} \frac{1}{2} \| y - X\beta\|_2^2 + t \sum_{i=1}^d |\beta_i|.
+\end{align*}
+Analogous to the above, one can consider a closely related estimator:
+\begin{align*}
+\widehat{\beta} &= \arg \min_{\beta} \frac{1}{2} \| y - X\beta\|_2^2, \\
+&~~~~~~\text{subject~to}~\sum_{i=1}^d |\beta_i| \leq k,
+\end{align*}
+again there is an equivalence, i.e. every value of $t$ corresponds to some value of $k$. 
+This program is a convex program, and simple methods (roughly, gradient descent with tweaks) can be used to solve it quite fast. There is typically no closed-form solution but that is not a huge problem.
+\end{enumerate}
+This brings us to an important distinction between the Gaussian sequence model and regression. In the Gaussian sequence model (no $X$) both of these programs had simple closed-form solutions, whereas now this is no longer the case. More importantly, best-subset is computationally intractable but the LASSO is not.
+
+With this motivation in place, let us study the prediction error of the LASSO. We begin with some assumptions, for simplicity we will study the constrained form of the LASSO, and further we will just assume that the tuning parameter $k$ is chosen to be exactly $\|\beta^*\|_1$. In practice, one might choose this tuning parameter by cross-validation or some other method.  
+
+To simplify our calculations we will also assume the design matrix $X$ is column-normalized, i.e. for each column $j$ of the matrix:
+\begin{align*}
+\sum_{i=1}^n X_{ij}^2 \leq n.
+\end{align*}
+You can ensure this by re-normalizing every column of $X$. This does change $\beta^*$ (and its $\ell_1$ norm). 
+
+\begin{theorem}
+Suppose we consider the constrained-LASSO with $k =\|\beta^*\|_1$, then the prediction error of our estimator, with probability at least $1 - \delta$, satisfies:
+\begin{align*}
+\frac{1}{n} \| X\widehat{\beta} - X\beta^*\|_2^2 \leq 4 \sigma \|\beta^*\|_1 \sqrt{\frac{2 \log(2d/\delta)}{n}}.
+\end{align*}
+\end{theorem}
+This bound is exactly analogous to the bound on the error of the hard/soft-thresholding estimator in the Gaussian sequence model when we assumed that the $\ell_1$ norm of the mean vector $\theta^*$ was bounded. Notice again, that the prediction error goes to 0 with $n$, even in settings where $d \gg n$.
+
+This result is due to Greenshtein and Ritov and really kicked off the wave of high-dimensional statistics. It showed that high-dimensional prediction was possible (at least in the linear model). Several later works showed that under stronger assumptions, one could achieve small $\ell_2$ error and even exactly identify the non-zero components of $\beta^*$ (i.e. do feature selection) in the high-dimensional setting. Furthermore, most of these phenomena generalize to general parametric models (for instance, high-dimensional logistic regression, high-dimensional graphical model estimation and so on).
+
+{\bf Proof (optional): } To prove this we note that, since we selected the tuning parameter to be $\|\beta^*\|_1$, the vector $\beta^*$ is feasible for the program and $\widehat{\beta}$ is optimal, so we have the so-called ``basic inequality'':
+\begin{align*}
+\frac{1}{2n} \|y - X\widehat{\beta}\|_2^2 \leq \frac{1}{2n} \|y - X\beta^*\|_2^2,
+\end{align*}
+where we divided both sides by $n$ for convenience. Re-arranging this inequality we obtain that,
+\begin{align*}
+\frac{1}{2n} \|X\widehat{\beta} - X \beta^*\|_2^2 \leq \frac{1}{n} \inprod{\epsilon}{X\widehat{\beta} - X \beta^*} =  \inprod{\frac{X^{T} \epsilon}{n}}{\widehat{\beta} - \beta^*},
+\end{align*}
+where $\epsilon$ is the noise in the linear model. Holder's inequality tells us that for any two vectors $a,b \in \mathbb{R}^d$, 
+\begin{align*}
+\inprod{a}{b} \leq \left(\max_{i=1}^d a_i\right) \left( \sum_{i=1}^d |b_i| \right).
+\end{align*}
+Applying this inequality we obtain,
+\begin{align*}
+\frac{1}{n} \|X\widehat{\beta} - X \beta^*\|_2^2 \leq 2 \|\widehat{\beta} - \beta^*\|_1 \max_{i=1}^d \frac{X_i ^{T} \epsilon}{n}
+\end{align*}
+where $X_i$ denotes the i-th column of the design. Now, by the triangle inequality, $ \|\widehat{\beta} - \beta^*\|_1 \leq 2 \|\beta^*\|_1$ (recall that we constrained our optimal solution to have $\ell_1$ norm at most $\|\beta^*\|_1$), so it only remains to bound $\max_{i=1}^d \frac{X_i ^{T} \epsilon}{n}$.
+
+Each entry here, has a Gaussian distribution with mean $0$ and variance $\sigma^2 \|X_i\|_2^2/n \leq \sigma^2/n$, using our column normalization assumption. So with probability at least $1 - \delta$, we have that,
+\begin{align*}
+\max_{i=1}^d \frac{X_i ^{T} \epsilon}{n} \leq \sigma \sqrt{ \frac{2 \log(2d/\delta)}{n}},
+\end{align*}
+and combining these facts we obtain the desired bound.
+\end{document}
+
+
+
+
+

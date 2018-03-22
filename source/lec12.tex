@@ -1,0 +1,430 @@
+\documentclass[twoside,12pt]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+\newcommand{\inprod}[2]{\ensuremath{\langle #1 , \, #2 \rangle}}
+
+
+\usepackage{amsmath,amsfonts,graphicx}
+
+
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf 36-705: Intermediate Statistics		\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+\newcommand{\cdist}{\overset{d}{\rightarrow}}
+\newcommand{\edist}{\overset{d}{=}}
+
+\newcommand{\cprob}{\overset{p}{\rightarrow}}
+
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+
+\begin{document}
+%FILL IN THE RIGHT INFO.
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{12}{September 27}{Siva Balakrishnan}{Siva Balakrishnan}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+Today we will discuss sufficiency in more detail and then begin to discuss some general strategies for constructing estimators. 
+
+\section{Minimal sufficiency}
+As we have seen previously sufficient statistics are not unique. Furthermore, it seems at least intuitively that some sufficient statistics present much more reduction than others (for instance in the Poisson model both the mean and the entire sample are sufficient).
+
+ This motivates the following definition of minimal sufficient statistics:
+ 
+ {\bf Minimal Sufficiency: } A statistic $T(x_1,\ldots,x_n)$ is minimal sufficient if it is sufficient, and furthermore for any other sufficient statistic $S(x_1,\ldots,x_n)$ we can write $T(x_1,\ldots,x_n) = g(S(x_1,\ldots,x_n))$, i.e. $T$ is a function of $S$.
+ 
+ There is unfortunately no straightforward way to verify this condition. Analogous to the factorization theorem we have a condition that we can check.
+ 
+ 
+ \begin{theorem}
+Define
+$$
+R(x_1,\ldots,x_n,y_1,\ldots,y_n;\theta) = \frac{p(y_1,\ldots,y_n;\theta)}{p(x_1,\ldots,x_n;\theta)}.
+$$
+Suppose that a statistic $T$ has the following property:
+
+\vspace{.25cm}
+
+\noindent
+\fbox{\parbox{6in}{
+{\bf $R(x_1,\ldots,x_n,y_1,\ldots,y_n;\theta)$ does not depend on $\theta$
+if and only if $T(y_1,\ldots,y_n)=T(x_1,\ldots,x_n)$.}}}
+
+\vspace{.25cm}
+
+\noindent
+Then $T$ is a MSS.
+\end{theorem}
+
+Before we prove the theorem let us consider some examples. 
+
+
+\begin{example}
+Suppose that $Y_1, \ldots, Y_n$ are i.i.d Poisson $(\theta)$.
+$$
+p(y_1,\ldots,y_n;\theta) = \frac{e^{-n\theta}\theta^{\sum y_i}}{\prod   y_i},\ \ 
+\frac{p(y_1,\ldots,y_n;\theta)}{p(x_1,\ldots,x_n;\theta)} =
+\frac{\theta^{\sum y_i-\sum x_i}}{\prod y_i! / \prod x_i!}
+$$
+which is independent of $\theta$ iff $\sum y_i = \sum x_i$.
+This implies that
+$T(X_1,\ldots,X_n) = \sum_{i=1}^n X_i$
+is a minimal sufficient statistic
+for $\theta$.
+\end{example}
+
+The minimal sufficient statistic is not unique.
+But, the minimal sufficient partition is unique.
+
+\begin{example}
+Cauchy.
+$$
+p(x;\theta) = \frac{1}{\pi(1+(x-\theta)^2)}.
+$$
+Then
+$$
+\frac{p(y_1,\ldots,y_n;\theta)}{p(x_1,\ldots,x_n;\theta)} =
+\frac{\prod\limits^n_{i=1}\{1+(x_i-\theta)^2\}}{\prod\limits^n_{j=1}\{1+(y_j-\theta)^2\}}.
+$$
+The ratio is a constant function of $\theta$ if 
+\[T(X_1,\ldots,X_n) = (X_{(1)}, \cdots, X_{(n)}).\] 
+It is technically harder to show that the ratio is independent of $\theta$ only if 
+$T$ is the order statistics, but it could be done using 
+theorems about polynomials.   Having shown this, one can
+conclude that the order statistics are 
+the minimal
+sufficient statistics for $\theta$.  
+\end{example}
+
+\begin{proof}
+This proof is a bit technical so feel free to skip it.
+
+
+
+We prove this in two steps. We first show that $T$ is a sufficient statistic and then we check that it is minimal. We define the partition induced by $T$, as $\{A_t: t \in \text{Range}(T)\}$ and for each set in the partition $A_t$ we associate a representative $(x_{t1},\ldots,x_{tn}) \in A_t$.
+
+{\bf $T$ is sufficient: } We look at the joint distribution at any $(x_1,\ldots,x_n)$. Suppose that $T(x_1,\ldots,x_n) = u$, then consider $(y_1,\ldots,y_n) := (x_{u1},\ldots,x_{un}).$ Observe that, $(y_1,\ldots,y_n)$ depends only on $T(x_1,\ldots,x_n)$, i.e. the point $y$ is a function of the statistic $T$ only. Now we have that,
+\begin{align*}
+p(x_1,\ldots,x_n; \theta) = p(y_1,\ldots,y_n; \theta) R(y_1,\ldots,y_n,x_1,\ldots,x_n; \theta),
+\end{align*}
+and since $T(x_1,\ldots,x_n) = T(y_1,\ldots,y_n)$, $R$ does not depend on $\theta$. Recalling that $(y_1,\ldots,y_n)$ is only a function of $T(x_1,\ldots,x_n)$ we have that,
+\begin{align*}
+p(x_1,\ldots,x_n; \theta) = g(T(x_1,\ldots,x_n);\theta) h(x_1,\ldots,x_n),
+\end{align*}
+where $g$ corresponds to the first term and $h$ corresponds to the $R$ term. We conclude that $T$ is sufficient.
+
+{\bf $T$ is minimal: } As a preliminary we note that the definition of a minimal sufficient statistic could be equivalently written as: $T$ is a MSS if for any other sufficient statistic $S$, if we have that $S(x_1,\ldots,x_n) = S(y_1,\ldots,y_n)$ then we also have that $T(x_1,\ldots,x_n) = T(y_1,\ldots,y_n)$. This is equivalent to the statement that $T$ is a function of $S$.
+
+Consider, any other sufficient statistic $S$. Suppose that, $S(x_1,\ldots,x_n) = S(y_1,\ldots,y_n)$, then by the factorization theorem we have that,
+\begin{align*}
+p(x_1,\ldots,x_n; \theta) &= g(S(x_1,\ldots,x_n);\theta) h(x_1,\ldots,x_n) \\
+&=  g(S(y_1,\ldots,y_n);\theta) h(y_1,\ldots,y_n) \frac{h(x_1,\ldots,x_n)}{h(y_1,\ldots,y_n)} \\
+&= p(y_1,\ldots,y_n; \theta) \frac{h(x_1,\ldots,x_n)}{h(y_1,\ldots,y_n)},
+\end{align*}
+so we have that $R(x_1,\ldots,x_n,y_1,\ldots,y_n; \theta)$ does not depend on $\theta$. So we conclude that $T(x_1,\ldots,x_n) = T(y_1,\ldots,y_n)$ and so $T$ is minimal.
+\end{proof}
+
+
+\section{Minimal sufficiency and the likelihood}
+Although minimal sufficient statistics are not unique they induce a unique partition on the possible datasets. This partition is also induced by the likelihood, i.e.
+
+Suppose we have a partition such that $(x_1,\ldots,x_n)$ and $(y_1,\ldots,y_n)$ are placed in the same set of the partition iff $L(\theta;  x_1,\ldots,x_n) \propto L(\theta; y_1,\ldots,y_n)$, then the partition is the minimal sufficient partition. 
+
+You will prove this on your homework but it is a simple consequence of the characterization we have seen in the previous section.
+
+\section{Sufficiency - the risk reduction viewpoint}
+We will return to the concept of risk more formally in the next few lectures, but for now let us try to understand the main ideas. 
+
+{\bf Setting: } Suppose we observe $X_1,\ldots,X_n \sim p(X; \theta)$ and we would like to estimate $\theta$, i.e. we want to construct some function of the data that is close in some sense to $\theta$. We construct an estimator $\widehat{\theta}(X_1,\ldots,X_n)$. In order to evaluate our estimator we might consider how far our estimate is from $\theta$ on average, i.e. we can define
+\begin{align*}
+R(\widehat{\theta},\theta) = \mathbb{E} (\widehat{\theta} - \theta)^2.
+\end{align*}
+We will see this again later on but the risk of an estimator can be decomposed into its bias and variance, i.e.
+\begin{align*}
+\mathbb{E} (\widehat{\theta} - \theta)^2 = (\mathbb{E}\widehat{\theta} - \theta)^2 + \mathbb{E}(\widehat{\theta} - \mathbb{E}\widehat{\theta})^2, 
+\end{align*}
+where the first term is referred to as the bias and the second is the variance.
+
+There is a strong sense in which estimators which do not depend only on sufficient statistics can be improved. This is known as the Rao-Blackwell theorem.
+
+Let $\widehat{\theta}$ be an estimator. Let $T$ be any sufficient statistic and define $\widetilde{\theta} = \mathbb{E}[\widehat{\theta} | T].$
+
+{\bf Rao-Blackwell theorem: } 
+\begin{align*}
+R(\widetilde{\theta},\theta) \leq R(\widehat{\theta},\theta).
+\end{align*}
+
+
+We will not spend too much time on this but lets see a quick example and then prove the result.
+
+{\bf Example: } Suppose we toss a coin $n$ times, i.e. $X_1,\ldots,X_n \sim \text{Ber}(\theta)$. We consider the estimator:
+\begin{align*}
+\widehat{\theta} = X_1,
+\end{align*}
+and the sufficient statistic $T = \sum_{i=1}^n X_i$, then 
+\begin{align*}
+\widetilde{\theta} = \mathbb{E}[X_1 | T] = \mathbb{E}[X_1 | \sum_i X_i].
+\end{align*}
+I claim that the conditional expectation is simply the average, i.e. 
+\begin{align*}
+\widetilde{\theta} = \frac{1}{n} \sum_{i=1}^n X_i.
+\end{align*}
+First, let us check this in the case when $n = 2$. If $X_1 + X_2 = 2$ then $X_1 = 1$, and if $X_1 + X_2 = 0$, $X_1 = 0$. In the case, when $X_1 + X_2 = 1$, we have $X_1 = 1$ with probability $1/2$ and $0$ with probability $1/2.$ So we conclude the conditional expectation is $(X_1+X_2)/2$.
+
+More generally, if we have $\sum X_i = k$, then of the ${k \choose n}$ equally likely possibilities we have that $X_1 = 1$ for ${k-1 \choose n-1}$ of them so that the conditional expectation is simply:
+\begin{align*}
+\mathbb{E}[X_1 | \sum_i X_i = k] = \frac{{k \choose n} }{{k-1 \choose n-1}} = \frac{k}{n},
+\end{align*}
+as desired.
+
+We observe that both estimators are unbiased but the variance of the Rao-Blackwellized estimator is $\theta(1-\theta)/n$ as opposed to the original estimator which has variance $\theta(1 - \theta)$.
+
+
+
+{\bf Proof of Rao-Blackwell: } Observe that,
+\begin{align*}
+R(\widetilde{\theta},\theta) &= \mathbb{E} [ (\mathbb{E}[\widehat{\theta} | T] - \theta)^2 ] \\
+&=  \mathbb{E} [ (\mathbb{E}[\widehat{\theta}- \theta | T] )^2 ] \\
+&\leq  \mathbb{E} [ \mathbb{E}[(\widehat{\theta}- \theta)^2 | T] ] \\
+&= R(\widehat{\theta},\theta).
+\end{align*}
+The inequality is Jensen's inequality (equivalently just $\text{Var(X)} = \mathbb{E}[X^2] - (\mathbb{E}[X])^2 \geq 0$).
+
+A question worth pondering is: why does it matter for Rao-Blackwellization that $T$ is a sufficient statistic?
+
+\section{More examples with the likelihood}
+
+\begin{example}
+Suppose that
+$X=(X_1, X_2, X_3)\sim {\rm Multinomial}(n,p)$
+where
+$$
+p= (p_1,p_2,p_3) = (\theta,\theta,1-2\theta).
+$$
+So
+$$
+p(x;\theta) = \binom{n}{x_1\ x_2\ x_3} p_1^{x_1}p_2^{x_2}p_3^{x_3} = \theta^{x_1+x_2}(1-2\theta)^{x_3}.
+$$
+Suppose that 
+$X = (1,3,2)$.
+Then
+$$
+L(\theta)=\frac{6!}{1!\  3! \ 2!} \theta^1 \theta^3
+(1-2\theta)^2 \propto \theta^4 (1-2\theta)^2.
+$$
+Now suppose that
+$X =(2,2,2)$.
+Then
+$$
+L(\theta)= \frac{6!}{2!\  2! \ 2!}\theta^2 \theta^2
+(1-2\theta)^2 \propto \theta^4 (1-2\theta)^2.
+$$
+Hence, the likelihood function is the same for these two datasets.
+\end{example}
+
+\begin{example}
+$X_1, \cdots, X_n \sim N(\mu, 1).$
+Then,
+$$
+L(\mu)=\left(\frac{1}{2\pi}\right)^{\frac{n}{2}}
+\exp\left\{-\frac{1}{2}\sum_{i=1}^n (x_i-\mu)^2\right\}
+\propto
+\exp\left\{-\frac{n}{2}(\overline{x}-\mu)^2\right\}.
+$$
+\end{example}
+
+
+\begin{example}
+Let $X_1,\ldots,X_n \sim {\rm Bernoulli}(p)$. Then
+$$
+L(p)\propto p^X (1-p)^{n-X}
+$$
+for $p\in[0,1]$
+where $X = \sum_i X_i$.
+\end{example}
+
+%\section{The Robins-Ritov Example} 
+
+
+\section{Estimation}
+Now we begin discussing more formally the estimation problem.
+
+$X_1,\ldots, X_n\sim p(x;\theta)$.
+Want to estimate
+$\theta = (\theta_1,\ldots, \theta_k)$.
+An {\em estimator}
+$$
+\widehat\theta =\widehat\theta_n = w(X_1, \ldots, X_n)
+$$
+is a function of the data.
+Keep in mind that the parameter is a fixed, unknown constant.
+The estimator is a random variable.
+
+For now, we will discuss three methods
+of constructing estimators:
+\begin{enumerate}
+\item The Method of Moments (MOM)
+\item Maximum likelihood (MLE)
+\item Bayesian estimators.
+\end{enumerate}
+
+
+
+\textsf{\textbf{Some Terminology.}}
+Throughout these notes, we will use the following terminology:
+
+\begin{enumerate}
+\item $\mathbb{E}_\theta(\widehat\theta) =
+\int\cdots \int \widehat\theta(x_1,\ldots, x_n) p(x_1;\theta)\cdots p(x_n;\theta) dx_1 \cdots dx_n$.
+\item Bias: $\mathbb{E}_\theta(\widehat\theta) - \theta$.
+\item The distribution of $\widehat\theta$ is called its {\em sampling distribution}.
+\item The standard deviation of $\widehat\theta$ is called the
+{\em standard error} denoted by ${\rm se}(\widehat\theta)$.
+\item $\widehat\theta$ is {\em consistent} if $\widehat\theta\cprob \theta$ as $n \rightarrow \infty$.
+\item Later we will see that if
+${\rm bias}\to 0$ and ${\rm Var}(\widehat\theta)\to 0$ as $n\to \infty$ then
+$\widehat\theta$ is consistent.
+\end{enumerate}
+
+\section{The Method of Moments}
+
+Suppose that
+$\theta = (\theta_1,\ldots, \theta_k)$.
+Define
+\begin{eqnarray*}
+m_1 = \frac{1}{n}\sum_{i=1}^n X_i , \ \ &&\ \ \mu_1(\theta) = \mathbb{E}(X_i)\\
+m_2 = \frac{1}{n}\sum_{i=1}^n X_i^2 , \ \ &&\ \ \mu_2(\theta) = \mathbb{E}(X_i^2)\\
+\vdots && \vdots\\
+m_k = \frac{1}{n}\sum_{i=1}^n X_i^k , \ \ &&\ \ \mu_k(\theta) = \mathbb{E}(X_i^k).
+\end{eqnarray*}
+Let $\widehat\theta = (\widehat\theta_1,\ldots,\widehat\theta_k)$ solve:
+$$
+m_j = \mu_j(\widehat\theta),\ \ \ j=1,\ldots, k.
+$$
+In other words, we equate the first $k$ sample moments
+with the first $k$ theoretical moments.
+This defines $k$ equations with $k$ unknowns.
+
+\vspace{1cm}
+
+\begin{example}
+$N(\beta,\sigma^2)$ with
+$\theta = (\beta,\sigma^2)$.
+Then
+$\mu_1 = \beta$ and $\mu_2 = \sigma^2 + \beta^2$.
+Equate:
+$$
+\frac{1}{n}\sum_{i=1}^n X_i = \widehat\beta,\ \ \ 
+\frac{1}{n}\sum_{i=1}^n X_i^2 = \widehat\sigma^2 + \widehat\beta^2
+$$
+to get
+$$
+\widehat\beta = \overline{X}_,\ \ \ 
+\widehat\sigma^2 = \frac{1}{n}\sum_{i=1}^n (X_i - \overline{X}_n)^2.
+$$
+\end{example}
+
+\vspace{1cm}
+
+\begin{example}
+Suppose
+$$
+X_1, \ldots, X_n \sim {\rm Binomial}(k,p)
+$$
+where both $k$ and $p$ are unknown.
+We get
+$$
+kp = \overline{X}_n,\ \ \ 
+\frac{1}{n}\sum_{i=1}^n X_i^2 = kp (1-p) + k^2 p^2
+$$
+giving
+$$
+\widehat{p} = \frac{\overline{X}}{k},\ \ \ 
+\widehat{k} = \frac{\overline{X}^2}{\overline{X}- \frac{1}{n}\sum_i (X_i-\overline{X})^2}.
+$$
+\end{example}
+
+
+The method of moments was popular many years ago
+because it is often easy to compute.
+Lately, it has attracted attention again.
+For example, there is a large literature on estimating
+``mixtures of Gaussians'' using the method of moments.
+
+
+
+
+\end{document}
+
+
+
+
+

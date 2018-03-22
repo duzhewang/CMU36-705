@@ -1,0 +1,242 @@
+\documentclass[twoside,12pt]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+\newcommand{\inprod}[2]{\ensuremath{\langle #1 , \, #2 \rangle}}
+
+
+\usepackage{amsmath,amsfonts,graphicx}
+
+
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf 36-705: Intermediate Statistics		\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+\newcommand{\cdist}{\overset{d}{\rightarrow}}
+\newcommand{\edist}{\overset{d}{=}}
+
+\newcommand{\cprob}{\overset{p}{\rightarrow}}
+
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+
+\begin{document}
+%FILL IN THE RIGHT INFO.
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{10}{September 20}{Siva Balakrishnan}{Siva Balakrishnan}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+In the last lecture we discussed the relationship between the uniform convergence of empirical probabilities to true ones over collections of sets and the VC dimension of the collection of sets. 
+Today we return to the uniform convergence over classes of functions, and relate this to the \emph{Rademacher complexity,} of the collection of functions.
+
+\section{Empirical process}
+As a reminder, the setup for today is that we have a collection of functions $\mathcal{F}$, we observe samples $X_1,\ldots,X_n \sim P$ for some distribution $P$ and we are interested in (upper bounding) the quantity:
+\begin{align*}
+\Delta(\mathcal{F}) = \sup_{f \in \mathcal{F}} \left| \frac{1}{n} \sum_{i=1}^n f(X_i) - \mathbb{E}[f] \right|.
+\end{align*}
+
+\section{Rademacher complexity}
+Unlike the VC dimension, in the definition of the Rademacher complexity we do not maximize over the locations of points, i.e. in some sense it is not a worst case measure of complexity. In order to define the Rademacher complexity, we first suppose that we have a fixed collection $\{x_1,\ldots,x_n\}$ of points. 
+
+We let $\epsilon = \{\epsilon_1,\ldots,\epsilon_n\}$ denote a collection of $n$ Rademacher random variables, i.e. they take the values $\{+1,-1\}$ with equal probabilities. 
+In this case, we can define the \emph{empirical} Rademacher complexity as:
+\begin{align*}
+\mathcal{R}(x_1,\ldots,x_n) = \mathbb{E}_{\epsilon} \left[ \sup_{f \in \mathcal{F}} \left| \frac{1}{n} \sum_{i=1}^n \epsilon_i f(x_i) \right| \right].
+\end{align*}
+When we think of $\{x_1,\ldots,x_n\}$ as a random sample then the empirical Rademacher complexity is a random variable. We define the Rademacher complexity of the class $\mathcal{F}$ as the expectation of this quantity, i.e.
+\begin{align*}
+\mathcal{R}(\mathcal{F}) = \mathbb{E}_{\epsilon} \mathbb{E}_X \left[ \sup_{f \in \mathcal{F}} \left| \frac{1}{n} \sum_{i=1}^n \epsilon_i f(X_i) \right| \right].
+\end{align*}
+
+Just intuitively, we should think about when the Rademacher complexity is large, and when it decays to 0. The Rademacher complexity is measuring the maximum absolute covariance between 
+$\{f(X_1),\ldots,f(X_n)\}$ and a vector of random signs $\{\epsilon_1,\ldots,\epsilon_n \}$.
+
+Intuitively, we think of a class $\mathcal{F}$ as too large if for many random sign vectors we can find a function in $\mathcal{F}$ that is strongly correlated with the random sign vectors.
+
+The main utility of the Rademacher complexity is that it upper bounds the quantity $\Delta(\mathcal{F})$ that we care about. 
+
+{\bf Rademacher Theorem: } 
+\begin{align*}
+\mathbb{E}[\Delta(\mathcal{F})] \leq 2 \mathcal{R}(\mathcal{F}).
+\end{align*}
+
+This theorem again might not appear to be so useful since we still need to understand the Rademacher complexity. 
+It turns out that the Rademacher complexity is relatively easy to upper bound in terms of more geometric measures of the function class $\mathcal{F}$ (these are things like covering numbers or bracketing numbers of $\mathcal{F}$). This is analogous to how VC theory gave us a way to go from the uniform convergence question to a combinatorial property of the collection of sets. You will see these in more detail in 702.
+
+{\bf Proof: } At a high-level the proof will resemble what we did in proving Hoeffding's inequality. We will introduce a ghost sample, and symmetrize the empirical process. Concretely, let $\{Y_1,\ldots,Y_n\}$ be an independent identically distributed sample. Then,
+\begin{align*}
+\mathbb{E}[\Delta(\mathcal{F})] &= \mathbb{E}_X\left[ \sup_{f \in \mathcal{F}} \left| \frac{1}{n} \sum_{i=1}^n f(X_i) - \mathbb{E}[f] \right|\right] \\
+&=  \mathbb{E}_X\left[ \sup_{f \in \mathcal{F}} \left| \frac{1}{n} \sum_{i=1}^n f(X_i) - \mathbb{E}_{Y_i} f(Y_i) \right|\right] \\
+&= \mathbb{E}_X\left[ \sup_{f \in \mathcal{F}} \left| \mathbb{E}_Y \frac{1}{n} \sum_{i=1}^n [f(X_i) -  f(Y_i)] \right|\right] \\
+&\leq  \mathbb{E}_X\left[ \sup_{f \in \mathcal{F}} \mathbb{E}_Y  \left| \frac{1}{n} \sum_{i=1}^n [f(X_i) -  f(Y_i)] \right|\right] \\
+&\leq \mathbb{E}_{X,Y} \left[ \sup_{f \in \mathcal{F}}   \left| \frac{1}{n} \sum_{i=1}^n [f(X_i) -  f(Y_i)] \right|\right]
+\end{align*}
+We note that the distribution of the difference $f(X_i) - f(Y_i)$ is the same as the distribution of $\epsilon_i (f(X_i) - f(Y_i))$ so we obtain, 
+\begin{align*}
+\mathbb{E}[\Delta(\mathcal{F})] &\leq  \mathbb{E}_{X,Y,\epsilon} \left[ \sup_{f \in \mathcal{F}}   \left| \frac{1}{n} \sum_{i=1}^n \epsilon_i [f(X_i) -  f(Y_i)] \right|\right] \\
+&\leq  2 \mathbb{E}_{X,\epsilon} \left[ \sup_{f \in \mathcal{F}}   \left| \frac{1}{n} \sum_{i=1}^n \epsilon_i f(X_i) \right|\right] \\
+&= 2 \mathcal{R}(\mathcal{F}),
+\end{align*}
+which gives us the Rademacher theorem.
+
+If the function class is bounded, i.e. for every $f \in \mathcal{F}$ we have that $\|f\|_{\infty} \leq b$, then the empirical process $\Delta(\mathcal{F})$ is sharply concentrated around its mean, i.e.
+\begin{align*}
+\mathbb{P}( |\Delta(\mathcal{F}) - \mathbb{E}[\Delta(\mathcal{F})]| \geq t) \leq 2 \exp( -nt^2/(2b^2)).
+\end{align*}
+This inequality is a consequence of Azuma's inequality we studied previously. We won't go through this argument but it is a great exercise (HW4?). 
+
+
+Putting this inequality together with the upper bound on the mean we obtain that for a bounded class $\mathcal{F}$ with probability at least $1 - \delta$,
+\begin{align*}
+\Delta(\mathcal{F}) \leq 2\mathcal{R}(\mathcal{F}) + b \sqrt{ \frac{2 \ln(2/\delta)}{n}}. 
+\end{align*}
+Noting that we obtain the concentration bound rather easily, the quantity that is often difficult to deal with is $\mathcal{R}(\mathcal{F}).$ We'll consider a few examples and leave the rest to 702.
+
+
+\section{Rademacher Complexity of a Finite Class}
+Suppose that we have a finite collection of functions $\mathcal{F} = \{f_1,\ldots,f_N\}$, which are bounded i.e. $\|f_i\|_{\infty} \leq b$ then we have the following bound on the Rademacher complexity.
+
+{\bf Finite Class Bound: } The Rademacher complexity for a finite class, 
+\begin{align*}
+\mathcal{R}(\mathcal{F}) \leq  2b \sqrt{\frac{\log(2N)}{n}}.
+\end{align*}
+
+Note that in this case it would in fact be more direct to work with the empirical process, and upper bound that directly. This is not usually the case.
+
+{\bf Proof: } Define,
+\begin{align*}
+\Theta := \mathbb{E}_{X,\epsilon}  \left[ \sup_{f \in \mathcal{F}}   \left| \frac{1}{n} \sum_{i=1}^n \epsilon_i f(X_i) \right|\right].
+\end{align*}
+For convenience let us augment the class $\mathcal{F}$ with the negative of every function, i.e. we take
+$\widetilde{\mathcal{F}} = \mathcal{F} \cup (- \mathcal{F})$, so that there are now $2N$ functions. Then,
+\begin{align*}
+\Theta \leq \mathbb{E}_{X,\epsilon}  \left[ \sup_{f \in \widetilde{\mathcal{F}}}  \frac{1}{n} \sum_{i=1}^n \epsilon_i f(X_i) \right].
+\end{align*}
+Note that,
+\begin{align*}
+\exp (t \Theta) &\leq \exp \left(t  \mathbb{E}_{X,\epsilon}  \left[ \sup_{f \in \widetilde{\mathcal{F}}}  \frac{1}{n} \sum_{i=1}^n \epsilon_i f(X_i) \right]\right) \\
+&\leq  \mathbb{E}_{X,\epsilon} \exp \left(t\left[ \sup_{f \in \widetilde{\mathcal{F}}}   \frac{1}{n} \sum_{i=1}^n \epsilon_i f(X_i) \right]\right) \\
+&\leq \mathbb{E}_{X,\epsilon} \sum_{j=1}^{2N} \prod_{i=1}^n \exp \left(\frac{t   \epsilon_i f_j(X_i) }{n}\right) \\
+&= \sum_{j=1}^{2N} \prod_{i=1}^n \mathbb{E}_{X,\epsilon}  \exp \left(\frac{t   \epsilon_i f_j(X_i) }{n}\right).
+\end{align*}
+Since $\|f_j\|_{\infty} \leq b$ we can use the argument we used in the proof of Hoeffding's inequality to obtain that,
+\begin{align*}
+\exp (t \Theta) \leq 2N \exp  \left(\frac{4t^2 b^2  }{n}\right),
+\end{align*}
+so we obtain that, 
+\begin{align*}
+\Theta \leq \frac{\log (2N)}{t} +   \frac{4t b^2  }{n},
+\end{align*}
+where $t$ is a free parameter that is $> 0$. Choosing, $t = \sqrt{n \log(2N) /(4b^2)}$ we obtain,
+\begin{align*}
+\Theta \leq 2b \sqrt{\frac{\log(2N)}{n}}.
+\end{align*}
+
+% &= \int_{0}^\infty \mathbb{P} \left( \sup_{f \in \mathcal{F}}   \left| \frac{1}{n} \sum_{i=1}^n \epsilon_i f(X_i) \right| \geq t\right) dt \\
+%&= \int_0^{\infty} \sum_{j=1}^N  \mathbb{P} \left(  \left| \frac{1}{n} \sum_{i=1}^n \epsilon_i f_j(X_i) \right| \geq t\right) dt \\
+%&\leq  \int_0^{\infty} 2N \exp( -  n t^2/(2b^2) )dt \\
+%&\leq 2 N b \sqrt{\frac{\pi}{n}}
+%\end{align*}
+
+
+
+\section{Using the Rademacher Theorem to obtain the VC theorem}
+The Rademacher theorem in a very straightforward way implies the VC theorem. We'll sketch the proof here. Our class of functions just corresponds to the indicators arising from the set system. These functions are upper bounded by $b = 1$. We can get a high-probability statement as in the initial section so we only need to deal with $\mathcal{R}(\mathcal{F})$.
+
+We follow an identical argument to the one we did in the previous section,
+\begin{align*}
+\Theta \leq  \mathbb{E}_{X,\epsilon} \exp \left(t\left[ \sup_{f \in \widetilde{\mathcal{F}}}   \frac{1}{n} \sum_{i=1}^n \epsilon_i f(X_i) \right]\right),
+\end{align*}
+where the class $\widetilde{\mathcal{F}}$ just contains the set indicators and their negations. 
+
+The key point is to note here is the following: suppose we think of the vectors $(f(X_1),\ldots,f(X_n))$ for each function in $\widetilde{\mathcal{F}}$ and ask how many different such vectors are there? Each set in $\mathcal{A}$ picks out some subset of the points (and assigns them the value $+1$).
+Even though there are possibly infinitely many sets in $\mathcal{A}$ there are at most only twice (because we included the negations) the shattering number of different vectors.
+
+The shattering number is precisely the (maximum) number of different vectors $(f(X_1),\ldots,f(X_n))$ we can induce using our collection of sets.
+
+With this insight in hand we can just repeat the previous argument to conclude that,
+\begin{align*}
+\Theta \leq  \sqrt{\frac{4 \log(2 s(\mathcal{A},n))}{n}},
+\end{align*}
+and putting this together with the high-probability bound from before we have that with probability at least $1 - \delta$, 
+\begin{align*}
+\Theta &\leq  \sqrt{\frac{4 \log(2 s(\mathcal{A},n))}{n}} +  \sqrt{ \frac{2 \ln(2/\delta)}{n}} \\
+&\leq  \sqrt{\frac{4 \log(4 s(\mathcal{A},n)/\delta)}{n}},
+\end{align*}
+which is precisely the VC theorem (again always ignore constants).
+
+
+
+
+\end{document}
+
+
+
+
+

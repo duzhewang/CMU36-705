@@ -1,0 +1,241 @@
+\documentclass[twoside,12pt]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+\newcommand{\inprod}[2]{\ensuremath{\langle #1 , \, #2 \rangle}}
+
+
+\usepackage{amsmath,amsfonts,graphicx}
+
+
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf 36-705: Intermediate Statistics		\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+
+\begin{document}
+%FILL IN THE RIGHT INFO.
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{3}{September 1}{Siva Balakrishnan}{Siva Balakrishnan}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+% **** YOUR NOTES GO HERE:
+
+This lecture will be mostly a summary of other useful exponential tail bounds. We will not prove any of these in lecture, some of them follow similar lines of using Chernoff's method in clever ways. I can provide references if you are curious.
+In particular, we will go through:
+\begin{enumerate}
+\item Bernstein's inequality: sharper concentration for bounded random variables
+\item Azuma's inequality: Concentration of Lipschitz functions of bounded random variables
+\item Levy's inequality/Tsirelson's inequality: Concentration of Lipschitz functions of Gaussian random variables
+\item $\chi^2$ tail bound
+\end{enumerate}
+Finally, we will see an application of the $\chi^2$ tail bound in proving the Johnson-Lindenstrauss lemma. 
+
+\section{Bernstein's inequality}
+One nice thing about the Gaussian tail inequality was that it explicitly depended on the variance of the random variable $X$, i.e. roughly the inequality guaranteed us that the deviation from the mean was at most $\sigma \sqrt{\log(2/\delta)/n}$ with probability at least $1 - \delta$.
+
+On the other hand Hoeffding's bound depended only on the bounds of the random variable but not explicitly on the variance of the RVs. The bound $b-a$, provides a (possibly loose) upper bound on the variance. One might at least hope that if the random variables were bounded, and additionally had \emph{small variance} we might be able to improve Hoeffding's bound.
+
+This is indeed the case. Such inequalities are typically known as Bernstein inequalities. As a concrete example, suppose we had $X_1,\ldots,X_n$ which were i.i.d from a distribution with mean zero, bounded support $[a,b]$, with variance $\mathbb{E}[X^2] = \sigma^2$. Then,
+\begin{align*}
+\mathbb{P}(| \widehat{\mu} - \mu| \geq t) \leq 2 \exp\left( - \frac{nt^2}{2(\sigma^2 + (b-a) t)} \right).
+\end{align*}
+
+Roughly this inequality says with probability at least $1 - \delta$,
+\begin{align*}
+|\widehat{\mu} - \mu| \leq 4 \sigma \sqrt{ \frac{\ln (2/\delta)}{n}} +  \frac{ 4(b-a) \ln(2/\delta)}{n}.
+\end{align*}
+{\bf As an exercise work through the above algebra.}
+
+Upto some small constants this is never worse than Hoeffding's bound, which just comes from using the worst-case upper bound of $\sigma \leq b - a.$ When the RVs have small variance, i.e. $\sigma$ is small, this bound can be much sharper than Hoeffding's bound. These are cases where one has a random variable that occasionally takes large values (so the bounds are not great) but has much smaller variance. 
+
+Intuitively, it captures more of the Chebyshev effect, i.e. that random variables with small variance should be tightly concentrated around their mean. 
+
+\section{Azuma's inequality}
+So far we have mostly been focused on the concentration of averages. A natural question is whether other functions of i.i.d. random variables also show exponential concentration. It turns out that many other functions do concentrate sharply, and roughly the main property of the function that we need is that if we change the value of one random variable the function does not change dramatically.
+
+Formally, we have i.i.d. RVs $X_1,\ldots,X_n$, where each $X_i \in \mathbb{R}$. We have a function $f: \mathbb{R}^n \mapsto \mathbb{R},$ that satisfies the property that:
+\begin{align*}
+|f(x_1,\ldots,x_n) - f(x_1,\ldots,x_{k-1}, x'_k, x_{k+1},\ldots,x_n)| \leq L_k,
+\end{align*}
+for every $x,x' \in \mathbb{R}^n$, i.e. the function changes by at most $L_k$ if its $k$-th co-ordinate is changed. This is known as the bounded difference condition.
+
+If the random variables $X_1,\ldots, X_n$ are i.i.d then for all $t \geq 0$
+\begin{align*}
+\mathbb{P}(|f(X_1,\ldots,X_n) - \mathbb{E}[f(X_1,\ldots,X_n)] | \geq t) \leq 2 \exp \left( - \frac{2t^2}{\sum_{k=1}^n L_k^2} \right).
+\end{align*}
+
+{\bf Example 1: } A simple example of this inequality in action is to see that it directly implies the Hoeffding bound. In this case the function of interest is the average:
+\begin{align*}
+f(X_1,\ldots,X_n) = \frac{1}{n} \sum_{i=1}^n X_i,
+\end{align*}
+and since the random variables are bounded we have that each $L_k \leq (b - a)/n$. This in turn directly yields Hoeffding's bound (with slightly better constants).
+
+{\bf Example 2: } A perhaps more interesting example is that of $U$-statistics. A $U$-statistic is defined by a kernel, which is just a function of two random variables, i.e. $g: \mathbb{R}^2 \mapsto \mathbb{R}$. The U-statistic is then given as:
+\begin{align*}
+U(X_1,\ldots,X_n) := \frac{1}{ {n \choose 2} } \sum_{j < k} g(X_j, X_k).
+\end{align*}
+There are many examples of $U$-statistics, for instance:
+\begin{enumerate}
+\item {\bf Variance: } The usual estimator of the sample variance:
+\begin{align*}
+\widehat{\sigma} = \frac{1}{n-1} \sum_{i=1}^n (X_i - \widehat{\mu})^2,
+\end{align*}
+is the U-statistic that arises from taking $g(X_j, X_k) = \frac{1}{2} (X_i - X_j)^2.$
+\item {\bf Mean absolute deviation: } If we take $g(X_j, X_k) = |X_j - X_k|$, this leads to a U-statistic that is an unbiased estimator of the mean absolute deviation $\mathbb{E}|X_1 - X_2|$.
+\end{enumerate}
+
+For bounded $U$-statistics, i.e. if $g(X_i, X_j) \leq b$, we can apply Azuma's inequality to obtain a concentration bound. Note that since each random variable $X_i$ participates in $(n-1)$ terms we have that,
+\begin{align*}
+|U(X_1,\ldots,X_n) - U(X_1,\ldots,X_i',\ldots, X_n)| \leq \frac{1}{{n \choose 2}} (n-1)(2b) = \frac{4b}{n}.
+\end{align*}
+So that Azuma's inequality tells us that,
+\begin{align*}
+\mathbb{P}(|U(X_1,\ldots,X_n) - \mathbb{E}[U(X_1,\ldots,X_n)] | \geq t) \leq 2 \exp (-nt^2/(8b^2)).
+\end{align*}
+
+\section{Levy's inequality}
+There is a similar concentration inequality that applies to functions of Gaussian random variables that are sufficiently smooth. In this case, the assumption is quite different. We assume that:
+\begin{align*}
+|f(X_1,\ldots,X_n) - f(Y_1,\ldots,Y_n)| \leq L \sqrt{\sum_{i=1}^n (X_i - Y_i)^2},
+\end{align*}
+for all $X_1,\ldots,X_n,Y_1,\ldots,Y_n \in \mathbb{R}$.
+
+For such functions we have that if $X_1,\ldots,X_n \sim N(0,1)$ then,
+\begin{align*}
+\mathbb{P}(|f(X_1,\ldots,X_n) - \mathbb{E}[f(X_1,\ldots,X_n)] | \geq t) \leq 2 \exp \left( - \frac{t^2}{2L^2} \right).
+\end{align*}
+
+\section{$\chi^2$ tail bounds}
+A $\chi^2$ random variable with $n$ degrees of freedom, denoted by $Y \sim \chi^2_n$, is a RV that is a sum of $n$ i.i.d. standard Gaussian RVs, i.e. $Y = \sum_{i=1}^n X_i^2$ where each $X_i \sim N(0,1)$. The expected value $\mathbb{E}[X_i^2] = 1$, and we have the $\chi^2$ tail bound:
+\begin{align*}
+\mathbb{P} \left(\left| \frac{1}{n} \sum_{k=1}^n Z_k^2 - 1 \right| \geq t\right) \leq 2 \exp (-nt^2/8)~~~\text{for all}~~t \in (0,1).
+\end{align*}
+You will derive this in your HW using the Chernoff method. Analogous to the class of sub-Gaussian RVs, $\chi^2$ random variables belong to a class of what are known as \emph{sub-exponential} random variables. The main note-worthy difference is that the Gaussian-type behaviour of the tail only holds for small values of the deviation $t$.
+
+{\bf Detour: The union bound. } This is also known as Boole's inequality. It says that if we have events $A_1,\ldots,A_n$ then 
+\begin{align*}
+\mathbb{P}\left( \bigcup_{i=1}^n A_i\right) \leq \sum_{i=1}^n \mathbb{P}(A_i).
+\end{align*}
+In particular, if we consider a case when each event $A_i$ is a failure of some type, then the above inequality says that the probability that even a single failure occurs is at most the sum of the probabilities of each failure. 
+
+{\bf Example: The Johnson-Lindenstrauss Lemma. } One very nice application of $\chi^2$ tail bounds is in the analysis of what are known as ``random projections''. Suppose we have a data set $X_1,\ldots,X_n \in \mathbb{R}^d$ where $d$ is quite large. Storing such a dataset might be expensive and as a result we often resort to ``sketching'' or ``random projection'' where the goal is to create a map $F: \mathbb{R}^d \mapsto \mathbb{R}^m$, with $m \ll d$. We then instead store the mapped dataset $\{F(X_1),\ldots,F(X_n)\}$. The challenge is to design this map $F$ in a way that preserves essential features of the original dataset. In particular, we would like that for every pair $(X_i,X_j)$ we have that,
+\begin{align*}
+(1 - \epsilon) \|X_i - X_j\|_2^2 \leq \|F(X_i) - F(X_j)\|_2^2 \leq (1+\epsilon) \|X_i - X_j\|_2^2,
+\end{align*}
+i.e. the map preserves all the pair-wise distances up to a $(1 \pm \epsilon)$ factor. Of course, if $m$ is large we might expect this is not too difficult.
+
+The Johnson-Lindenstrauss lemma is quite stunning: it says that a simple randomized construction will produce such a map with probability at least $1 - \delta$ provided that,
+\begin{align*}
+m \geq \frac{16 \log (n/\delta) }{\epsilon^2}.
+\end{align*}
+Notice that this is completely independent of the original dimension $d$ and depends on logarithmically on the number of points $n$. This map can  result in huge savings in storage cost while still essentially preserving all the pairwise distances.
+
+The map itself is quite simple: we construct a matrix $Z \in \mathbb{R}^{m \times d}$, where each entry of $Z$ is i.i.d $N(0,1)$. We then define the map as:
+\begin{align*}
+F(X_i) = \frac{ZX_i}{\sqrt{m}}.
+\end{align*}
+Now let us fix a pair $(X_j,X_k)$ and consider, 
+\begin{align*}
+\frac{\|F(X_j) - F(X_k)\|_2^2}{\|X_j - X_k\|_2^2} &= \left\|\frac{Z (X_j - X_k)}{\sqrt{m} \|X_j - X_k\|_2}\right\|_2^2 \\
+&= \frac{1}{m} \sum_{i=1}^m \underbrace{\inprod{Z_i}{\frac{X_j - X_k}{\|X_j - X_k\|_2}}^2}_{T_i}.
+\end{align*}
+Now, for some fixed numbers $a_j$ the 
+distribution of $\sum_{j=1}^d a_j Z_{ij}$ is Gaussian with mean 0 and variance $\sum_{j=1}^d a_j^2$.
+So each term $T_i$ is an independent $\chi^2$ random variable. Now applying the $\chi^2$ tail bound, we obtain that,
+\begin{align*}
+\mathbb{P}\left( \left| \frac{\|F(X_j) - F(X_k)\|_2^2}{\|X_j - X_k\|_2^2} - 1 \right| \geq \epsilon \right) \leq 2 \exp (- m \epsilon^2/8).
+\end{align*}
+Thus for the fixed pair $(X_i,X_j)$ the probability that our map fails to preserve the distance is exponentially small, i.e. is at most 
+$ 2 \exp (- m \epsilon^2/8).$ Now, to find the probability that our map fails to preserve \emph{any} of our ${n \choose 2}$ pairwise distances we simply apply the union bound to conclude that, the probability of any failure is at most:
+\begin{align*}
+\mathbb{P}(\text{failure}) \leq 2 {n \choose 2} \exp ( - m \epsilon^2/8).
+\end{align*}
+Now, it is straightforward to verify that if 
+\begin{align*}
+m \geq \frac{16 \log (n/\delta) }{\epsilon^2},
+\end{align*}
+then this probability is at most $\delta$ as desired. An important point to note is that the \emph{exponential concentration} is what leads to such a small value for $m$ (i.e. it only needs to grow logarithmically with the sample size).
+
+%We have already seen tail bounds for random variables which are sub-Gaussian. A relaxation of the sub-Gaussian condition, that is termed \emph{sub-exponentiality} is often quite useful. 
+%
+%An important example to keep in mind is that of $\chi^2$ random variables. These turn out to not be sub-Gaussian (naturally, squaring a Gaussian makes its tails fatter) but are instead sub-exponential random variables. 
+%
+%A random variable $X$ is $(\sigma, \alpha)$ sub-exponential if:
+%\begin{align*}
+%\mathbb{E}[\exp(t (X - \mu)] \leq \exp (t^2 \sigma^2/2)~~~~\text{for all}~~|t| \leq 1/\alpha.
+%\end{align*}
+
+\end{document}
+
+
+
+
+

@@ -1,0 +1,432 @@
+\documentclass[twoside,12pt]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+\newcommand{\inprod}[2]{\ensuremath{\langle #1 , \, #2 \rangle}}
+
+
+\usepackage{amsmath,amsfonts,graphicx,amssymb}
+\newcommand{\V}{\mbox{${\sf Var}$}}
+
+
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf 36-705: Intermediate Statistics		\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+\newcommand{\cdist}{\overset{d}{\rightarrow}}
+\newcommand{\edist}{\overset{d}{=}}
+
+\newcommand{\cprob}{\overset{p}{\rightarrow}}
+\newcommand{\tobs}{T(Z_{\text{obs}})}
+\newcommand{\zobs}{Z_{\text{obs}}}
+\newcommand{\permtest}{\phi_{\text{perm}}}
+
+
+
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+
+\begin{document}
+%FILL IN THE RIGHT INFO.
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{33}{November 29}{Siva Balakrishnan}{Siva Balakrishnan}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+Today we will continue discussing the bootstrap, and then try to understand why it works in a simple case. In the last lecture we discussed estimating the variance of an estimator. Today, we will discuss constructing confidence intervals using the bootstrap, and then start discussing model selection. 
+
+
+\section{Bootstrap Confidence Intervals}
+The bootstrap can also be used to obtain confidence intervals. If your estimator has a normal limit then you could just use a Wald interval with the bootstrap variance estimate, i.e. $C_n = [ \widehat{\theta}_n - \widehat{s} z_{\alpha/2}, \widehat{\theta}_n + \widehat{s} z_{\alpha/2}].$
+
+It is often more accurate to use the distribution of the bootstrap estimates itself to construct the bootstrap confidence interval.
+
+\subsection{Hypothetical confidence interval}
+Suppose we knew the distribution of our estimator, in particular suppose we knew the distribution of $\sqrt{n} (\widehat{\theta}_n - \theta)$. Let us denote the distribution by $G$ and denote its $\alpha/2$ and $1-\alpha/2$ quantiles by $g_{\alpha/2}$ and $g_{1 - \alpha/2}$.
+
+Then a $1 - \alpha$ confidence interval would be:
+$$C_n = \left[\widehat{\theta}_n - \frac{g_{1 - \alpha/2}}{\sqrt{n}}, \widehat{\theta}_n - \frac{g_{\alpha/2}}{\sqrt{n}} \right].$$
+This might seem a little strange, but this is probably because you are used to confidence intervals based on the normal distribution which has symmetric quantiles. To verify this, 
+\begin{align*}
+\mathbb{P}(\theta \in C_n) &= \mathbb{P}\left(g_{\alpha/2} \leq \sqrt{n} (\widehat{\theta}_n - \theta) \leq g_{1 - \alpha/2}\right)\\
+&= 1 - \alpha/2 - \alpha/2 = 1 - \alpha. 
+\end{align*}
+Again the point is that we do not know the distribution $G$ above so we try to approximate this using the bootstrap.
+
+\subsection{Bootstrap confidence interval algorithm}
+\fbox{\parbox{7in}{
+\begin{center}
+Bootstrap Confidence Interval
+\end{center}
+\begin{enumerate}
+\item Draw a bootstrap sample
+$X_1^*,\ldots, X_n^* \sim P_n$.
+Compute
+$\widehat\theta_n^* = g(X_1^*,\ldots, X_n^*)$.
+\item Repeat the previous step, $B$ times,
+yielding estimators
+$\widehat\theta_{n,1}^*,\ldots,\widehat\theta_{n,B}^*$.
+\item Let
+$$
+\widehat G(t) = \frac{1}{B}\sum_{j=1}^B I\Bigl(\sqrt{n}(\widehat\theta_{n,j}^* -\widehat\theta_n\Bigr) \leq t).
+$$
+\item Let 
+$$
+C_n = \left[
+\widehat\theta_n - \frac{g_{1-\alpha/2}}{\sqrt{n}},\ 
+\widehat\theta_n - \frac{g_{\alpha/2}}{\sqrt{n}}\right]
+$$
+where
+$g_{\alpha/2} = \widehat G^{-1}(\alpha/2)$ and
+$g_{1-\alpha/2} = \widehat G^{-1}(1-\alpha/2)$.
+\item Output $C_n$.
+\end{enumerate}
+}}
+
+\section{Variants}
+There are many many many papers that have been written about the bootstrap. Particularly, there are lots of variants -- the ``studentized'' bootstrap where you throw in some estimates of the standard deviation in constructing confidence intervals, the block bootstrap for time-series, the residual bootstrap or the wild bootstrap for regression, the parametric bootstrap for parametric models, the smooth bootstrap and ideas related to sub-sampling to avoid certain regularity conditions, the less computationally intensive but less general Jackknife and so on. 
+
+\section{Justifying the Bootstrap}
+This part is going to be a little bit technical. Before we get into it, we should try to figure out what it means to ``justify the bootstrap''. Roughly, we want that the quantiles of the bootstrap distribution of our statistic should be close to the quantiles its actual distribution, i.e. suppose we define:
+\begin{align*}
+\widehat{F}_n(t) = \mathbb{P}_n(\sqrt{n} (\widehat{\theta}_n^* - \widehat{\theta}_n) \geq t \vert X_1,\ldots,X_n),
+\end{align*}
+to be the CDF of the bootstrap distribution, and
+\begin{align*}
+F_n(t) = \mathbb{P}(\sqrt{n} (\widehat{\theta}_n - \theta) \geq t),
+\end{align*}
+to be the CDF of the true sampling distribution of our statistic, then the bootstrap works if for instance:
+\begin{align*}
+\sup_{t} |\widehat{F}_n(t) - F_n(t)| \rightarrow 0.
+\end{align*}
+This turns out to be true in quite a bit of generality, only requiring mild conditions (Hadamard differentiability, see Bootstrap chapter in van der Vaart), but we will prove it in the simplest case: when $\widehat{\theta}_n$ is a sample mean. In this case there are much simpler ways to construct confidence intervals (using Normal approximations) but that is not really the point.
+
+Suppose that
+$X_1,\ldots, X_n \sim P$
+where $X_i$ has mean $\mu$
+and variance $\sigma^2$.
+Suppose we want to construct a confidence interval for $\mu$.
+
+Let $\widehat\mu_n = \frac{1}{n}\sum_{i=1}^n X_i$ and define
+\begin{equation}
+F_n(t) = \mathbb{P}( \sqrt{n}(\widehat\mu_n - \mu) \leq t).
+\end{equation}
+We want to show that
+$$
+\widehat F_n(t) = \mathbb{P}\Bigl( \sqrt{n}(\widehat\mu_n^* - \widehat\mu_n) \leq t \Bigm| X_1,\ldots, X_n\Bigr)
+$$
+is close to $F_n$.
+
+
+
+\begin{theorem}[Bootstrap Theorem]
+Suppose that $\mu_3 = \mathbb{E}|X_i|^3 < \infty$.
+Then,
+$$
+\sup_t | \widehat F_n(t) - F_n(t)| = O_P\left(\frac{1}{\sqrt{n}}\right).
+$$
+\end{theorem}
+
+\begin{figure}
+\begin{center}
+\includegraphics[scale=1.2]{bootdiag-crop}
+\end{center}
+\vspace{-5in}
+\caption{\em The distribution $F_n(t) = \mathbb{P}(\sqrt{n}(\widehat\theta_n - \theta) \leq t)$
+is close to some limit distribution $L$.
+Similarly, the bootstrap distribution $\widehat F_n(t) = \mathbb{P}(\sqrt{n}(\widehat\theta_n^* - \widehat\theta_n) \leq t|X_1,\ldots, X_n)$
+is close to some limit distribution $\widehat L$.
+Since $\widehat L$ and $L$ are close,
+it follows that
+$F_n$ and $\widehat F_n$ are close.
+In practice, we approximate
+$\widehat F_n$ with its Monte Carlo version $\overline{F}$
+which we can make as close to
+$\widehat F_n$ as we like by taking $B$ large.}
+\label{fig::bootstrap-explained}
+\end{figure}
+
+
+
+To prove this result, let us recall that
+Berry-Esseen Theorem.
+
+
+\begin{theorem}[Berry-Esseen Theorem]
+Let $X_1, \ldots, X_n$ be i.i.d. with mean
+$\mu$ and variance $\sigma^2$.
+Let
+$\mu_3 = \E[ |X_i-\mu|^3] < \infty$.
+Let $\overline{X}_n = n^{-1}\sum_{i=1}^n X_i $ be the sample mean
+and let $\Phi$ be the cdf of a $N(0,1)$ random variable.
+Let
+$Z_n = \frac{\sqrt{n}(\overline{X}_n-\mu)}{\sigma}.$
+Then
+\begin{equation}
+\sup_z \Bigl|\mathbb{P}(Z_n \leq z) - \Phi(z)\Bigr| \leq \frac{33}{4} \frac{\mu_3}{\sigma^3\sqrt{n}}.
+\end{equation}
+\end{theorem}
+
+{\bf Proof of the Bootstrap Theorem.}
+Let $\Phi_\sigma(t)$ denote the cdf of a Normal with mean 0
+and variance $\sigma^2$.
+Let $\widehat\sigma^2 = \frac{1}{n}\sum_{i=1}^n (X_i - \widehat\mu_n)^2$.
+Thus,
+$\widehat\sigma^2 = {\rm Var}( \sqrt{n}(\widehat\mu_n^* - \widehat\mu_n)|X_1,\ldots, X_n)$.
+Now, by the triangle inequality,
+\begin{align*}
+\sup_t | \widehat F_n(t) - F_n(t)| & \leq
+\sup_t | F_n(t) - \Phi_\sigma(t)| +
+ \sup_t | \Phi_\sigma(t) - \Phi_{\widehat\sigma}(t)| + 
+\sup_t | \widehat F_n(t) - \Phi_{\widehat\sigma}(t)| \\
+& =
+\mbox{I} + \mbox{II} + \mbox{III}.
+\end{align*}
+Let $Z\sim N(0,1)$.
+Then, 
+$\sigma Z \sim N(0,\sigma^2)$ and
+from the Berry-Esseen theorem,
+\begin{align*}
+\mbox{I} &= \sup_t | F_n(t) - \Phi_\sigma(t)| =
+\sup_t \left|\mathbb{P}\left(\sqrt{n}(\widehat\mu_n - \mu)\leq t\right) - \mathbb{P}\left(\sigma Z \leq t\right)\right|\\
+&=
+\sup_t \left|\mathbb{P}\left(\frac{\sqrt{n}(\widehat\mu_n - \mu)}{\sigma}\leq \frac{t}{\sigma}\right) - 
+\mathbb{P}\left( Z \leq \frac{t}{\sigma}\right)\right| \leq
+\frac{33}{4} \frac{\mu_3}{\sigma^3\sqrt{n}}.
+\end{align*}
+Using the same argument on the third term, we have that
+$$
+\mbox{III}=\sup_t | \widehat F_n(t) - \Phi_{\widehat\sigma}(t)| \leq
+\frac{33}{4} \frac{\widehat\mu_3}{\widehat\sigma^3\sqrt{n}}
+$$
+where
+$\widehat\mu_3 = \frac{1}{n}\sum_{i=1} |X_i-\widehat\mu_n|^3$
+is the empirical third moment.
+By the strong law of large numbers,
+$\widehat\mu_3$ converges almost surely to $\mu_3$ and
+$\widehat\sigma$ converges almost surely to $\sigma$.
+So, almost surely, for all large $n$,
+$\widehat\mu_3 \leq 2 \mu_3$ and
+$\widehat\sigma \geq (1/2) \sigma$ and
+$\mbox{III} \leq \frac{33}{4} \frac{4\mu_3}{\sqrt{n}}.$
+From the fact that
+$\widehat\sigma - \sigma = O_P(\sqrt{1/n})$
+it may be shown that
+$\mbox{II} =\sup_t | \Phi_\sigma(t) - \Phi_{\widehat\sigma}(t)| =O_P(\sqrt{1/n})$.
+(This may be seen by Taylor expanding
+$\Phi_{\widehat\sigma}(t)$ around $\sigma$.)
+This completes the proof.
+$\Box$
+
+We have shown that
+$\sup_t | \widehat F_n(t) - F_n(t)| = O_P\left(\frac{1}{\sqrt{n}}\right).$
+From this, it may be shown that, for each $0 < \beta < 1$,
+$t_{\beta}- z_{\beta}= O_P\left(\frac{1}{\sqrt{n}}\right).$
+
+So far we have focused on the mean.
+Similar theorems may be proved for more general
+parameters.
+The details are complex so we will not
+discuss them here.
+
+
+
+\section{Model Selection}
+In non-parametric regression we had an unknown
+bandwidth parameter. In practice, this tuning parameter is chosen using cross-validation.
+
+Before we discuss cross-validation lets understand a train-test split, i.e. suppose
+we split the data into two parts we can estimate our regression function for a grid of 
+bandwidths $\{h_1,\ldots, h_M\}$ on one part of the data. 
+Now, we want to pick one of these bandwidths.
+
+In this case, we could simply check how well we can predict on the test set, i.e.,
+\begin{align*}
+\widehat{R}(\widehat{f}_{h_1}, f) = \frac{1}{n_{\text{test}}} \sum_{i=1}^{n_{\text{test}}} (Y_i - \widehat{f}_{h_1}(X_i))^2,
+\end{align*}
+and repeat this for each of the bandwidths and then pick the bandwidth that minimizes this.
+Why does this work? Essentially, train-test splits allow us to \emph{estimate} the risk, and then we are picking the value of the tuning parameter that minimizes our estimated risk.
+
+We should be a little bit careful about what risk we are estimating:
+\begin{align*}
+\mathbb{E}(\widehat{R}(\widehat{f}_{h_1}, f)) = \mathbb{E} (f(X) + \epsilon - \widehat{f}_{h_1}(X))^2 
+= \mathbb{E} (f(X) - \widehat{f}_{h_1}(X))^2 + \sigma^2. 
+\end{align*}
+We can of course ignore the $\sigma^2$, but one should notice that the risk we are estimating:
+\begin{align*}
+\mathbb{E} (f(X) - \widehat{f}_{h_1}(X))^2 = \int (f(x) - \widehat{f}_{h_1}(x))^2 p(x) dx,
+\end{align*}
+where $p$ is the density of the covariates. This is sometimes called the $L_2(\mathbb{P})$-risk,
+as opposed to the $L_2$-risk which we defined earlier:
+\begin{align*}
+R = \int (f(x) - \widehat{f}_{h_1}(x))^2  dx.
+\end{align*}
+Most people would consider the $L_2(\mathbb{P})$-risk to be more natural, since it puts less weight
+in places where you have less data. 
+% It is not
+%hard to see that $\widehat{R}$ is an unbiased estimator of $R$, and so the procedure makes sense.
+
+Practitioners might be concerned that this the train-test split is wasteful of the data: you might need a pretty large test set to get a good estimate and this is data that you might have instead used to estimate the model.
+Also, train-test splits have a ``lottery'' effect: you might get unlucky in the way you split the data and this could affect results. 
+
+$K$-fold cross-validation tries to get around this by splitting the data into $K$ pieces (think of $K$ as a small number like 5). Now, we repeat the train-test split $K$ times, each time we use $K-1$ pieces for training and the $K$-th piece for testing. In this way we get, $K$ estimates of the error 
+for each value of the bandwidth. We average these $K$ numbers to get our risk estimate.
+Finally, we choose the value of the bandwidth that minimizes the risk. The extreme case
+of $K$-fold cross-validation is called leave-one-out or $n$-fold cross-validation. Here we leave 
+out one observation, and try to predict it and then cycle through the observations.
+
+The basic question is then: is there a sense in which cross-validation is ``doing the right thing''?
+
+%Regression is a case when its relatively clear how to estimate the risk. It is much less clear in the context of density estimation. In density estimation, we want to estimate:
+%\begin{align*}
+%R(\widehat{f}_{h}, f) = \int (\widehat{f}_{h}(x) - f(x) )^2 dx,
+%\end{align*}
+%and pick an $h$ that (approximately) minimizes this. We can expand this out:
+%\begin{align*}
+%R(\widehat{f}_{h}, f) = \int \widehat{f}^2_{h}(x) dx + \int f^2(x) dx - 2 \int \widehat{f}_{h}(x) f(x) dx,
+%\end{align*}
+%the second term does not depend on $h$ so we can ignore it while selecting $h$, the first term
+%of course we can calculate, but the third term depends on the unknown true density. The standard procedure is to estimate this using the samples in a leave-one-out fashion. The estimator of
+%the risk is then:
+%\begin{align*}
+%\widehat{J}(\widehat{f}_{h}, f) = \int \widehat{f}^2_{h}(x) dx - \frac{2}{n} \sum_{i=1}^n \widehat{f}_{-i, h}(X_i).
+%\end{align*}
+%Here $ \widehat{f}_{-i, h}(X_i)$ is the KDE without the $i$th observation, with bandwidth $h$, evaluated at the $i$th observation. Finally, we choose $h$ to minimize this quantity.
+
+\section{A simple analysis of the train-test split}
+Lets try to understand cross-validation in a simple scenario. 
+We will do this in the context of point estimation, but one could use \emph{exactly} the same argument for bandwidth selection.
+
+Say we have 
+models $\mathcal{M}_1, \ldots, \mathcal{M}_M$. These are different models that we think might be reasonable fits to the data. Now, we observe our data $(X_1,\ldots,X_{2n})$ and randomly 
+split it into train and test sets of size $n$ each. We really should refer to the test set as a validation set but we will ignore this for today. 
+
+On the train set, we fit our models (say using the MLE), and compute point estimates $\widehat{\theta}_1,\ldots,\widehat{\theta}_M$. Now, suppose that we want to select the model/estimate that fits the
+data well. We will use the negative log-likelihood as our measure, i.e., we want an estimate
+that has low negative log-likelihood. This is the same as using the KL divergence as our loss function. 
+
+We can use the test set to estimate the negative log-likelihood:
+\begin{align*}
+R_i = \frac{- 1}{n} \sum_{i=1}^n \log f_{\widehat{\theta}_i}(X_{n+i}).
+\end{align*} 
+Note that:
+\begin{align*}
+\mathbb{E}(R_i) =  - \mathbb{E}_{f_{\theta^*}} \log f_{\widehat{\theta}_i}(X) = KL ( f_{\theta^*} || f_{\widehat{\theta}_i}) -  \mathbb{E}_{f_{\theta^*}}\log f_{\theta^*}(X),
+\end{align*}
+so we are estimating the KL divergence upto some term that does not depend on $\widehat{\theta}_i$. So minimizing $\mathbb{E}(R_i)$ is equivalent to minimizing the KL divergence. 
+
+We can now use the LLN to argue that if the test-set size goes to $\infty$ then our risk estimates converge to their expectations, and then we will find the model/estimate with the lowest KL to the true model.
+
+Suppose however we wanted to be more precise, and try to understand the role of the test set size
+and the number of models $M$?
+
+We could use Hoeffding's inequality. This will need an assumption that $|\log f_{\theta}(X)| \leq B$
+for every $\theta$ and $X$ that we care about (this can be relaxed using more complex techniques).
+Now, notice that the following is an important but straightforward consequence of Hoeffding's inequality:
+\begin{align*}
+\mathbb{P}(\max | R_i - \mathbb{E} (R_i) | \geq \epsilon) \leq 2M \exp (-2n\epsilon^2/(4B^2)).
+\end{align*}
+This is true since for each $i$ we know that 
+\begin{align*}
+\mathbb{P}(| R_i - \mathbb{E} (R_i) | \geq \epsilon) \leq 2 \exp (-2n\epsilon^2/(4B^2)).
+\end{align*}
+so we can obtain the desired inequality via a union bound (if the max exceeds $\epsilon$ at least one 
+of the terms must exceed $\epsilon$).
+
+Define, 
+\begin{align*}
+\epsilon_n = \sqrt{ \frac{ 4B^2 \log (2M/\alpha)}{n}},
+\end{align*}
+then we know that 
+\begin{align*}
+\mathbb{P}(\max | R_i - \mathbb{E} (R_i) | \geq \epsilon_n) \leq \alpha.
+\end{align*}
+
+Suppose we select the model $\widehat{i} = \arg \min_i R_i$, 
+and let $i^* = \arg \min_i \mathbb{E}(R_i)$, then we have that with probability
+at least $1 - \alpha$:
+\begin{align*}
+\mathbb{E}(R_{\widehat{i}}) \leq R_{\widehat{i}} + \epsilon_n \leq R_{i^*} + \epsilon_n \leq
+\mathbb{E}(R_{i^*}) + 2 \epsilon_n.
+\end{align*}
+So the model we select will be sub-optimal by at most $2\epsilon_n$. In regression, we would use exactly the same reasoning, but just replace the risk with the squared loss. 
+
+Reasoning about $K$-fold  cross-validation turns out to be much more challenging, because  the data re-use breaks independence assumptions. 
+
+The analysis above should remind you of the analysis we did before of Empirical Risk Minimization. The goals are slightly different, as is the final guarantee. It is worth thinking about what exactly the data splitting buys you. In particular, we do not require uniform convergence of the empirical to the true risk over all the model classes $\mathcal{M}_1,\ldots,\mathcal{M}_M$, rather we only require a good estimate of the risk for the \emph{fixed} models indexed by $\widehat{\theta}_1,\ldots,\widehat{\theta}_M$.
+
+
+
+
+
+\end{document}
+
+
+
+
+

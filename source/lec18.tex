@@ -1,0 +1,358 @@
+\documentclass[twoside,12pt]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+\newcommand{\inprod}[2]{\ensuremath{\langle #1 , \, #2 \rangle}}
+
+
+\usepackage{amsmath,amsfonts,graphicx}
+\newcommand{\V}{\mbox{${\sf Var}$}}
+
+
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf 36-705: Intermediate Statistics		\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+\newcommand{\cdist}{\overset{d}{\rightarrow}}
+\newcommand{\edist}{\overset{d}{=}}
+
+\newcommand{\cprob}{\overset{p}{\rightarrow}}
+
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+
+\begin{document}
+%FILL IN THE RIGHT INFO.
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{18}{October 11}{Siva Balakrishnan}{Siva Balakrishnan}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+Today we will try to address the question of what is the asymptotic distribution of the MLE. This is analogous to the CLT which gave the asymptotic distribution of averages.
+
+In some cases, we can do this directly. For instance, if $X_1,\ldots,X_n \sim \text{Ber}(p)$ then the 
+MLE is just the average:
+\begin{align*}
+\widehat{p} = \frac{1}{n} \sum_{i=1}^n X_i,
+\end{align*} 
+and so we know by the CLT:
+\begin{align*}
+\sqrt{n} \frac{\widehat{p} - p}{\sqrt{p(1-p)}}  \cdist N(0,1),
+\end{align*}
+which tells us the asymptotic distribution of the MLE.
+
+More generally, however the MLE need not be a simple average of i.i.d. terms, but the main take-away is that asymptotically it often behaves like one.
+
+\section{Reminder}
+Just to remind you - in the lecture on the Cram\'{e}r-Rao bound, we defined the score,
+\begin{align*}
+s(\theta) = \sum_{i=1}^n \nabla \log(p(X_i ;\theta)),
+\end{align*}
+which is the gradient of the log-likelihood, and the Fisher Information,
+\begin{align*}
+I(\theta) = \mathbb{E}[s(\theta)s(\theta)^T].
+\end{align*}
+We showed that $s(\theta)$ has mean 0, so $I(\theta) = \text{Var}(s(\theta)).$
+The Fisher information is alternatively the expected Hessian of the log-likelihood:
+\begin{align*}
+I(\theta) = \mathbb{E} \left[\sum_{i=1}^n \nabla^2 \log p(X_i ; \theta)\right].
+\end{align*}
+It is worth remembering that the score is data-dependent, while the Fisher Information is not (it is an expectation over the data so does not depend on the values of $X_1,\ldots,X_n$).
+
+Let $\widehat{\theta}$ denote the MLE. The rough goal for most of today is to show that (under enough regularity conditions),
+\begin{align*}
+\sqrt{n} (\widehat{\theta} - \theta) \cdist N(0, [I(\theta)]^{-1}).
+\end{align*}
+
+\section{Counterexample}
+The usual counterexample to the above convergence in distribution is the MLE for the uniform distribution.
+
+For the uniform distribution most regularity conditions fail. Formally, we observe $X_1,\ldots,X_n \sim U[0,\theta]$ and want to estimate $\theta$. The log-likelihood:
+\begin{align*}
+\mathcal{LL}(\theta) = \log \left[ \frac{1}{\theta^n} \mathbb{I}(\theta \geq \max_{i=1}^n X_i)\right]. 
+\end{align*}
+The MLE is just $\widehat{\theta} = \max_{i=1}^n X_i.$
+Firstly, you should observe that the log-likelihood is not differentiable at the MLE, so the Fisher information is not defined at the MLE. 
+
+Another thing that we used frequently in defining the equivalent forms of the Fisher information was to exchange derivatives (with respect to $\theta$) and integrals (with respect to $X$). This in general does not work if the domain of integration depends on the parameter with respect to which we are taking the derivative. For the uniform distribution the domain of density depends on the parameter.
+
+On the other hand, things are usually nice for exponential families. They will automatically satisfy all the regularity conditions (provided it is identifiable, i.e. say full-rank and minimal) and the MLE is extremely well-behaved in such models.
+
+Returning to the uniform case, we can directly analyze the distribution of the MLE. In Lecture 4, we showed the following:
+\begin{align*}
+n(\widehat{\theta} - \theta) \cdist - \text{Exp}(1/\theta)
+\end{align*}
+(we did this when $\theta = 1$ but you can work out the general case). So it should be clear that, $\sqrt{n}(\widehat{\theta} - \theta) \cdist \delta_0$, where $\delta_0$ is a point mass at 0 and it does not have a Gaussian limit.
+
+
+\section{MLE asymptotics}
+We will only attempt a heuristic calculation here. If you are curious to see a rigorous proof with minimal regularity assumptions you should look at Van der Vaart's book on Asymptotic Statistics. 
+Here is a list of some sufficient regularity conditions:
+\begin{enumerate}
+\item The dimension of the
+parameter space does not change with n, i.e. $\theta \in \mathbb{R}^d$ and $d$ is fixed. We have seen that if $d$ grows the MLE need not even be consistent.
+\item $p(x; \theta)$ is a smooth (thrice differentiable) function of $\theta$, 
+\item We can
+interchange differentiation with respect to $\theta$ and integration over $X$. This in turn requires that the range of X does not
+depend on $\theta$, and some integrability conditions on $p(x;\theta)$. 
+\item The parameter $\theta$ is identifiable.
+\item If the parameter space is restricted, i.e. $\theta \in \Theta$ for some set $\Theta$ then $\theta$ is in the interior of the set $\Theta$ (i.e. cannot be on its boundary).
+\end{enumerate}
+
+We will focus on the case when the parameter is one-dimensional, although everything carries over almost exactly in the general (fixed) $d$ case.
+\begin{theorem}
+Under the regularity conditions above,
+\begin{align*}
+\sqrt{n} (\widehat{\theta} - \theta) \cdist N(0, 1/I(\theta)).
+\end{align*}
+\end{theorem}
+
+We note that under the conditions of the theorem one can verify that the MLE is consistent, i.e. that $\widehat{\theta} \cprob \theta$. The basic idea is to verify that under the differentiability assumptions on the density, we can effectively treat the parameter space as compact, then derive a uniform law of large numbers, and then apply the proof from the previous lecture notes.  This is a complicated technical proof but you can look it up by searching for Wald's proof of the consistency of the MLE.
+
+The proof will use all the facts about scores and the Fisher information that we derived earlier. 
+
+\begin{proof}
+This is not a complete proof. I will try to point out why the various regularity conditions are needed. 
+
+To begin with let us note the following fact: if $\widehat{\theta} \cprob \theta$, then 
+\begin{align*}
+\mathbb{E}_{\theta}  [ - \nabla^2_{\theta}\log p(X; \widehat{\theta})] \cprob
+\mathbb{E}_{\theta}  [ - \nabla^2_{\theta}\log p(X;\theta)] = I(\theta). 
+\end{align*}
+Roughly, this is saying that as $\widehat{\theta}$ gets close to $\theta$ the Hessian of the log-likelihood at $\widehat{\theta}$ gets close to the Hessian of log-likelihood at $\theta$. This is just a smoothness assumption on the Hessian, which is why we assumed that $p(X;\theta)$ is thrice differentiable.
+
+
+Since $\widehat{\theta}$ maximizes the log-likelihood we know that the derivative of the log-likelihood at $\widehat{\theta}$ must be 0, i.e.
+\begin{align*}
+\mathcal{LL}'(\widehat{\theta}) = 0.
+\end{align*}
+Formally you need to know that $\widehat{\theta}$ is not on the boundary of the parameter space. To prove this you will need to use the fact that $\theta$ is not on the boundary and that $\widehat{\theta} \cprob \theta$.
+
+By a Taylor expansion of the derivative of the log-likelihood we obtain that,
+\begin{align*}
+0 = \mathcal{LL}'(\widehat{\theta}) = \mathcal{LL}'(\theta) + (\widehat{\theta}- \theta)  \mathcal{LL}''(\widetilde{\theta}),
+\end{align*}
+where $\widetilde{\theta}$ is some point in between $\widehat{\theta}$ and $\theta$.
+This in turn gives us that,
+\begin{align*}
+(\widehat{\theta}- \theta) = \frac{\mathcal{LL}'(\widehat{\theta})}{- \mathcal{LL}''(\widetilde{\theta})},
+\end{align*}
+so that,
+\begin{align*}
+\sqrt{n}(\widehat{\theta}- \theta) = \frac{\frac{\mathcal{LL}'(\widehat{\theta})}{\sqrt{n}}}{-\frac{ \mathcal{LL}''(\widetilde{\theta})}{n}}.
+\end{align*}
+We will look at the numerator and denominator separately.
+The denominator is:
+\begin{align*}
+-\frac{ \mathcal{LL}''(\widetilde{\theta})}{n} = \frac{1}{n} \sum_{i=1}^n - \nabla^2_{\theta}\log p(X_i; \widetilde{\theta}) \cprob \mathbb{E}_{\theta} [ - \nabla^2_{\theta}\log p(X; \widetilde{\theta})] \cprob \mathbb{E}_{\theta} [ - \nabla^2_{\theta}\log p(X; \theta)] 
+\end{align*}
+where the last step uses the fact that $\widetilde{\theta} \cprob \theta$.
+
+The numerator is just the score function, i.e.
+\begin{align*}
+\frac{1}{\sqrt{n}}\mathcal{LL}'(\widehat{\theta}) &=  \frac{1}{\sqrt{n}} \sum_{i=1}^n \nabla_{\theta} \log p(X_i; \theta) = \sqrt{n} \times \frac{1}{n} \sum_{i=1}^n\left[ \nabla_{\theta} \log p(X_i; \theta) - \mathbb{E}[\nabla_{\theta} \log p(X; \theta)] \right] \\
+&\cdist N(0, \text{Var}(\nabla_{\theta} \log p(X; \theta))) \cdist N(0,I(\theta)),
+\end{align*}
+where we used the facts that the score has mean 0, that the variance of the score is the Fisher information and that by the CLT $\sqrt{n}$ times an average of i.i.d. terms minus its expectation converges in distribution to a normal.
+
+Putting the pieces together via Slutsky's theorem we obtain that,
+\begin{align*}
+\sqrt{n}(\widehat{\theta}- \theta) \cdist \frac{1}{I(\theta)} N(0, I(\theta)) \cdist N(0, 1/I(\theta)),
+\end{align*}
+which is what we wanted to prove.
+\end{proof}
+
+{\bf Example: } Suppose that $X_1,\ldots,X_n \sim \text{Exp}(\theta)$, then the log-likelihood,
+\begin{align*}
+\mathcal{LL}(\theta) = n \log \theta - \theta \sum_{i=1}^n X_i.
+\end{align*}
+The score function:
+\begin{align*}
+s(\theta) = \frac{n}{\theta} - \sum_{i=1}^n X_i,
+\end{align*}
+and the Fisher information,
+\begin{align*}
+I(\theta) = \frac{n}{\theta^2}.
+\end{align*}
+The MLE is $\widehat{\theta} = \frac{1}{\overline{X}}.$
+So we can use the above result to conclude that,
+\begin{align*}
+\widehat{\theta} - \theta \cdist N\left(0, \frac{\theta^2}{n}\right).
+\end{align*}
+
+
+\section{Influence Functions and Regular Asymptotically Linear Estimators}
+We could have followed a similar proof as above to conclude that the MLE can be written as:
+\begin{align*}
+\widehat{\theta} = \theta + \frac{1}{n} \sum_{i=1}^n \frac{\nabla_{\theta} \log p(X_i; \theta)}{I(\theta)} + \text{Remainder},
+\end{align*}
+where the remainder is small (roughly proportional to the previous term multiplied by $[I(\widetilde{\theta}) - I(\theta)] \rightarrow 0$).
+
+The term,
+\begin{align*}
+\psi(x) = \frac{\nabla_{\theta} \log p(x; \theta)}{I(\theta)},
+\end{align*}
+is called the \emph{influence function}, i.e. as you can see above it measures the influence each single observation has on the estimator $\widehat{\theta}$, i.e.
+\begin{align*}
+\widehat{\theta} \approx \theta + \frac{1}{n} \sum_{i=1}^n \psi(X_i).
+\end{align*}
+An estimator is often called \emph{robust} if the function $\psi$ is bounded, i.e. each observation can exert a limited influence on the estimator. Almost every estimator we have seen so far is non-robust in this sense. 
+
+For instance, for $X_1,\ldots,X_n \sim N(\theta,\sigma^2)$ with $\sigma$ known say, it is easy to check that the MLE satisfies,
+\begin{align*}
+\widehat{\theta} = \theta + \frac{1}{n} \sum_{i=1}^n (X_i - \theta),
+\end{align*}
+so that the influence of any point on the MLE is $X_i - \theta$ which is certainly unbounded. This means that if I corrupted a single point $X_i$ then the MLE could be arbitrarily bad. 
+
+Thinking of a complex predictor like a deep neural network, one can try to obtain some information about the predictor by trying to compute the influence function of training images on the final predictor. A paper that did this (and quite a bit more) won ICML's best paper award this year.
+
+Returning to the expression:
+\begin{align*}
+\widehat{\theta} \approx \theta + \frac{1}{n} \sum_{i=1}^n \psi(X_i).
+\end{align*}
+Estimators that satisfy this type of expansion are called asymptotically linear estimators (many non-MLE estimators also satisfy expansions of this form). There is a classical result due to Le Cam that any sufficiently well-behaved (regular) estimator is asymptotically linear. It is not easy to prove (see Van Der Vaart's book). This together with the Cram\'{e}r-Rao lower bound implies that the MLE is the ``best regular asymptotically linear estimator''. 
+
+\section{Asymptotic Relative Efficiency}
+Once you restrict attention to asymptotically linear estimators, comparing estimators in terms of their MSE boils down to comparing their variances.
+Specifically, if
+\begin{eqnarray*}
+\sqrt{n}(W_n - \tau(\theta)) & \rightsquigarrow & N(0,\sigma^2_W)\\
+\sqrt{n}(V_n - \tau(\theta)) & \rightsquigarrow & N(0,\sigma^2_V)
+\end{eqnarray*}
+then the {\em asymptotic relative efficiency (ARE)} is
+$$
+{\rm ARE}(V_n,W_n) = \frac{\sigma^2_W}{\sigma^2_V}.
+$$
+
+\begin{example}
+Let $X_1,\ldots, X_n \sim {\rm Poisson} (\lambda)$.
+The mle of $\lambda$ is $\overline{X}$.
+Let
+$$
+\tau = \mathbb{P}(X_i=0).
+$$
+So $\tau = e^{-\lambda}$.
+Define
+$Y_i = I(X_i=0)$.
+This suggests the estimator
+$$
+W_n = \frac{1}{n}\sum_{i=1}^n Y_i.
+$$
+Another estimator is the mle
+$$
+V_n = e^{-\hat\lambda}.
+$$
+The delta method gives
+$$
+{\rm Var}(V_n) \approx \frac{\lambda e^{-2\lambda}}{n}.
+$$
+We have
+\begin{eqnarray*}
+\sqrt{n}(W_n - \tau)& \rightsquigarrow & N(0,e^{-\lambda}(1-e^{-\lambda}))\\
+\sqrt{n}(V_n - \tau)& \rightsquigarrow & N(0,\lambda e^{-2\lambda}).
+\end{eqnarray*}
+So
+$$
+{\rm ARE}(W_n,V_n) = \frac{\lambda}{e^\lambda -1} \leq 1.\ \ \ \Box
+$$
+\end{example}
+
+\vspace{.5cm}
+
+Since the mle is efficient, we 
+know that, in general,
+${\rm ARE}(W_n,{\rm mle})\leq 1$.
+
+\section{Multivariate Case}
+
+Now let $\theta = (\theta_1,\ldots, \theta_k)$.
+In this case we have
+$$
+\sqrt{n}(\hat\theta - \theta)\rightsquigarrow N(0,I^{-1}(\theta))
+$$
+where
+$I^{-1}(\theta)$ is the inverse of the Fisher information matrix.
+The approximate standard error of
+$\hat\theta_j$ is
+$\sqrt{I^{-1}_{jj}/n}$.
+If $\tau = g(\theta)$ with
+$g: \mathbb{R}^k \to \mathbb{R}$ then by the delta method,
+$$
+\sqrt{n}(\hat \tau - \tau)\rightsquigarrow N(0, (g')^T I^{-1}g')
+$$
+where
+$g'$ is the gradient of $g$ evaluated at $\theta$.
+
+
+
+\end{document}
+
+
+
+
+

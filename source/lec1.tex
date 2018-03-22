@@ -1,0 +1,609 @@
+\documentclass[twoside,12pt]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+
+\usepackage{amsmath,amsfonts,graphicx}
+
+
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf 36-705: Intermediate Statistics		\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+
+\begin{document}
+%FILL IN THE RIGHT INFO.
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{1}{August 28}{Siva Balakrishnan}{Siva Balakrishnan}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+% **** YOUR NOTES GO HERE:
+Our broad goal for the first few lectures is to try to understand the behaviour of sums of 
+independent random variables. We would like to find ways to formalize the fact:
+
+\begin{center}
+{\it Averages of independent random variables concentrate around their expectation. }
+\end{center}
+
+We will try to answer this question from the asymptotic (i.e. the number of random variables we average $\rightarrow \infty$) and the non-asymptotic viewpoint (i.e. the number of random variables is some fixed finite number). The asymptotic viewpoint is typically characterized by what are known as the
+ Laws of Large Numbers (LLNs) and Central Limit Theorems (CLTs) while the non-asymptotic viewpoint is characterized by concentration inequalities.
+
+We will need to first review what a random variable is, what its expectation is, and what we precisely mean by concentration. This will be fairly terse. Please read Chapters 1-3 of the Wasserman book for more details.
+
+\section{Random Variables}
+Let $\Omega$ be a sample space
+(a set of possible outcomes) with a probability distribution 
+(also called a probability measure)
+$P$.
+A {\em random variable} is
+a map $X: \Omega\to \mathbb{R}$.
+We write
+$$
+P(X\in A) = P(\{\omega \in\Omega:\ X(\omega)\in A\})
+$$
+and we write $X\sim P$ to mean that $X$ has distribution $P$.
+The {\em cumulative distribution function (cdf)} of $X$ is
+$$
+F_X(x) = F(x) = P(X\leq x).
+$$
+A cdf has three properties:
+\begin{enumerate}
+\item $F$ is right-continuous. At each $x$,
+$F(x) = \lim_{n\to\infty} F(y_n) = F(x)$ for any sequence $y_n \to x$ with $y_n > x$.
+\item $F$ is non-decreasing. If $x<y$ then $F(x) \leq F(y)$.
+\item $F$ is normalized. $\lim_{x\to -\infty}F(x) =0$ and 
+$\lim_{x\to \infty}F(x) =1$.
+\end{enumerate}
+Conversely, any $F$ satisfying these three properties is a cdf for some random variable.
+
+
+If $X$ is discrete, its
+{\em probability mass function (pmf)} is
+$$
+p_X(x) = p(x) = P(X=x).
+$$
+If $X$ is continuous, then its
+{\em probability density function function (pdf)} 
+satisfies
+$$
+P(X\in A) = \int_A p_X(x) dx = \int_A p(x) dx
+$$
+and $p_X(x) =p(x)=  F'(x)$.
+The following are all equivalent:
+$$
+X\sim P,\ \ \ 
+X \sim F,\ \ \ 
+X \sim p.
+$$
+
+
+\vspace{1cm}
+
+\fbox{\parbox{6in}{
+Suppose that $X\sim P$ and $Y\sim Q$.
+We say that
+$X$ and $Y$ have the same distribution if
+$P(X\in A) = Q(Y\in A)$
+for all $A$.
+In that case we say that
+$X$ and $Y$ are {\em equal in distribution} and we write
+$X\stackrel{d}{=} Y$.}}
+
+
+\begin{lemma}
+$X\stackrel{d}{=} Y$
+if and only if
+$F_X(t) = F_Y(t)$ for all $t$.
+\end{lemma}
+
+
+\section{Expected Values}
+
+The {\em mean} or expected value of $g(X)$ is
+$$
+\mathbb{E} \left(g(X)\right) = 
+\int g(x) dF(x) =\int g(x) dP(x) =
+\left\{
+\begin{array}{ll}
+\int_{-\infty}^\infty g(x) p(x) dx & {\rm if\ } X {\rm \ is\  continuous}\\
+\vspace{.25cm}
+\sum_j g(x_j) p(x_j) & {\rm if\ } X \ {\rm is\  discrete}.
+\end{array}
+\right.
+$$
+
+Recall that:
+\begin{enumerate}
+\item {\bf Linearity of Expectations: } $\mathbb{E} ( \sum_{j=1}^k c_j g_j(X) )= \sum_{j=1}^k c_j \mathbb{E} (g_j(X))$.
+\item If $X_1,\ldots, X_n$ are independent then 
+$$
+\mathbb{E}\left(\prod_{i=1}^n X_i\right) = \prod_i \mathbb{E}\left(X_i\right).
+$$
+\item We often write $\mu = \mathbb{E}(X)$.
+\item $\sigma^2={\sf Var}\left(X\right) = \mathbb{E}\left((X-\mu)^2\right)$ is the {\bf Variance}.
+\item ${\sf Var}\left(X\right) = \mathbb{E}\left(X^2\right) - \mu^2.$
+\item If  $X_1, \ldots, X_n$ are independent then 
+$$ 
+{\sf Var}\left(\sum_{i=1}^n a_i X_i\right) = \sum_i a_i^2 {\sf Var}\left(X_i\right).
+$$
+\item The covariance is
+$$ 
+{\sf Cov}(X,Y) = \mathbb{E}((X-\mu_x)(Y-\mu_y)) = \mathbb{E}(XY)- \mu_X \mu_Y
+$$
+and the correlation is
+$\rho(X,Y)= {\sf Cov}(X,Y)/\sigma_x\sigma_y$.
+Recall that $-1 \leq \rho(X,Y) \leq 1$.
+\end{enumerate}
+
+\vspace{1cm}
+
+\fbox{\parbox{6in}{
+The {\bf conditional expectation} of $Y$ given $X$
+is the random variable $\mathbb{E}(Y|X)$ whose value, when $X=x$ is
+$$
+\mathbb{E}(Y|X=x) = \int y \ p(y|x)dy
+$$
+where
+$p(y|x) = p(x,y)/p(x)$.
+}}
+
+
+\fbox{\parbox{6in}{
+The
+{\em Law of Total Expectation} or
+{\em Law of Iterated Expectation}:
+$$
+\mathbb{E}(Y)= \mathbb{E}\bigl[\mathbb{E}(Y|X)\bigr] = \int  \mathbb{E}(Y|X=x) p_X(x)dx.
+$$
+The {\em Law of Total Variance} is
+$$
+{\sf Var}(Y) =  {\sf Var}\bigl[ \mathbb{E}(Y|X)\bigr] + 
+\mathbb{E}\bigl[ {\sf Var}(Y|X)\bigr].
+$$ 
+}}
+
+\fbox{\parbox{6in}{
+The {\em moment generating function (mgf)} is
+$$
+M_X(t) = \mathbb{E}\left(e^{tX}\right).
+$$
+If $M_X(t)=M_Y(t)$ for all $t$ in an interval around 0 then
+$X\stackrel{d}{=}Y$.
+}}
+
+\vspace{1cm}
+
+The moment generating function can be used to ``generate'' all the moments of a distribution, i.e.
+we can take derivatives of the mgf with respect to $t$ and evaluate at $t = 0$, i.e. we have that
+\begin{align*}
+M^{(n)}_X(t)|_{t=0} = \mathbb{E}\left(X^n\right).
+\end{align*}
+
+\section{Independence}
+
+\fbox{\parbox{6in}{
+$X$ and $Y$ are 
+{\em independent} if and only if
+$$
+\mathbb{P}(X\in A, Y\in B) = 
+\mathbb{P}(X\in A)\mathbb{P}(Y\in B)
+$$
+for all $A$ and $B$.}}
+
+\begin{theorem}
+Let $(X,Y)$ be a bivariate random vector with $p_{X,Y}(x,y)$.  $X$ and $Y$ 
+are independent iff 
+$p_{X,Y}(x,y)=p_X(x)p_Y(y)$.
+\end{theorem}
+
+$X_1,\ldots, X_n$ are independent if and only if
+$$
+\mathbb{P}(X_1\in A_1, \ldots, X_n \in A_n) =
+\prod_{i=1}^n \mathbb{P}(X_i\in A_i).
+$$
+Thus,
+$p_{X_1,\ldots,X_n} (x_1,\ldots, x_n)= \prod_{i=1}^n p_{X_i}(x_i)$.
+
+If $X_1,\ldots, X_n$ are independent and identically distributed
+we say they are iid (or that they are a random sample) and we write
+$$
+X_1,\ldots, X_n \sim P
+\ \ \ \ {\rm or}\ \ \ \ 
+X_1,\ldots, X_n \sim F
+\ \ \ \ {\rm or}\ \ \ \ 
+X_1,\ldots, X_n \sim p.
+$$
+
+
+
+
+\section{Transformations}
+
+Let $Y=g(X)$
+where $g:\mathbb{R}\to \mathbb{R}$.
+Then
+$$
+F_Y(y) = \mathbb{P}(Y \leq y) = \mathbb{P}(g(X) \leq y) = \int_{A(y)} p_X(x) dx
+$$
+where
+$$
+A_y = \{ x:\ g(x) \leq y\}.
+$$
+The density is
+$p_Y(y) = F_Y'(y)$.
+If $g$ is strictly monotonic, then
+$$
+p_Y(y) =  p_X(h(y)) \left|\frac{d h(y)}{dy} \right|
+$$
+where $h=g^{-1}$.
+
+
+\begin{example}
+Let $p_X(x)=e^{-x}$ for $x>0$.  Hence
+$F_X(x) = 1-e^{-x}$.  Let $Y=g(X) = \log X$.  Then 
+\begin{eqnarray*} 
+F_Y(y) = P(Y \leq y) &=& P(\log(X) \leq y) \\
+&=& P(X \leq e^y) = F_X(e^y) = 1-e^{-e^y}
+\end{eqnarray*}
+and
+$p_Y(y) = e^{y} e^{-e^y}$ for
+$y\in \mathbb{R}$.
+\end{example}
+
+
+\begin{example}
+{\bf Practice problem.}
+Let $X$ be uniform on $(-1,2)$ and let
+$Y = X^2$.
+Find the density of $Y$.
+\end{example}
+
+\vspace{1cm}
+
+Let $Z = g(X,Y)$.
+For example,
+$Z=X+Y$ or $Z=X/Y$.
+Then we find the pdf of $Z$ as follows:
+
+\begin{enumerate}
+\item For each $z$, find the set $A_z=\{(x,y):g(x,y) \leq z\}$.
+\item Find the CDF
+\begin{eqnarray*}
+F_Z(z) &=& P(Z \leq z) = P(g(X,Y) \leq z) = P(\{(x,y):g(x,y) \leq z\}) =
+\int\int_{A_z} p_{X,Y}(x,y)dxdy.
+\end{eqnarray*}
+\item The pdf is $p_{Z}(z) = F_Z^\prime(z)$.
+\end{enumerate}
+
+\begin{example}
+{\bf Practice problem.}
+Let $(X,Y)$ be uniform on the unit square.
+Let $Z=X/Y$.
+Find the density of $Z$.
+\end{example}
+
+
+
+
+
+
+
+\section{Important Distributions}
+
+{\bf Normal (Gaussian).}
+$X\sim N(\mu,\sigma^2)$ if
+$$
+p(x) = \frac{1}{\sigma\sqrt{2\pi}}e^{-(x-\mu)^2/(2\sigma^2)}.
+$$
+If $X \in \mathbb{R}^d$ then
+$X\sim N(\mu,\Sigma)$ if
+$$
+p(x) = \frac{1}{ (2\pi)^{d/2} |\Sigma|} \exp\left( - \frac{1}{2} (x-\mu)^T \Sigma^{-1} (x-\mu)\right).
+$$
+
+\vspace{.2cm}
+
+{\bf Chi-squared.}
+$X\sim \chi^2_p$ if
+$X = \sum_{j=1}^p Z_j^2$
+where
+$Z_1,\ldots, Z_p\sim N(0,1)$.
+
+{\bf Non-central chi-squared (more on this below).} $X \sim \chi^2_1(\mu^2)$ if $X = Z^2$ where $Z \sim N(\mu,1)$.
+
+\vspace{.2cm}
+
+{\bf Bernoulli.}
+$X\sim {\rm Bernoulli}(\theta)$ if
+$\mathbb{P}(X=1)=\theta$ and 
+$\mathbb{P}(X=0)=1-\theta$ and hence
+$$
+p(x)= \theta^x (1-\theta)^{1-x}\ \ \ \ \ \ x=0,1.
+$$
+
+\vspace{.2cm}
+
+{\bf Binomial.}
+$X\sim {\rm Binomial}(\theta)$ if
+$$
+p(x)=\mathbb{P}(X=x) = \binom{n}{x} \theta^x (1-\theta)^{n-x}
+\ \ \ \ \ \ x\in\{0,\ldots, n\}.
+$$
+
+\vspace{.2cm}
+
+{\bf Uniform.}
+$X\sim {\rm Uniform}(0,\theta)$ if
+$p(x) = I(0 \leq x \leq \theta)/\theta$.
+
+
+\vspace{.2cm}
+
+{\bf Poisson.}
+$X\sim {\rm Poisson}(\lambda)$ if
+$P(X=x) = \frac{e^{-\lambda}\lambda^x}{x!}$  $x=0,1,2,\ldots$.
+The
+$\mathbb{E}\left(X\right) = {\sf Var}\left(X\right) = \lambda$
+and
+$M_X(t) = e^{\lambda({e^t}-1)}$. 
+We can use
+the mgf to show: if $X_1 \sim {\rm Poisson}(\lambda_1)$, $X_2 \sim  {\rm Poisson}(\lambda_2)$,
+independent then
+$Y=X_1 + X_2 \sim {\rm Poisson} (\lambda_1 + \lambda_2)$.
+
+\vspace{.2cm}
+
+{\bf Multinomial.}
+The multivariate version of a Binomial is called a Multinomial.  Consider
+drawing a ball from an urn with has balls with $k$ different colors 
+labeled ``color 1, color 2, \ldots, color $k$.''  Let $p=(p_1,p_2,\ldots,p_k)$
+where $\sum_j p_j =1$ and $p_j$ is the probability of drawing color $j$.  Draw
+$n$ balls from the urn
+(independently and with replacement) and let $X=(X_1,X_2,\ldots,X_k)$ be 
+the count of the number of balls of each color drawn.  We say that $X$ has
+a Multinomial $(n,p)$ distribution. The pdf is 
+$$ 
+p(x) = {n \choose {x_1,\ldots,x_k}} p_1^{x_1}\ldots p_k^{x_k}.
+$$
+
+\vspace{.2cm}
+
+{\bf Exponential.}
+$X\sim {\rm exp}(\beta)$ if
+$p_X(x) = \frac{1}{\beta} e^{-x/\beta}$, $x>0$.
+Note that ${\rm exp}(\beta)=\Gamma(1,\beta)$. 
+
+\vspace{.2cm}
+
+{\bf Gamma.}
+$X \sim \Gamma(\alpha,\beta)$ if
+$$
+p_X(x) = \frac 1{\Gamma(\alpha) \beta^\alpha} x^{\alpha-1} e^{-x/\beta}
+$$
+for $x>0$
+where
+$\Gamma(\alpha) = \int_0^\infty \frac 1{\beta^\alpha} x^{\alpha-1} e^{-x/\beta} dx$.
+
+\vspace{1cm}
+
+{\bf Remark:}
+In all of the above, make sure you understand the distinction between
+random variables and parameters.
+
+\vspace{1cm}
+
+{\bf More on the Multivariate Normal.}
+Let $Y\in \mathbb{R}^d$. Then
+$Y \sim N(\mu,\Sigma)$ if
+$$
+p(y) = \frac{1}{(2\pi)^{d/2} |\Sigma|^{1/2}}
+\exp\left(-\frac{1}{2}(y-\mu)^T \Sigma^{-1} (y-\mu)\right).
+$$
+Then
+$\mathbb{E}(Y) = \mu$ and
+${\sf cov}(Y) = \Sigma$.
+The moment generating function is
+$$
+M(t) = \exp\left( \mu^T t + \frac{t^T \Sigma t}{2}\right).
+$$
+
+
+
+\begin{theorem}
+(a).  If $Y\sim N(\mu, \Sigma)$,
+then $E(Y) = \mu$, cov$(Y) = \Sigma.$
+
+(b).  
+If $Y\sim N(\mu, \Sigma)$ and $c$ is a scalar, then
+$cY\sim N(c\mu, c^2\Sigma).$  
+
+(c). Let $Y\sim N(\mu, \Sigma).$  
+If $A$ is $p \times n$ and 
+$b$ is $p\times 1$, 
+then $A Y + b \sim N(A\mu + b, A\Sigma A^T )$.
+\end{theorem}
+
+
+
+\begin{theorem}
+Suppose that $Y\sim N(\mu, \Sigma)$.
+Let 
+$$
+Y={Y_1 \choose Y_2}, \ \ \mu = {\mu_1 \choose
+  \mu_2}, \ \ \Sigma = 
+{\Sigma_{11}\,\Sigma_{12}\choose\Sigma_{21}\,\Sigma_{22}}.
+$$
+where $Y_1$ and $\mu_1$ are $p \times 1$, and $\Sigma_{11}$ is $p
+\times p$.
+
+(a) $Y_1 \sim N_p(\mu_1, \Sigma_{11}),Y_2 \sim
+N_{n-p}(\mu_2, \Sigma_{22}).$
+
+(b)  $Y_1$ and  $Y_2$ are independent if and only
+if $\Sigma_{12}=0$.
+
+(c)  If $\Sigma_{22}>0,$ then the condition distribution of  
+$Y_1$ given $Y_2$ is 
+\begin{equation}
+Y_1|Y_2 \sim
+N_p(\mu_1+\Sigma_{12}\Sigma_{22}^{-1}(Y_2 - \mu_2),
+\Sigma_{11}-\Sigma_{12}\Sigma_{22}^{-1}\Sigma_{21}).
+\end{equation}
+\end{theorem}
+
+
+\begin{lemma}
+Let $Y \sim N(\mu, \sigma^2 I),$
+where $Y^{T} = 
+(Y_1, \ldots, Y_n), \mu^{T}=(\mu_1, \ldots, \mu_n)$ and
+$\sigma^2>0$ is a scalar.  Then the $Y_i$ are independent, $Y_i \sim
+N_1(\mu, \sigma^2)$ and 
+$$
+\frac{\|Y\|^2}{\sigma^2} = \frac{Y^T Y}{\sigma^2} \sim \chi^2_n 
+\left(\frac{\mu^{T}\mu}{\sigma^2}\right).
+$$
+\end{lemma}
+
+
+
+
+\begin{theorem}
+Let $Y \sim N(\mu, \Sigma)$.
+Then:\\
+(a)  $Y^{T}\Sigma^{-1}Y \sim
+\chi^2_n(\mu^{T}\Sigma^{-1}\mu).$\\
+(b)  $(Y-\mu)^{T}\Sigma^{-1}(Y-\mu)\sim \chi^2_n(0).$
+\end{theorem}
+
+
+
+
+
+
+\section{Sample Mean and Variance}
+
+Let $X_1,\ldots, X_n \sim P$.
+The sample mean is 
+$$
+\widehat{\mu}_n = \frac{1}{n}\sum_i X_i
+$$
+and the sample variance is 
+$$
+\widehat{\sigma}^2_n= \frac{1}{n-1} \sum_i (X_i- \widehat{\mu}_n)^2.
+$$
+The {\em sampling distribution} of $\widehat{\mu}_n$ is
+$$
+G_n(t) = \mathbb{P}(\widehat{\mu}_n \leq t).
+$$
+
+{\bf Practice Problem.}
+Let $X_1,\ldots, X_n$ be iid with
+$\mu = \mathbb{E}(X_i)=\mu$ and
+$\sigma^2 = {\sf Var}(X_i)=\sigma^2$.
+Then
+$$
+\mathbb{E}(\widehat{\mu}_n) = \mu,\ \ \ 
+{\sf Var}(\widehat{\mu}_n) = \frac{\sigma^2}{n},\ \ \ 
+\mathbb{E}(\widehat{\sigma}_n^2) = \sigma^2.
+$$
+
+
+
+\begin{theorem}
+If
+$X_1,\dots,X_n \sim N(\mu,\sigma^2)$
+then 
+\begin{itemize}
+\item [(a)]  $\widehat{\mu}_n \sim N(\mu,\frac{\sigma^2}{n})$.
+\item [(b)]  $\frac{(n-1) \widehat{\sigma}_n^2}{\sigma^2} \sim \chi_{n-1}^2$.
+\item [(c)]  $\widehat{\mu}_n$ and $\widehat{\sigma}_n^2$ are independent.
+\end{itemize}
+\end{theorem}
+
+
+\section{A preview of the next few lectures}
+Let us consider a simple experiment. I toss a fair coin $n$ times, and if the outcome is heads I record $X_i = +1$, and if the outcome is tails I record $X_i = -1$. Now, let us consider the average:
+\begin{align*}
+\widehat{\mu}_n = \frac{1}{n} \sum_{i=1}^n X_i.
+\end{align*}
+It is easy to see that $\mathbb{E}[\widehat{\mu}_n] = 0$, and we would like to know how far $\widehat{\mu}_n$ is from its expectation. When all the $X_i = +1$ (for instance), we have have that $\widehat{\mu}_n = 1$. There is however a remarkable phenomenon, known as the concentration of measure phenomenon, that asserts that $\widehat{\mu}_n$ ``concentrates'' much closer to $\mathbb{E}[\widehat{\mu}_n]$.
+
+\begin{center}
+{\it The average of $n$ i.i.d random variables concentrates within an interval of length roughly $1/\sqrt{n}$ around the mean. }
+\end{center}
+
+The basic intuition is that in order to pull an average from an expectation many \emph{independent} random variables need to work together simultaneously, which is extremely unlikely. Independence is the key. This seemingly simple fact underlies essentially all of statistics.
+
+\end{document}
+
+
+
+
+

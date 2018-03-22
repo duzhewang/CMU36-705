@@ -1,0 +1,441 @@
+\documentclass[twoside,12pt]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+\newcommand{\inprod}[2]{\ensuremath{\langle #1 , \, #2 \rangle}}
+
+
+\usepackage{amsmath,amsfonts,graphicx}
+\newcommand{\V}{\mbox{${\sf Var}$}}
+
+
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf 36-705: Intermediate Statistics		\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+\newcommand{\cdist}{\overset{d}{\rightarrow}}
+\newcommand{\edist}{\overset{d}{=}}
+
+\newcommand{\cprob}{\overset{p}{\rightarrow}}
+\newcommand{\tobs}{T(Z_{\text{obs}})}
+\newcommand{\zobs}{Z_{\text{obs}}}
+\newcommand{\permtest}{\phi_{\text{perm}}}
+
+
+
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+
+\begin{document}
+%FILL IN THE RIGHT INFO.
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{24}{October 30}{Siva Balakrishnan}{Siva Balakrishnan}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+Today we will continue discussing confidence sets and ways to construct them.
+We have discussed point estimation so far where the goal is to construct an estimate $\widehat{\theta}(X_1,\ldots,X_n)$ of some parameter $\theta$ after observing $\{X_1,\ldots,X_n\}$.
+
+As we discussed in the last lecture: the setting is that we have a statistical model (i.e. a collection of distributions) $\mathcal{P}$. Let
+$C_n(X_1,\ldots,X_n)$ be a set constructed using the observed data $X_1,\ldots,X_n$. This is a random set. $C_n$ is a $1 - \alpha$ confidence set for a parameter $\theta$ if:
+\begin{align*}
+P(\theta \in C_n(X_1,\ldots,X_n)) \geq 1 - \alpha,~~~~\text{for all}~~P \in \mathcal{P}.
+\end{align*}
+This means that no matter which distribution in $\mathcal{P}$ generated the data, the interval guarantees the coverage property described above. Some people would refer to such intervals as \emph{honest} confidence intervals to make explicit the fact that the coverage is uniform over the model.
+
+At a high-level, the confidence interval gives us some idea of how precise our estimate of the unknown parameter is, i.e. a wide interval indicates that our (point) estimate is imprecise.
+
+{\bf Example: } Suppose that we considered, $X_1,\ldots,X_n \sim U[0,\theta]$. Then we could construct the usual point estimate $\widehat{\theta} = X_{(n)}.$ We could perhaps consider two types of confidence intervals:
+\begin{align*}
+C_1 &= [a_1\widehat{\theta}, b_1\widehat{\theta}],~~~1 \leq a_1 \leq b_1 \\
+C_2 &= [\widehat{\theta} + a_2, \widehat{\theta} + b_2],~~~a_2, b_2\geq 0.
+\end{align*}
+Let us try to calculate the coverage probabilities of these two types of intervals. As a preliminary observe that:
+\begin{align*}
+\mathbb{P}(\widehat{\theta} \leq t) = \left(\frac{t}{\theta}\right)^n, ~~~\text{for}~~0 \leq t \leq \theta.
+\end{align*}
+\begin{enumerate}
+\item $C_1$: 
+We can compute that,
+\begin{align*}
+\mathbb{P}(\theta \in C_1) &= \mathbb{P}(\widehat{\theta} \leq \theta/a_1, \widehat{\theta} \geq \theta/b_1) \\
+&= \mathbb{P}(\widehat{\theta} \leq \theta/a_1) -  \mathbb{P}(\widehat{\theta} \leq \theta/b_1) \\
+&= \left(\frac{1}{a_1}\right)^n - \left(\frac{1}{b_1}\right)^n.
+\end{align*}
+So we have that for instance choosing $a_1 = 1$, $b_1 = \left(\frac{1}{\alpha}\right)^{1/n}$ guarantees us that this confidence interval has coverage probability exactly $1 - \alpha$. 
+\item $C_2$: Similarly we have that,
+\begin{align*}
+\mathbb{P}(\theta \in C_2) &= \mathbb{P}(\widehat{\theta} \leq \theta - a_2 , \widehat{\theta} \geq \theta - b_2) \\
+&= \mathbb{P}(\widehat{\theta} \leq \theta - a_2) -  \mathbb{P}(\widehat{\theta} \leq \theta - b_2) \\
+&= \left(\frac{\theta - a_2}{\theta}\right)^n - \left(\frac{\theta - b_2}{\theta}\right)^n.
+\end{align*}
+Notice that now the coverage probability depends on the unknown parameter $\theta$ (which is undesirable). Furthermore, if we choose any constants $(a_2,b_2)$ (say depending only on the desired coverage probability $\alpha$), then as $\theta \rightarrow \infty$ we have that the interval has coverage probability that tends to 0, i.e. the interval is not honest for any constants $(a_2,b_2)$.
+\end{enumerate}
+
+We will now discuss a few different ways of constructing confidence intervals. Although superficially different most of these methods are roughly the same.
+
+\section{Inverting a test}
+We discussed this method in the last lecture. We suppose that we have a (family of) test(s) for the hypotheses:
+\begin{align*}
+H_0: &~\theta = \theta_0 \\
+H_1: &~\theta \neq \theta_0.
+\end{align*}
+These tests have a rejection region and a corresponding acceptance region (where we fail to reject the null). Denote the acceptance region for the test of $\theta = \theta_0$ as $A(\theta_0)$. This is a subset of the sample space.
+
+
+Given observed data $\{X_1,\ldots,X_n\}$ we consider the random set:
+\begin{align*}
+C(X_1,\ldots,X_n) = \{ \theta_0: \{X_1,\ldots,X_n\} \in A(\theta_0) \}.
+\end{align*}
+Our confidence set is simply the set of parameters $\theta_0$ that we would fail to reject using our family of tests. If our family of tests has level $\alpha$ then the set $C(X_1,\ldots,X_n)$ is a $1 - \alpha$ confidence set.
+
+To see this observe that since our test controls the Type I error we have that for any parameter $\theta_0$,
+\begin{align*}
+\mathbb{P}_{\theta_0} (\{X_1,\ldots,X_n\} \notin A(\theta_0)) \leq \alpha,
+\end{align*}
+so with probability at least $1 - \alpha$ we have that, 
+$\{X_1,\ldots,X_n\} \in A(\theta_0)$ and hence that $\theta_0 \in C(X_1,\ldots,X_n)$.
+
+We can also construct tests using confidence intervals, i.e. consider the test that rejects the null hypothesis $\theta = \theta_0$ if $\theta_0 \notin C(X_1,\ldots,X_n)$, then if $C(X_1,\ldots,X_n)$ is a $1 - \alpha$ confidence interval this test has level $\alpha$, i.e.
+\begin{align*}
+\mathbb{P}_{\theta_0} (\text{reject null } \theta = \theta_0) = \mathbb{P}_{\theta_0}(\theta_0 \notin C(X_1,\ldots,X_n)) \leq \alpha.
+\end{align*}
+
+We did a simple example of this in the last lecture (constructing a confidence interval for a Gaussian mean) so let us try a more complex example today.
+
+{\bf Example: } Suppose we observe $X_1,\ldots,X_n \sim \text{Exp}(\lambda)$, and want to construct a confidence interval for $\lambda$.
+
+As our test, suppose we use the LRT, i.e. we define the likelihood ratio:
+\begin{align*}
+\Lambda = \frac{\lambda_0^n \exp (- \lambda_0 \sum_{i} X_i)}{ (\frac{1}{\overline{X}})^n \exp (-n)}.
+\end{align*}
+The acceptance region has the form:
+\begin{align*}
+A(\lambda_0) = \left\{ \{X_1,\ldots,X_n\}: \left(\lambda_0 \sum X_i \right)^n \exp (-\lambda_0 \sum X_i) \geq k_{\alpha}(\lambda_0)\right\}, 
+\end{align*}
+where $k_{\alpha}(\lambda_0)$ needs to be chosen appropriately to control the Type I error. 
+Observe that since $X_i \sim \text{Exp}(\lambda_0)$, $\lambda_0 X_i \sim \text{Exp}(1)$, so $k_{\alpha}(\lambda_0)$ does not depend on $\lambda_0$.
+Once we determine the cut-off we would obtain the confidence interval by collecting:
+\begin{align*}
+C(X_1,\ldots,X_n) = \{\lambda: \left(\lambda \sum X_i \right)^n \exp (-\lambda \sum X_i) \geq k_{\alpha} \},
+\end{align*}
+which is an expression that can be solved numerically.
+Determining $k_{\alpha}$ and then finding the confidence set can be quite tedious to do exactly (see the Casella and Berger book) and an alternative would be to use large-sample (asymptotic approximations).
+
+\section{Inverting Probability Inequalities}
+In some simple cases, we can use tail bounds to derive confidence intervals. These typically have the advantage of being exact, finite-sample intervals. However, they are rarely used in practice for many reasons including: (1) we do not always have tail bounds for estimators of interest (2) there are usually imprecisely known constants in tails bounds (3) related to (2) they are often very conservative (i.e. the intervals are often too wide to be useful).
+
+Here are a couple of examples:
+
+\begin{example}
+Let $X_1,\ldots, X_n \sim {\rm Bernoulli}(p)$.
+By Hoeffding's inequality:
+$$
+\mathbb{P}(|\widehat p - p | > \epsilon) \leq 2 e^{-2n\epsilon^2}.
+$$
+Let
+$$
+\epsilon_n = \sqrt{\frac{1}{2n}\log\left(\frac{2}{\alpha}\right)}.
+$$
+Then
+$$
+\mathbb{P}\left( | \widehat{p}-p| > \sqrt{\frac{1}{2n}\log\left(\frac{2}{\alpha}\right)}\right)\leq \alpha.
+$$
+Hence,
+$\mathbb{P}(p\in C)\ge 1-\alpha$ where
+$C=(\widehat p -\epsilon_n,\widehat p +\epsilon_n)$.
+\end{example}
+
+\begin{example}
+Let $X_1,\ldots, X_n \sim F$.
+Suppose we want a 
+{\bf confidence band} for $F$.
+We can use VC theory.
+Remember that
+$$
+\mathbb{P}\left(\sup_x | F_n(x) - F(x)| > \epsilon\right)\leq 2 e^{- 2n\epsilon^2}.
+$$
+Let
+$$
+\epsilon_n = \sqrt{\frac{1}{2n}\log\left(\frac{2}{\alpha}\right)}.
+$$
+Then
+$$
+\mathbb{P}\left(\sup_x | F_n(x) - F(x)| > \sqrt{\frac{1}{2n}\log\left(\frac{2}{\alpha}\right)}\right)\leq \alpha.
+$$
+Hence,
+$$
+P_F(L(t) \leq F(t)\leq U(t)\ \ {\rm for\ all\ }t) \geq 1-\alpha
+$$
+for all $F$, where
+$$
+L(t) = \widehat{F}_n(t) -\epsilon_n,\ \ \ 
+U(t) = \widehat{F}_n(t) +\epsilon_n.
+$$
+We can improve this by taking
+$$
+L(t) = \max\left\{\widehat{F}_n(t) -\epsilon_n,\ 0\right\},\ \ \ 
+U(t) = \min\left\{\widehat{F}_n(t) +\epsilon_n,\ 1\right\}.
+$$
+\end{example}
+
+\section{Pivots}
+This is something that is known as pivotal inference in statistics. This idea is really motivated by our first example where we constructed two different confidence intervals for the uniform parameter $\theta$. One of them was well-behaved (i.e. we could easily get it to have the right coverage probability) and the other one failed (i.e. we needed to set the length of the interval to depend on the unknown parameter $\theta$). 
+
+
+A function
+$Q(X_1,\ldots,X_n,\theta)$
+is a {\em pivot} if the distribution of $Q$ does not depend on $\theta$.
+For example, if
+$X_1,\ldots, X_n \sim N(\theta,1)$ then
+$$
+\overline{X}_n-\theta \sim N(0,1/n)
+$$
+so
+$Q=\overline{X}_n-\theta$ is a pivot.
+
+Let $a$ and $b$ be such that
+$$
+P_\theta(a \leq Q(X,\theta)\leq b) \geq 1-\alpha
+$$
+for all $\theta$.
+We can find such an $a$ and $b$ because
+$Q$ is a pivot.
+It follows immediately that
+$$
+C(X) = \{\theta:\ a \leq Q(X,\theta)\leq b\}
+$$
+has coverage $1-\alpha$.
+
+\begin{example}
+Let $X_1,\ldots, X_n\sim N(\mu,\sigma^2)$.
+($\sigma$ known.)
+Then
+$$
+Z = \frac{\sqrt{n}(\overline{X}-\mu)}{\sigma} \sim N(0,1).
+$$
+We know that
+$$
+P(-z_{\alpha/2}\leq Z \leq z_{\alpha/2}) = 1-\alpha
+$$
+and so
+$$
+P\left(-z_{\alpha/2}\leq \frac{\sqrt{n}(\overline{X}-\mu)}{\sigma} \leq z_{\alpha/2}\right) = 1-\alpha.
+$$
+Thus
+$$
+C = \overline{X} \pm \frac{\sigma}{\sqrt{n}} z_{\alpha/2}.
+$$
+If $\sigma$ is unknown, then this becomes
+$$
+C = \overline{X} \pm \frac{S}{\sqrt{n}} t_{n-1,\alpha/2}
+$$
+because
+$$
+T = \frac{\sqrt{n}(\overline{X}-\mu)}{S} \sim t_{n-1}.
+$$
+\end{example}
+
+We can similarly re-interpret the uniform interval we created in terms of a pivot.
+
+\begin{example}
+Let $X_1,\ldots, X_n\sim {\rm Uniform}(0,\theta)$.
+Let $Q = X_{(n)}/\theta$.
+Then
+$$
+\mathbb{P}(Q \leq t ) = \prod_i \mathbb{P}(X_i  \leq t\theta ) = t^n
+$$
+so $Q$ is a pivot.
+Let $c = \alpha^{1/n}$.
+Then
+$$
+\mathbb{P}( Q \leq c) = \alpha.
+$$
+Also, $\mathbb{P}(Q\leq 1)=1$.
+Therefore,
+\begin{eqnarray*}
+1-\alpha &=& \mathbb{P}( c \leq Q \leq 1) = 
+\mathbb{P}\left( c \leq \frac{X_{(n)}}{\theta} \leq 1\right)\\
+&=& \mathbb{P}\left( \frac{1}{c} \geq \frac{\theta}{X_{(n)}} \geq 1\right)\\
+&=& \mathbb{P}\left( X_{(n)} \leq \theta \leq \frac{X_{(n)}}{c}\right)
+\end{eqnarray*}
+so a $1-\alpha$ confidence interval is
+$$
+\left(  X_{(n)},\  \frac{X_{(n)}}{\alpha^{1/n}}\right).
+$$
+\end{example}
+
+\section{Large Sample Intervals}
+
+{\bf The Wald Interval.}
+We know that, under regularity conditions,
+$$
+\frac{\widehat\theta_n - \theta}{\rm se}\rightsquigarrow N(0,1)
+$$
+where
+$\widehat\theta_n$ is the mle and
+${\rm se} = 1/\sqrt{I_n(\widehat\theta)}$.
+So this is an asymptotic pivot
+and an approximate confidence interval is
+$$
+\widehat\theta_n \pm z_{\alpha/2} {\rm se}.
+$$
+By the delta method,
+a confidence interval for $\tau(\theta)$ is
+$$
+\tau(\widehat\theta_n) \pm z_{\alpha/2} {\rm se}(\widehat\theta) |\tau'(\widehat\theta_n)|.
+$$
+
+\vspace{1cm}
+
+{\bf The Likelihood-Based Confidence Set.} We saw an example before of trying to exactly the invert the LRT. This is often difficult to do.
+Let's consider inverting the asymptotic LRT.
+We test
+$$
+H_0: \theta=\theta_0\ \ \ {\rm versus}\ \ \ H_1 :\theta \neq \theta_0.
+$$
+Let $k$ be the dimension of $\theta$.
+We don't reject if
+$$
+-2 \log \left(\frac{L(\theta_0)}{L(\widehat\theta)}\right) \leq \chi^2_{k,\alpha} 
+$$
+that is, if
+$$
+\frac{L(\theta_0)}{L(\widehat\theta)} > e^{-\chi^2_{k,\alpha}/2}.
+$$
+So, the set of non-rejected nulls is
+$$
+C_n = \left\{\theta:
+\frac{L(\theta)}{L(\widehat\theta)} > e^{-\frac{\chi^2_{k,\alpha}}{2}}\right\}.
+$$
+This confidence set has a somewhat pleasing interpretation that it is just a collection of parameters that have high likelihood.
+Then
+$$
+P_\theta(\theta\in C) \to 1-\alpha
+$$
+for each $\theta$.
+
+\begin{example}
+Let $X_1,\ldots, X_n \sim {\rm Bernoulli}(p)$, let $S = \sum X_i$.
+Using the Wald statistic
+$$
+\frac{\widehat{p} -p}{\sqrt{ \frac{\widehat{p}(1-\widehat{p})}{n}}} \rightsquigarrow N(0,1)
+$$
+so an approximate confidence interval is
+$$
+\widehat p \pm z_{\alpha/2} \sqrt{ \frac{\widehat{p}(1-\widehat{p})}{n}}.
+$$
+Using the LRT we get
+$$
+C = \Biggl\{ p:\ 
+-2 \log \left(\frac{ p^S (1-p)^{n-S}}{ \widehat{p}^S (1-\widehat{p})^{n-S}}\right) \leq \chi^2_{1,\alpha}\Biggr\}.
+$$
+These intervals are different but, for large $n$, they are nearly the same.
+\end{example}
+
+\section{Multiple Confidence Intervals}
+When we have multiple parameters we might want to construct intervals $C_1,\ldots,C_d$ such that we control:
+\begin{align*}
+\mathbb{P}(\exists~j~\text{such that}~\theta_j \notin C_j) \leq \alpha.
+\end{align*}
+In this case, we could just Bonferroni correct our confidence intervals, i.e. we could construct confidence intervals which have coverage probability $\alpha/d$, and these would then have the desired property. This is analogous to controlling the FWER.
+
+It is worth pondering what the analog of FDR control might be for confidence intervals (maybe look up False Coverage-statement Rate).
+
+\section{Tests Versus Confidence Intervals}
+
+Confidence intervals are more informative than tests. Intuitively, p-values are more informative than an accept/reject decision because it summarizes all the significance levels for which we would reject the null hypothesis. Similarly, a confidence interval is more informative that a test because it summarizes all the parameters for which we would (fail to) reject the null hypothesis. More practically, a confidence interval tells us something about the ``effect size'' as well as something about the uncertainty in our estimate of the ``effect size''. 
+
+Look at Figure \ref{fig::testversusci}.
+Suppose we are testing $H_0:\theta =0$ versus $H_1:\theta \neq 0$.
+We see 5 different confidence intervals.
+The first two cases (top two) correspond to not rejecting $H_0$.
+The other three correspond to rejecting $H_0$.
+Reporting the  confidence intervals is much more informative than
+simply reporting ``reject'' or ``don't reject.''
+
+\begin{figure}
+\vspace{-1in}
+\begin{center}
+\includegraphics[scale=0.8]{ci}
+\end{center}
+\caption{Five examples:
+1. Not significant, precise.
+2. Not significant, imprecise.
+3. Barely significant, imprecise.
+4. Barely significant, precise.
+5. Significant and precise.}
+\label{fig::testversusci}
+\end{figure}
+
+\end{document}
+
+
+
+
+

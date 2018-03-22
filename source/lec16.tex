@@ -1,0 +1,843 @@
+\documentclass[twoside,12pt]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+\newcommand{\inprod}[2]{\ensuremath{\langle #1 , \, #2 \rangle}}
+
+
+\usepackage{amsmath,amsfonts,graphicx}
+\newcommand{\V}{\mbox{${\sf Var}$}}
+
+
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf 36-705: Intermediate Statistics		\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+\newcommand{\cdist}{\overset{d}{\rightarrow}}
+\newcommand{\edist}{\overset{d}{=}}
+
+\newcommand{\cprob}{\overset{p}{\rightarrow}}
+
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+
+\begin{document}
+%FILL IN THE RIGHT INFO.
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{16}{October 6}{Siva Balakrishnan}{Siva Balakrishnan}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+In the last lecture we discussed the MSE and the bias-variance decomposition. We discussed briefly that finding uniformly optimal estimators (i.e. estimators with lowest possible MSE for every value of the unknown parameter) is hopeless, and then briefly discussed finding optimal unbiased estimators. 
+
+We then introduced some quantities: the score and the Fisher information, and used these notions to discuss the Cram\'{e}r-Rao bound, which provides a lower bound on the variance of any unbiased estimator. 
+
+You might come across this terminology in your research: estimators that achieve the Cram\'{e}r-Rao bound, i.e. are unbiased and achieve the Cram\'{e}r-Rao lower bound on the variance, are often called \emph{efficient} estimators. In many problems efficient estimators do not exist, and we often settle for a weaker notion of \emph{asymptotic efficiency}, i.e. efficient but only as $n \rightarrow \infty$. Next week, we will show that in many cases the MLE is asymptotically efficient.
+
+The Cram\'{e}r-Rao bound suggests that the MSE in a parametric model typically scales as $1/(nI_1(\theta))$. 
+In essence $1/I_1(\theta)$ behaves like the variance (we will see this more clearly in the future), so that the MSE behaves as $\sigma^2/n$, which is exactly analogous to what we have seen before with averages (think back to Chebyshev/sub-Gaussian tail bounds).
+
+Supposing that the Fisher information is non-degenerate, i.e. that $I_1(\theta) > 0$, and treating the model and $\theta$ as fixed: $I_1(\theta)$ is a constant as $n \rightarrow \infty$. In such ``nice'' cases, the MSE converges to 0 at the rate of $1/n$. This is often referred to as the \emph{parametric rate}. We will in later lectures discuss non-parametric models where the typical rate of convergence is much slower (and depends more drastically on the dimension of the model -- this is called the \emph{curse of dimensionality}).
+
+We now return to Larry's notes on minimax theory.
+
+
+
+\section{Minimax Theory}
+
+Suppose we want to estimate a parameter $\theta$ using data
+$X^n = (X_1, \ldots, X_n)$. What is the best possible estimator
+$\widehat\theta = \widehat\theta(X_1, \ldots, X_n)$ of $\theta$?
+Minimax theory provides a framework for answering this question.
+
+
+\subsection{Introduction}
+
+Let $\widehat\theta = \widehat\theta(X^n)$ be an estimator
+for the parameter $\theta\in\Theta$.
+We start with a {\bf loss function}
+$L(\theta,\widehat\theta)$ that measures how good the estimator is.
+For example:
+$$
+\begin{array}{ll}
+L(\theta,\widehat\theta) = (\theta -\widehat\theta)^2 & \mbox{ squared error loss,}\\
+L(\theta,\widehat\theta) = |\theta -\widehat\theta|   & \mbox{ absolute error loss,}\\
+L(\theta,\widehat\theta) = |\theta -\widehat\theta|^p & 
+\hspace{.1cm}\mbox{$L_p$\ loss,}\\
+L(\theta,\widehat\theta) = 0\ {\rm if\ }\theta=\widehat\theta \ {\rm or}\ 1\ 
+{\rm if\ }\theta\neq \widehat\theta &\mbox{ zero--one loss,}\\
+L(\theta,\widehat\theta) = I(|\widehat\theta-\theta| > c) &\mbox{ large deviation loss,}\\
+L(\theta,\widehat\theta) = 
+\int \log \left( \frac{p(x;\, \theta)}{p(x;\, \widehat\theta)}\right)
+                 p(x;\, \theta) dx & 
+\hspace{.1cm}\mbox{Kullback--Leibler loss}.
+\end{array}
+$$
+If $\theta=(\theta_1,\ldots,\theta_k)$ is a vector then some common loss functions are
+$$
+L(\theta,\widehat\theta) = \|\theta-\widehat\theta\|^2 = \sum_{j=1}^k(\widehat\theta_j-\theta_j)^2,
+$$
+$$
+L(\theta,\widehat\theta) = \|\theta-\widehat\theta\|_p = \left(\sum_{j=1}^k |\widehat\theta_j-\theta_j|^p\right)^{1/p}.
+$$
+When the problem is to predict a $Y\in\{0,1\}$
+based on some classifier $h(x)$ a commonly used loss is
+$$
+L(Y,h(X)) = I(Y \neq h(X)).
+$$
+For real valued prediction a common loss function is
+$$
+L(Y,\widehat Y) = (Y - \widehat{Y})^2.
+$$
+
+\vspace{1cm}
+
+
+The {\bf risk} of an estimator $\widehat\theta$ is
+\begin{equation}
+R(\theta, \widehat\theta) = 
+\E_\theta \biggl(L(\theta, \widehat\theta)\biggr)=
+\int L(\theta, \widehat\theta(x_1,\ldots, x_n)) p(x_1,\ldots, x_n ; \theta) dx.
+\end{equation}
+
+
+When the loss function is squared error, the risk is just the 
+MSE (mean squared error):
+\begin{equation}
+R(\theta,\widehat\theta) = \E_\theta ( \widehat\theta -\theta)^2 =
+\V_\theta (\widehat\theta) + {\rm bias}^2.
+\end{equation}
+If we do not state what loss function we are using,
+assume the loss function is squared error.
+
+\vspace{1cm}
+
+\fbox{\parbox{5in}{
+\noindent
+The {\bf minimax risk} is
+$$
+R_n = \inf_{\widehat \theta}\sup_\theta R(\theta,\widehat\theta)
+$$
+where the infimum is over all estimators.
+An estimator $\widehat \theta$ is {\bf a minimax estimator}
+if
+$$
+\sup_\theta R(\theta,\widehat\theta) = \inf_{\widehat \theta}\sup_\theta R(\theta,\widehat\theta).
+$$
+}}
+
+\vspace{1cm}
+
+\begin{example}
+Let $X_1,\ldots, X_n \sim N(\theta,1)$.
+We will see that $\overline{X}_n$ is minimax with respect to
+many different loss functions.
+The risk is $1/n$.
+\end{example}
+
+\begin{example}
+Let $X_1,\ldots, X_n$ be a sample from a density $f$.
+Let ${\cal F}$ be the class of smooth densities
+(defined more precisely later).
+We will see (later in the course)
+that the minimax risk for estimating $f$ is
+$C n^{-4/5}$.
+\end{example}
+
+
+
+
+\subsection{Comparing Risk Functions}
+
+
+To compare two estimators, we compare their risk functions.
+However, this does not provide a clear
+answer as to which estimator is better.
+Consider the following examples.
+
+\begin{example}\label{example::compare-two}
+Let $X\sim N(\theta,1)$ and assume we are using squared error loss.
+Consider two estimators:
+$\widehat\theta_1 =X$ and
+$\widehat\theta_2 =3$.
+The risk functions are
+$R(\theta,\widehat\theta_1)=\E_\theta (X-\theta)^2 =1$ and
+$R(\theta,\widehat\theta_2)=\E_\theta (3-\theta)^2 = (3-\theta)^2.$
+If $2 < \theta < 4$ then
+$R(\theta,\widehat\theta_2)<R(\theta,\widehat\theta_1)$,
+otherwise,
+$R(\theta,\widehat\theta_1)<R(\theta,\widehat\theta_2)$.
+Neither estimator uniformly dominates the other; see Figure
+\ref{fig::two-risk-functions}.
+\end{example}
+
+\begin{figure}
+\begin{center}
+\includegraphics{mini1}
+\end{center}
+\vspace{-8.5in}
+\caption{Comparing two risk functions. Neither risk function dominates
+the other at all values of $\theta$.}
+\label{fig::two-risk-functions}
+\end{figure}
+
+\begin{example}\label{ex::binomial-risk}
+Let $X_1, \ldots, X_n \sim {\rm Bernoulli}(p)$.
+Consider squared error loss and
+let $\widehat{p}_1=\overline{X}$.
+Since this has zero bias, we have that
+$$
+R(p,\widehat{p}_1) = \V(\overline{X}) = \frac{ p(1-p)}{n}.
+$$
+Another estimator is
+$$
+\widehat{p}_2 = \frac{Y + \alpha}{\alpha+\beta+n}
+$$
+where
+$Y = \sum_{i=1}^n X_i$ and
+$\alpha$ and $\beta$ are positive constants.\footnote{{\sf
+This is the posterior mean using a {\rm Beta} ($\alpha,\beta$) prior.}}
+Now,
+\begin{eqnarray*}
+R(p,\widehat{p}_2) &=&
+\V_p (\widehat{p}_2) + ({\rm bias}_p(\widehat{p}_2))^2 \\
+&=&
+\V_p\left( \frac{Y+\alpha}{\alpha+\beta+n}\right) +
+\left( \E_p \left( \frac{Y+\alpha}{\alpha+\beta+n}\right) -p\right)^2\\
+&=&
+\frac{n p (1-p)}{ (\alpha + \beta +n)^2} +
+\left( \frac{n p + \alpha}{\alpha+\beta+n}-p\right)^2.
+\end{eqnarray*}
+Let $\alpha =\beta = \sqrt{n/4}$.
+The resulting 
+estimator is
+$$
+\widehat{p}_2 = \frac{Y + \sqrt{n/4}}{n+ \sqrt{n}}
+$$
+and the risk function is
+$$
+R(p,\widehat{p}_2) = \frac{n}{ 4(n+ \sqrt{n})^2}.
+$$
+The risk functions are plotted in Figure \ref{fig::bin-risk}.
+As we can see, neither estimator uniformly dominates the other.
+\end{example}
+
+\begin{figure}
+\begin{center}
+\includegraphics[angle=90]{mini2}
+\end{center}
+\vspace{-8in}
+\caption{Risk functions for $\widehat{p}_1$ and $\widehat{p}_2$ 
+in Example \ref{ex::binomial-risk}.
+The solid curve is $R(\widehat{p}_1)$.
+The dotted line is $R(\widehat{p}_2)$.}
+\label{fig::bin-risk}
+\end{figure}
+
+These examples highlight the need to be able to 
+compare risk functions.
+To do so, we need a one-number summary of the risk
+function.
+Two such summaries are
+the maximum risk
+and
+the Bayes risk.
+
+
+The {\bf maximum risk}\index{maximum risk|idxdef} is
+\begin{equation}
+\overline{R}(\widehat\theta)=\sup_{\theta\in\Theta} R(\theta, \widehat\theta)
+\end{equation}
+and the {\bf Bayes risk}\index{Bayes risk|idxdef} under prior $\pi$ is
+\begin{equation}
+B_\pi(\widehat\theta) = \int R(\theta,\widehat\theta) \pi(\theta)d\theta.
+\end{equation}
+
+
+\begin{example}
+Consider again
+the two estimators in Example \ref{ex::binomial-risk}.
+We have
+$$
+\overline{R}(\widehat{p}_1) = \max_{0 \leq p \leq 1}\frac{p (1-p)}{n} = \frac{1}{4n}
+$$
+and
+$$
+\overline{R}(\widehat{p}_2) = \max_p \frac{n}{ 4(n+ \sqrt{n})^2} =
+\frac{n}{ 4(n+ \sqrt{n})^2}.
+$$
+Based on maximum risk,
+$\widehat{p}_2$ is a better estimator since
+$\overline{R}(\widehat{p}_2)< \overline{R}(\widehat{p}_1)$.
+However, when $n$ is large,
+$\overline{R}(\widehat{p}_1)$ has smaller risk
+except for a small region in the parameter space near $p=1/2$.
+Thus, many people prefer
+$\widehat{p}_1$ to
+$\widehat{p}_2$.
+This illustrates that one-number summaries like
+maximum risk are imperfect.
+\end{example}
+
+These two summaries of the risk function
+suggest two different methods
+for devising estimators:
+choosing $\widehat\theta$ to minimize the maximum risk
+leads to minimax estimators;
+choosing $\widehat\theta$ to minimize the Bayes risk
+leads to Bayes estimators.
+
+
+An estimator $\widehat\theta$ that minimizes the Bayes risk is called a
+{\bf Bayes estimator}.
+That is,
+\begin{equation}
+B_\pi(\widehat\theta) = \inf_{\tilde{\theta}}B_\pi(\tilde{\theta})
+\end{equation}
+where the infimum is over all estimators $\tilde{\theta}$.
+An estimator that minimizes the maximum risk is called
+a {\bf minimax estimator}.
+That is,
+\begin{equation}\label{eq::this-defines-minimax-risk}
+\sup_\theta R(\theta,\widehat\theta) = 
+\inf_{\tilde{\theta}}\sup_\theta R(\theta,\tilde{\theta})
+\end{equation}
+where the infimum is over all estimators $\tilde{\theta}$.
+We call the right hand side of
+(\ref{eq::this-defines-minimax-risk}), namely,
+\begin{equation}
+R_n \equiv R_n(\Theta)=\inf_{\widehat{\theta}}\sup_{\theta\in\Theta} R(\theta,\widehat{\theta}),
+\end{equation}
+the {\bf minimax risk}.
+Statistical decision theory has
+two goals: determine the minimax risk $R_n$
+and find an estimator that achieves this risk.
+
+Once we have found the minimax risk $R_n$
+we want to find the minimax estimator that achieves this risk:
+\begin{equation}
+\sup_{\theta\in\Theta}R(\theta,\widehat\theta) =
+\inf_{\widehat\theta}\sup_{\theta\in\Theta}R(\theta,\widehat\theta).
+\end{equation}
+Sometimes we settle for an asymptotically minimax estimator
+\begin{equation}
+\sup_{\theta\in\Theta}R(\theta,\widehat\theta) \sim
+\inf_{\widehat\theta}\sup_{\theta\in\Theta}R(\theta,\widehat\theta)\ \ \ n\to\infty
+\end{equation}
+where $a_n\sim b_n$ means that
+$a_n/b_n\to 1$.
+Even that can prove too difficult and we might
+settle for an estimator that achieves the minimax rate,
+\begin{equation}
+\sup_{\theta\in\Theta}R(\theta,\widehat\theta) \asymp
+\inf_{\widehat\theta}\sup_{\theta\in\Theta}R(\theta,\widehat\theta)\ \ \ n\to\infty
+\end{equation}
+where $a_n\asymp b_n$ means that
+both $a_n/b_n$ and $b_n/a_n$ are both bounded as $n\to\infty$.
+
+
+
+
+
+
+\subsection{Bayes Estimators}
+
+Let $\pi$ be a prior distribution.
+After observing $X^n=(X_1, \ldots, X_n)$,
+the posterior distribution is, according to Bayes' theorem,
+\begin{equation}
+\mathbb{P}(\theta\in A|X^n)=
+\frac{\int_A p(X_1, \ldots, X_n|\theta) \pi(\theta)d\theta}{\int_\Theta p(X_1, \ldots, X_n|\theta) \pi(\theta)d\theta}=
+\frac{\int_A {\cal L}(\theta) \pi(\theta)d\theta}{\int_\Theta {\cal L}(\theta) \pi(\theta)d\theta}
+\end{equation}
+where ${\cal L}(\theta) = p(x^n;\theta)$ is the likelihood function.
+The posterior has density
+\begin{equation}
+\pi(\theta|x^n) = \frac{ p(x^n|\theta) \pi(\theta)}{ m(x^n)}
+\end{equation}
+where
+$m(x^n) = \int p(x^n|\theta) \pi(\theta) d\theta$
+is the {\bf marginal distribution}\index{marginal distribution} of $X^n$.
+Define the
+{\bf posterior risk}\index{posterior risk}
+of an estimator $\widehat\theta(x^n)$ by
+\begin{equation}
+r(\widehat\theta |x^n) =  \int L(\theta,\widehat\theta(x^n)) \pi(\theta|x^n)  d\theta .
+\end{equation}
+
+\begin{theorem}
+The Bayes risk $B_\pi(\widehat\theta)$ satisfies
+\begin{equation}
+B_\pi(\widehat\theta) = \int r(\widehat\theta|x^n) m(x^n) \,dx^n.
+\end{equation}
+Let $\widehat\theta(x^n)$ be the value of $\theta$ that minimizes
+$r(\widehat\theta |x^n)$.
+Then
+$\widehat\theta$ is the Bayes estimator.
+\end{theorem}
+
+\proof
+Let $p(x,\theta) = p(x|\theta)\pi(\theta)$ denote the joint density
+of $X$ and $\theta$.
+We can rewrite the Bayes risk as follows:
+\begin{eqnarray*}
+B_\pi(\widehat\theta) &=&
+\int R(\theta,\widehat\theta) \pi(\theta) d\theta=
+\int \Biggl(\int L(\theta,\widehat\theta(x^n)) p(x|\theta)dx^n \Biggr)\pi(\theta) d\theta\\
+&=& \int \int L(\theta,\widehat\theta(x^n)) p(x,\theta) dx^n d\theta=
+\int \int L(\theta,\widehat\theta(x^n)) \pi(\theta|x^n)m(x^n) dx^n d\theta\\
+&=&\int \Biggl(\int L(\theta,\widehat\theta(x^n)) \pi(\theta|x^n)d\theta \Biggr)m(x^n)\,  dx^n=
+\int r(\widehat\theta |x^n) m(x^n)\,dx^n.
+\end{eqnarray*}
+If we 
+choose $\widehat\theta(x^n)$ to be the value of $\theta$
+that minimizes $r(\widehat\theta|x^n)$
+then we will
+minimize the integrand at
+every $x$ and thus minimize the integral
+$\int r(\widehat\theta|x^n) m(x^n) dx^n$.
+
+
+Now we can find an explicit formula for
+the Bayes estimator for some specific loss functions.
+
+\begin{theorem}
+If $L(\theta,\widehat\theta)=(\theta - \widehat\theta)^2$
+then the Bayes estimator is
+\begin{equation}\label{eq::post-mean-est}
+\widehat\theta(x^n) = \int \theta \pi(\theta|x^n) d\theta = \E(\theta|X=x^n).
+\end{equation}
+If $L(\theta,\widehat\theta)=|\theta - \widehat\theta|$
+then the Bayes estimator is
+the median of
+the posterior $\pi(\theta|x^n)$.
+If $L(\theta,\widehat\theta)$ is zero--one loss,
+then the Bayes estimator is
+the mode of
+the posterior $\pi(\theta|x^n)$.
+\end{theorem}
+
+\proof
+We will prove the theorem for squared error loss.
+The Bayes estimator $\widehat\theta(x^n)$ minimizes
+$r(\widehat\theta|x^n)=\int (\theta-\widehat\theta(x^n))^2 \pi(\theta|x^n)  d\theta$.
+Taking the derivative of $r(\widehat\theta|x^n)$ with respect to $\widehat\theta(x^n)$
+and setting it equal to zero yields
+the equation
+$2 \int (\theta -\widehat\theta(x^n)) \pi(\theta|x^n) d\theta =0$.
+Solving for $\widehat\theta(x^n)$ 
+we get \ref{eq::post-mean-est}. 
+
+\begin{example}
+Let $X_1, \ldots, X_n \sim N(\mu,\sigma^2)$
+where $\sigma^2$ is known.
+Suppose we use a $N(a,b^2)$ prior for $\mu$.
+The Bayes estimator with respect to squared error loss
+is the posterior mean, which is
+\begin{equation}
+\widehat\theta(X_1, \ldots, X_n)=
+\frac{b^2}{b^2+ \frac{\sigma^2}{n}} \overline{X} + 
+\frac{\frac{\sigma^2}{n}}{b^2+ \frac{\sigma^2}{n}} a.\ \ \ 
+\end{equation}
+\end{example}
+
+\subsection{Minimax Estimators}
+
+Finding minimax estimators is complicated and we cannot
+attempt a complete coverage of that theory here
+but we will mention a few key results.
+The main message to take away from this section is:
+{\bf Bayes estimators with a constant risk function are minimax}.
+
+
+
+\begin{theorem}\label{thm::first-minimax}
+Let $\widehat\theta$ be the Bayes estimator for some prior $\pi$.
+If
+\begin{equation}\label{eq:cond}
+R(\theta,\widehat\theta)\leq B_\pi(\widehat\theta)\ \ {\rm for\ all\ }\theta
+\end{equation}
+then $\widehat\theta$ is minimax and $\pi$ is called a 
+{\bf least favorable prior}\index{least favorable prior}.
+\end{theorem}
+
+\proof
+Suppose that $\widehat\theta$ is not minimax.
+Then there is another estimator $\widehat{\theta}_0$ such that
+$\sup_\theta R(\theta, \widehat{\theta}_0) < \sup_\theta R(\theta,\widehat\theta)$.
+Since the average of a function is always less than or equal to its maximum,
+we have that
+$B_\pi(\widehat{\theta}_0)\leq \sup_\theta R(\theta,\widehat{\theta}_0)$.
+Hence,
+\begin{equation}
+B_\pi(\widehat{\theta}_0)  \leq \sup_\theta R(\theta,\widehat{\theta}_0) <
+\sup_\theta R(\theta,\widehat\theta) \leq
+ B_\pi(\widehat\theta)
+\end{equation}
+which is a contradiction. 
+
+
+\begin{theorem}
+Suppose that $\widehat{\theta}$ is the Bayes estimator with respect to some prior $\pi$.
+If the risk is constant
+then $\widehat{\theta}$ is minimax.
+\end{theorem}
+
+
+\proof
+The Bayes risk is
+$B_\pi(\widehat{\theta}) = \int R(\theta,\widehat{\theta})  \pi(\theta)d\theta =c$
+and hence
+$R(\theta,\widehat{\theta}) \leq B_\pi(\widehat{\theta})$ for all $\theta$.
+Now apply the previous theorem. 
+
+\begin{example}\label{ex::binomial-minimax}
+Consider the Bernoulli model with squared error loss.
+In example \ref{ex::binomial-risk} we showed that the estimator 
+$$
+\widehat{p}(X^n) = \frac{\sum_{i=1}^nX_i + \sqrt{n/4}}{n+ \sqrt{n}}
+$$
+has a constant risk function.
+This estimator is the posterior mean, and hence the Bayes estimator,
+for the prior ${\rm Beta} (\alpha,\beta)$ with
+$\alpha = \beta = \sqrt{n/4}$. Hence, by the previous theorem, 
+this estimator is minimax.
+\end{example}
+
+\begin{example}
+Consider again the Bernoulli 
+but with loss function
+$$
+L(p,\widehat{p}) = \frac{ (p-\widehat{p})^2}{ p(1-p)}.
+$$
+Let
+$\widehat{p}(X^n) = \widehat{p} =\sum_{i=1}^n X_i/n$.
+The risk is
+$$
+R(p,\widehat{p}) =
+E \left( \frac{ (\widehat{p}-p)^2}{p (1-p)}\right) =
+\frac{1}{p(1-p)} \left( \frac{p(1-p)}{n}\right)=
+\frac{1}{n}
+$$
+which, as a function of $p$, is constant.
+It can be shown that,
+for this loss function, $\widehat{p}(X^n)$ is the Bayes estimator
+under the prior $\pi(p)=1$.
+Hence, $\widehat{p}$ is minimax.
+\end{example}
+
+What is the minimax estimator for a
+Normal model?
+To answer this question in generality we first need a definition.
+A function $\ell$ is
+{\bf bowl-shaped} if
+the sets $\{x:\ \ell(x) \leq c\}$
+are convex and symmetric about the origin.
+A loss function $L$ is bowl-shaped if
+$L(\theta,\widehat\theta) = \ell(\theta-\widehat\theta)$ for some
+bowl-shaped function $\ell$.
+
+\begin{theorem}
+Suppose that the random vector $X$
+has a Normal distribution with mean vector
+$\theta$ and covariance matrix $\Sigma$.
+If the loss function is bowl-shaped then
+$X$ is the unique (up to sets of measure zero)
+minimax estimator of $\theta$.
+\end{theorem}
+
+
+
+If the parameter space is restricted,
+then the theorem above does not apply as
+the next example shows.
+
+\begin{example}\label{example::restricted-normal}
+Suppose that $X\sim N(\theta,1)$ and that $\theta$ is known to lie
+in the interval $[-m,m]$ where $0<m<1$.
+The unique, minimax estimator under squared error loss is
+$$
+\widehat{\theta} (X) =m\, \left(\frac{e^{mX} - e^{-mX}}{e^{mX} + e^{-mX}}\right).
+$$
+This is the Bayes estimator with respect to the
+prior that puts mass 1/2 at $m$ and mass 1/2 at $-m$.
+The risk is not constant but it does satisfy
+$R(\theta,\widehat{\theta}) \leq B_\pi(\widehat{\theta})$ for all $\theta$;
+see Figure \ref{fig::risk-constrained-normal}.
+Hence, Theorem \ref{thm::first-minimax} implies that
+$\widehat\theta$ is minimax.
+This might seem like a toy example but it is not.
+The essence of modern minimax theory is that
+the minimax risk depends crucially on how the space
+is restricted. The bounded interval case is the tip of the iceberg.
+\end{example}
+
+\begin{figure}
+\begin{center}
+\includegraphics{mini3}
+\end{center}
+\vspace{-8in}
+\caption{Risk function for constrained Normal with m=.5.
+The two short dashed lines show the least favorable prior which puts its
+mass at two points.}
+\label{fig::risk-constrained-normal}
+\end{figure}
+
+
+{\bf Proof That $\overline{X}_n$ is Minimax Under Squared Error Loss.}
+Now we will explain why 
+$\overline{X}_n$ is justified by minimax theory.
+Let $X_1,\ldots, X_n \sim N(\theta,\sigma^2 I)$
+be multivariate Normal with
+mean vector $\theta = (\theta_1,\ldots, \theta_d)$.
+We will prove that
+$\widehat\theta = X$ is minimax when 
+$L(\theta,\widehat\theta) = ||\widehat\theta - \theta||^2$.
+
+For simplicity,
+I will take $n=1$ and $\sigma=1$.
+You should do the more general case.
+The calculations are essentially the same.
+
+Take the prior to be $\pi=N(0,c^2 I)$.
+Then the posterior is
+\begin{equation}
+\theta|X=x \ \sim N\left(\frac{c^2 x}{1+c^2},\frac{c^2 }{1+c^2} I\right).
+\end{equation}
+The Bayes risk for an estimator $\widehat\theta$ is
+$R_\pi(\widehat\theta) = \int R(\theta,\widehat\theta)\pi(\theta)d\theta$
+which is minimized by the posterior mean
+$\tilde{\theta} = c^2 X/(1+c^2)$.
+Direct computation shows that
+$R_\pi(\tilde\theta) = dc^2/(1+c^2)$.
+Hence,
+if $\theta^*$ is any estimator, then
+\begin{eqnarray}
+\frac{dc^2}{1+c^2} &=&
+R_\pi(\tilde\theta) \leq R_\pi(\theta^*) \\
+& = &
+\int R(\theta^*,\theta)d\pi(\theta) \leq
+\sup_\theta R(\theta^*,\theta).
+\end{eqnarray}
+We have now proved that
+$R_n \geq dc^2/(1+c^2)$ for every $c>0$ and hence
+\begin{equation}
+R_n \geq d.
+\end{equation}
+But the risk of $\widehat\theta = X$ is $d$.
+So, $\widehat\theta = X$ is minimax.
+
+{\bf Potential Test Question: fill in the details of the above proof
+for general $n$ and $\sigma^2$.}
+
+
+
+
+
+
+
+\subsection{Maximum Likelihood}
+
+For parametric models
+that satisfy weak regularity conditions,
+the maximum likelihood estimator is approximately minimax.
+Consider squared error loss which is squared bias plus variance.
+In parametric models with large samples,
+it can be shown that the variance term dominates the bias 
+so the risk of the {\rm mle} $\widehat{\theta}$ roughly 
+equals the variance:\footnote{{\sf Typically, the squared bias is order $O(n^{-2})$
+while the variance is of order $O(n^{-1})$.}}
+\begin{equation}
+R(\theta,\widehat{\theta})= \V_\theta(\widehat{\theta}) + {\rm bias}^2 \approx
+\V_\theta(\widehat{\theta}).
+\end{equation}
+The variance 
+of the {\rm mle} is approximately
+$\V(\widehat{\theta})\approx \frac{1}{n I(\theta)}$
+where
+$I(\theta)$ is the Fisher information.
+Hence,
+\begin{equation}
+nR(\theta,\widehat{\theta})\approx \frac{1}{I(\theta)}.
+\end{equation}
+For any other estimator $\theta'$,
+it can be shown that for large $n$,
+$R(\theta,\theta')\geq R(\theta,\widehat{\theta})$.
+So {\bf the maximum likelihood estimator is approximately minimax.}
+{\bf This assumes that the dimension of $\theta$ is fixed
+and $n$ is increasing.}
+
+
+
+
+
+\subsection{The Hodges Example}
+
+Here is an interesting example about the subtleties of optimal estimators.
+Let $X_1,\ldots, X_n \sim N(\theta,1)$.
+The mle is $\widehat\theta_n = \overline{X}_n = n^{-1}\sum_{i=1}^n X_i$.
+But consider the following estimator due to Hodges.
+Let
+\begin{equation}
+J_n = \left[- \frac{1}{n^{1/4}},\ \frac{1}{n^{1/4}}\right]
+\end{equation}
+and define
+\begin{equation}
+\tilde{\theta}_n =
+\left\{
+\begin{array}{ll}
+\overline{X}_n & {\rm if\ } \overline{X}_n \notin J_n\\
+0              & {\rm if\ } \overline{X}_n \in J_n.
+\end{array}
+\right.
+\end{equation}
+Suppose that $\theta \neq 0$.
+Choose a small $\epsilon$ so that
+0 is not contained in $I=(\theta - \epsilon,\theta + \epsilon)$.
+By the law of large numbers,
+$\mathbb{P}(\overline{X}_n \in I) \to 1$.
+In the meantime $J_n$ is shrinking.
+See Figure \ref{fig::hodges1}.
+Thus, for $n$ large,
+$\tilde{\theta}_n = \overline{X}_n$ with high probability.
+We conclude that, for any $\theta \neq 0$,
+$\tilde{\theta}_n$ behaves like $\overline{X}_n$.
+
+When $\theta =0$,
+\begin{eqnarray}
+\mathbb{P}(\overline{X}_n \in J_n ) &=& \mathbb{P}(|\overline{X}_n| \leq n^{-1/4})\\
+&=& \mathbb{P}(\sqrt{n}|\overline{X}_n| \leq n^{1/4})=
+\mathbb{P}( |N(0,1)| \leq n^{1/4}) \to 1.
+\end{eqnarray}
+Thus, for $n$ large,
+$\tilde{\theta}_n = 0=\theta$ with high probability.
+This is a much better estimator of $\theta$ than $\overline{X}_n$.
+
+We conclude that
+Hodges estimator is like $\overline{X}_n$ when $\theta \neq 0$ and
+is better than $\overline{X}_n$ when $\theta = 0$.
+So $\overline{X}_n$ is not the best estimator.
+$\tilde{\theta}_n$ is better.
+
+Or is it?
+Figure \ref{fig::hodgesrisk}
+shows the mean squared error, or {\bf risk},
+$R_n(\theta) = \E(\tilde{\theta}_n - \theta)^2$
+as a function of $\theta$ (for $n=1000$).
+The horizontal line is the risk of $\overline{X}_n$.
+The risk of $\tilde{\theta}_n$ is good at $\theta=0$.
+At any $\theta$, it will eventually behave like the risk
+of $\overline{X}_n$.
+But the maximum risk of 
+$\tilde{\theta}_n$ is terrible.
+We pay for the improvement at $\theta=0$ by an increase in risk elsewhere.
+
+There are two lessons here.
+First, we need to pay attention to the 
+maximum risk.
+Second,
+it is better to look at
+uniform asymptotics $\lim_{n\to\infty} \sup_\theta R_n(\theta)$ rather than
+pointwise asymptotics $\sup_\theta \lim_{n\to\infty}  R_n(\theta)$.
+
+
+
+
+
+
+\begin{figure}
+\begin{center}
+\includegraphics{mini4}
+\end{center}
+\vspace{-8in}
+\caption{Top: when $\theta\neq 0$, $\overline{X}_n$ will eventually be in $I$
+and will miss the interval $J_n$.
+Bottom: when $\theta= 0$, $\overline{X}_n$ is
+about $n^{-1/2}$ away from 0 and so is
+eventually in $J_n$.}
+\label{fig::hodges1}
+\end{figure}
+
+\begin{figure}
+\begin{center}
+\vspace{-1in}
+\includegraphics[width=3in,height=3in]{hodges}
+\end{center}
+\caption{The risk of the Hodges estimator for $n=1000$ as a function of $\theta$.
+The horizontal line is the risk of the sample mean.}
+\label{fig::hodgesrisk}
+\end{figure}
+
+
+
+\end{document}
+
+
+
+
+

@@ -1,0 +1,423 @@
+\documentclass[twoside,12pt]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+\newcommand{\inprod}[2]{\ensuremath{\langle #1 , \, #2 \rangle}}
+
+
+\usepackage{amsmath,amsfonts,graphicx}
+\newcommand{\V}{\mbox{${\sf Var}$}}
+
+
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf 36-705: Intermediate Statistics		\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+\newcommand{\cdist}{\overset{d}{\rightarrow}}
+\newcommand{\edist}{\overset{d}{=}}
+
+\newcommand{\cprob}{\overset{p}{\rightarrow}}
+\newcommand{\tobs}{T(Z_{\text{obs}})}
+\newcommand{\zobs}{Z_{\text{obs}}}
+\newcommand{\permtest}{\phi_{\text{perm}}}
+
+
+
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+
+\begin{document}
+%FILL IN THE RIGHT INFO.
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{27}{November 6}{Siva Balakrishnan}{Siva Balakrishnan}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+In today's lecture we will discuss the problem of non-parametric regression.
+
+
+
+Recall that, broadly in regression our goal is to estimate
+the regression function 
+\begin{align*}
+r(x) = \mathbb{E}[Y | X =x].
+\end{align*}
+Unlike the CDF which we could estimate with no assumptions
+about the distribution, here we will need 
+\emph{smoothness} assumptions, i.e. we will need 
+to assume that $r(x)$ is a smooth function
+of $x$. This allows us to 
+gain statistical strength by averaging near by points.
+
+Suppose we construct an estimate $\widehat{r}(x)$. Then a natural 
+measure of how well we do is the squared loss, except since these
+are functions this is called the \emph{integrated} squared loss, i.e.:
+\begin{align*}
+L(\widehat{r},r) = \int (\widehat{r}(x) - r(x))^2 dx.
+\end{align*}
+
+The risk is then just the expected loss, i.e.:
+\begin{align*}
+R(\widehat{r},r) = \mathbb{E} \left( \int (\widehat{r}(x) - r(x))^2 dx \right).
+\end{align*}
+
+As in the case of point estimation we have a bias variance decomposition.
+First we define the point-wise bias:
+\begin{align*}
+b(x) = \mathbb{E} (\widehat{r}(x)) - r(x),
+\end{align*}
+and the point-wise variance:
+\begin{align*}
+v(x) = \mathbb{E} (\widehat{r}(x) -  \mathbb{E} (\widehat{r}(x)))^2.
+\end{align*}
+
+Now, as before we can verify that:
+\begin{align*}
+R(\widehat{r},r) = \int b^2(x) dx + \int v(x) dx.
+\end{align*}
+
+A natural strategy in non-parametric regression is to locally average the data, i.e.
+our estimate of the regression function at any point will be the average 
+of the $Y$ values in a small neighborhood of the point. 
+
+The width of this neighborhood will determine the bias and variance. Too large
+a neighborhood will result in high bias and low variance (this is called oversmoothing)
+and too small a neighborhood will result in low bias but large variance (this is known 
+as undersmoothing).
+
+\section{Optimal Regression Function}
+Suppose we knew the joint distribution over $(X,Y)$. 
+One could alternatively begin by defining the risk of an estimate $\widehat{r}$ as 
+$$
+R(\widehat{r})= \mathbb{E}(Y-\widehat{r}(X))^2.
+$$
+This risk simply measures the prediction error, i.e. the expected error we make in predicting $Y$ when we use the function $\widehat{r}(X)$.
+This risk is minimized by the conditional expectation, i.e. we have the following theorem. 
+\begin{theorem}
+The risk $R$ is minimized by
+$$
+r(x) = \mathbb{E}(Y|X=x).
+$$
+\end{theorem}
+
+\begin{proof}
+Let $g(x)$ be any function of $x$.
+Then
+\begin{eqnarray*}
+R(g) &=& \mathbb{E}(Y-g(X))^2 = \mathbb{E}(Y-r(X)+r(X)-g(X))^2\\
+&=& \mathbb{E}(Y-r(X))^2 + \mathbb{E}(r(X)-g(X))^2 + 2   \mathbb{E}((Y-r(X)) (r(X)-g(X)))\\
+&\geq &
+\mathbb{E}(Y-r(X))^2 + 2   \mathbb{E}((Y-r(X)) (r(X)-g(X)))\\
+&=& \mathbb{E}(Y-r(X))^2 + 2   \mathbb{E} \mathbb{E} \Biggl( (Y-r(X)) (r(X)-g(X))\Biggm| X\Biggr)\\
+&=& \mathbb{E}(Y-r(X))^2 + 2   \mathbb{E}  \Biggl( ( \mathbb{E}(Y|X)-r(X)) (r(X)-g(X))\Biggr)\\
+&=& \mathbb{E}(Y-r(X))^2 + 2   \mathbb{E}  \Biggl( ( r(X)-r(X)) (r(X)-g(X))\Biggr)\\
+&=& \mathbb{E}(Y-r(X))^2 = R(r).
+\end{eqnarray*}
+\end{proof}
+
+For what we will do in class it will not matter which definition of risk we use so we will use the one from the previous section for the rest of the lecture.
+
+\section{Kernel Regression}
+One of the most basic ways of doing non-parametric regression is called kernel regression.
+We will analyze kernel regression when we only have one covariate. The general case is not 
+very different.
+
+Here the estimator is defined as:
+\begin{align*}
+\widehat{r}(x) = \sum_{i=1}^n w_i(x) Y_i,
+\end{align*}
+where the weights assign more importance to points near $x$. This is called a kernel regressor
+when the weights are chosen according to a kernel, i.e. we have weights:
+\begin{align*}
+w_i(x) = \frac{ K \left( \frac{x - X_i}{h} \right)}{\sum_{i=1}^n K \left( \frac{x - X_i}{h} \right) }, 
+\end{align*}
+where $h$ controls the amount of smoothing. It is called the bandwidth.
+As a typical common example we have the Gaussian kernel:
+\begin{align*}
+K(x) = \frac{1}{\sqrt{2\pi}} \exp (- x^2/2).
+\end{align*}
+
+\section{Analysis of Kernel Regression}
+In this section we will provide a simple analysis of kernel regression. 
+We will do so under various (strong) assumptions. We
+make these assumptions so that we can prove our main 
+result in this lecture. 
+
+We assume that 
+\begin{align*}
+y_i = r(x_i) + \epsilon_i,
+\end{align*}
+where:
+\begin{enumerate}
+\item {\bf Assumptions about the design: } We will assume that $x_i$ is one-dimensional,
+and equally spaced on $[0,1]$. In general, we do not need that the design is equally 
+spaced but intutively we do need to ensure that we 
+see some points in the vicinity of each point where $r$ is non-zero. 
+
+\item {\bf Assumptions about the regression function: } We will assume that the 
+function $r(x) = \mathbb{E}[Y | X = x]$ is $L$-Lipschitz, i.e.
+that there
+is some constant $L$ such that:
+\begin{align*}
+\left\vert \frac{d}{dx} r(x) \right\vert \leq L.
+\end{align*}
+\item {\bf Assumptions about the noise: } We will assume that 
+the noise is i.i.d and that $\mathbb{E}[\epsilon_i] = 0, \mathrm{Var}[\epsilon_i] = \sigma^2$. 
+\item {\bf Assumptions about the kernel: } We will assume that the kernel is 
+the \emph{spherical kernel}:
+\begin{align*}
+K(x) = \mathbb{I}(-1 \leq x \leq 1).
+\end{align*}
+Again the result we prove holds for a much broader class of kernels but we
+make this assumption to simplify the proof.
+\end{enumerate}
+
+{\bf The main result: } Suppose that the bandwidth $h \geq 1/n$, then the 
+point-wise bias 
+of the kernel regression estimator:
+\begin{align*}
+b(x) = \mathbb{E}[\widehat{r}(x)] - r(x) \leq Lh,
+\end{align*}
+and the point-wise variance:
+\begin{align*}
+\mathrm{Var}(\widehat{r}(x)) = \mathbb{E}( \widehat{r}(x) - \mathbb{E}(\widehat{r}(x)))^2 \leq
+\frac{ \sigma^2 }{nh}. 
+\end{align*}
+Before, we prove the theorem let us observe that we can calculate the
+integrated risk:
+\begin{align*}
+R(\widehat{r},r) = \int b^2(x) dx + \int v(x) dx \leq L^2 h^2 + \frac{ \sigma^2 }{nh},
+\end{align*}
+a natural strategy would be to choose the bandwidth to minimize this expression. Choosing
+\begin{align*}
+h = \left( \frac{  \sigma^2 }{2 n L^2} \right)^{1/3},
+\end{align*}
+we obtain that 
+\begin{align*}
+R(\widehat{r},r) \leq \frac{2 L^{2/3} \sigma^{4/3}}{n^{2/3}} = 2 \left( \frac{L \sigma^2}{n} \right)^{2/3}.
+\end{align*}
+This result already reveals something fundamental about non-parametrics.
+We see that with an optimally chosen bandwidth, the MISE decreases to $0$ at rate 
+$n^{-2/3}$. 
+By comparison, most parametric estimators converge at rate $n^{-1}$. 
+The slower rate of convergence is the price we pay for being nonparametric. The formula for the optimal bandwidth is not useful in practice since it depends on the unknown Lipschitz constant $L$,
+and the typically unknown noise variance. 
+
+With all of these preliminaries in place let us prove the result:
+
+{\bf Bounding the bias: } The bias is given by:
+\begin{align*}
+b(x) &= | \mathbb{E} \widehat{r}(x) - r(x) | = \left \vert \mathbb{E} \left[ \sum_{i=1}^n (w_i(X_i) (Y_i - r(x))) \right] \right \vert \\
+&= \left \vert  \sum_{i=1}^n (w_i(X_i) (r(X_i) - r(x))) \right \vert \leq \sum_{i=1}^n w(X_i) |r(X_i) - r(x)| \\
+&\leq Lh \sum_{i=1}^n w(X_i) = Lh.
+\end{align*}
+At a high-level, the kernel regressor aggregates $Y$ values from nearby points, and the bias just captures how much the true function can change over this region. 
+
+{\bf Bounding the variance: } We note first that each weight is upper bounded as:
+\begin{align*}
+w_i(X_i) \leq \frac{1}{nh}.
+\end{align*}
+Returning to the variance we obtain:
+\begin{align*}
+v(x) &= \mathbb{E} (\widehat{r}(x) - \mathbb{E}(\widehat{r}(x)))^2 
+= \mathbb{E} \left( \sum_{i=1}^n (w_i(X_i) (Y_i - r(X_i)))\right)^2 \\
+&= \mathbb{E} \left( \sum_{i=1}^n \epsilon_i w_i(X_i) \right)^2 \\
+&= \sum_{i=1}^n w_i(X_i)^2 \mathbb{E}(\epsilon_i^2) = \sigma^2 \sum_{i=1}^n w_i(X_i)^2  \\
+&\leq \sigma^2 \max_{i=1}^n w_i(X_i) \sum_{i=1}^n w_i(X_i) \leq \frac{\sigma^2}{nh}.
+\end{align*}
+This completes our analysis.
+
+%We will choose kernels that satisfy a few conditions:
+%\begin{enumerate}
+%\item $K(x) \geq 0$
+%\item $\int K(x) = 1$
+%\item $\int x K(x) = 0$.
+%\end{enumerate}
+%These will be useful when we analyze this estimator. As a typical common example
+%you should consider the Gaussian kernel:
+%\begin{align*}
+%K(x) = \frac{1}{\sqrt{2\pi}} \exp (- x^2/2).
+%\end{align*}
+%
+%Finally, in order to analyze the kernel regression estimator we will need to assume
+%something about $r(x)$. We will assume that $r(x)$ is Lipschitz, i.e. that there
+%is some constant $L$ such that:
+%\begin{align*}
+%\left\vert \frac{d}{dx} r(x) \right\vert \leq L.
+%\end{align*}
+%More generally, we could assume things about higher-derivatives (more smoothness), i.e.
+%for instance that the $\beta$-th derivative is bounded. In general, more smoothness will imply lower
+%MSE. 
+%
+%In the next class we will bound the bias and variance of the kernel regressor as a function of the bandwidth and try to concretely pin down the bias-variance tradeoff.
+
+\section{The general case}
+We will be quite loose here just to focus on the main ideas. 
+More generally, suppose that the $\beta^{\mathrm{th}}$ derivative of $r(x)$ is 
+bounded, and we are in $d$-dimensions. 
+In this case the bias will be roughly:
+\begin{align*}
+b^2(x) \approx h^{2\beta},
+\end{align*}
+and the variance:
+\begin{align*}
+v(x) \approx \frac{1}{nh^d},
+\end{align*}
+and balancing these will lead to the rate of convergence:
+\begin{align*}
+R(\widehat{r},r) \approx n^{- 2\beta/ (2\beta + d)}.
+\end{align*}
+This reveals another crucial feature of non-parametrics. In linear regression, the
+rate of convergence is typically something like:
+\begin{align*}
+R(\widehat{\beta},\beta) \approx \frac{d}{n}.
+\end{align*}
+In both cases, the situation gets worse as $d$ increases, however in non-parametrics the
+situation gets \emph{exponentially} worse. This is often colloquially referred
+to as the \emph{curse of dimensionality.}
+
+\section{RKHS regression - optional}
+In machine learning, a somewhat different form of non-parametric regression is popular. This form is also known as kernel regression but we will refer to it as Reproducing Kernel Hilbert Space (RKHS) regression. We will not cover this in much detail (I assume you will see this or something quite similar in an ML class but let me know if not).
+
+The idea roughly is the following. First we need the notion of a positive semi-definite kernel:
+
+A symmetric bivariate function $K: \mathcal{X} \times \mathcal{X} \mapsto \mathbb{R}$ is positive semidefinite (PSD) if for all integers $n \geq 1$ and elements $\{x_i\}_{i=1}^n$ where each $x_i \in \mathcal{X}$, the $n \times n$ matrix $K$ with elements $K_{ij} := K(x_i, x_j)$ is positive semidefinite.
+
+Here are a few standard examples:
+\begin{enumerate}
+\item Linear kernel: When $\mathcal{X} = \mathbb{R}^d$ then $K(x_i,x_j) = \inprod{x_i}{x_j} = \sum_{u=1}^d x_{iu} x_{ju},$ is the linear kernel and is PSD.
+\item Polynomial kernel: Again when $\mathcal{X} = \mathbb{R}^d$ then $K(x_i,x_j) = (\inprod{x_i}{x_j})^m,$ is the homogenous polynomial kernel of degree $m \geq 2$. This kernel is also PSD. The inhomogenous polynomial kernel $K(x_i,x_j) = (1 + \inprod{x_i}{x_j})^m$ is also PSD.
+\item Gaussian kernel: Perhaps the most popular kernel in machine learning is the Gaussian kernel. Here we take $K(x_i,x_j) = \exp(- \|x_i - x_j\|_2^2 / (2\sigma^2)).$
+\end{enumerate}
+
+%RKHSs, roughly are spaces of functions that are in one-to-one correspondence with a PSD kernel. Suppose we fix $y \in \mathcal{X}$, then we can think of the function:
+%\begin{align*}
+%f_y(\cdot) = K(\cdot,y),
+%\end{align*}
+%and consider the collection of functions $\{f_y: y \in \mathcal{X}\}$. Now we can consider all possible functions that we can obtain as linear combinations of these functions and this forms the RKHS. Suppose we take $\{y_1,\ldots,y_n\} \in \mathcal{X}^n$, for an arbitrary $n \geq 1$ we can consider a function of the form
+%\begin{align*}
+%f(\cdot) = \sum_{i=1}^n \alpha_i f_{y_i}(\cdot).
+%\end{align*}
+%Given another collection $\{\widetilde{y}_1,\ldots,\widetilde{y}_n\}$, we might obtain another function:
+%\begin{align*}
+%\widetilde{f}(\cdot) = \sum_{i=1}^n \widetilde{\alpha}_i f_{\widetilde{y}_i}(\cdot).
+%\end{align*}
+%We define the RKHS inner product between these functions:
+%\begin{align*}
+%\inprod{f}{\widetilde{f}}_{\mathcal{H}} = \sum_{i=1}^n \sum_{j=1}^n \alpha_i \widetilde{\alpha}_j K(y_i, \widetilde{y}_j).
+%\end{align*}
+
+The overly simplified description of RKHS regression is the following: given a training set $\{(x_1,y_1),\ldots,(x_n,y_n)\}$ we are going to attempt to estimate the function $r$ by a function $r_{\alpha}$ which we will assume has the form:
+\begin{align*}
+r_{\alpha}(x) = \sum_{i=1}^n \alpha_i K(x_i,x),
+\end{align*}
+where we need to estimate the $\alpha_i$s. In order to do this we will minimize a least-squares type objective:
+\begin{align*}
+\widehat{\alpha} = \arg \min_{\alpha} \frac{1}{2} \sum_{i=1}^n (y_i - r_{\alpha}(x_i))^2 + \lambda \text{Pen}(r_{\alpha}).
+\end{align*}
+The penalty we will use is something called an RKHS norm penalization and it takes the form:
+\begin{align*}
+ \text{Pen}(r_{\alpha}) = \alpha^T K \alpha,
+\end{align*}
+where $K$ is the gram matrix, i.e. $K_{ij} = K(x_i,x_j)$. This penalty encourages the function to be smooth but this is not easy to see without going into more detail. Observe that we can write:
+\begin{align*}
+\left[ \begin{array}{c}
+r_{\alpha}(x_1) \\
+r_{\alpha}(x_2) \\
+\vdots  \\
+r_{\alpha}(x_n) \end{array}\right] = K\alpha,
+\end{align*}
+so the RKHS regression objective simplifies to:
+\begin{align*}
+\widehat{\alpha} = \arg \min_{\alpha} \frac{1}{2} \|y - K\alpha\|_2^2 + \lambda \alpha^T K \alpha,
+\end{align*}
+which we can solve in closed form (just by taking derivatives and setting to zero) as:
+\begin{align*}
+\widehat{\alpha} = (K + \lambda I)^{-1} y. 
+\end{align*}
+Our estimated regression function then takes the form:
+\begin{align*}
+r_{\widehat{\alpha}}(x) = \sum_{i=1}^n \widehat{\alpha}_i K(x_i,x).
+\end{align*}
+Superficially there are similarities between RKHS regression and kernel regression. They both produce a function whose value at a given point is a weighted combination of the $y$ values at other points. In kernel regression the weights are easy to interpret, while in RKHS regression the weights are the solution to a least squares problem and are not directly interpretable.
+
+From a practical standpoint, RKHS regression typically has two tuning parameters: the penalty parameter $\lambda$ and usually some RKHS parameter (for instance the RKHS kernel bandwidth for a Gaussian kernel).
+
+There are two types of problems one could ponder: (1) we want to fit a function that is Lipschitz or Holder smooth (as we analyzed in the first half): in this case, it is perhaps natural to use kernel regression and somewhat more artificial to use RKHS regression (2) we want to fit a function in a particular RKHS, in this case it is perhaps more natural to use RKHS regression.
+
+From a theoretical standpoint, RKHS regression is usually analyzed using variants of the Rademacher complexity results we saw earlier in the course, i.e. they are not directly analyzed in terms of the bias and variance (this is because the RKHS regression procedure is naturally viewed as ERM over an RKHS). This means that the rates of convergence are typically specified in terms of properties of the RKHS and the data-generating distribution, i.e. a typical measure of complexity of an RKHS is the decay-rate of eigenvalues of the kernel gram matrix. This is quite unlike kernel regression where the function class is something simple (Lipschitz functions), and the measure of complexity is just the smoothness of the function.
+
+RKHS regression is not the only alternative to kernel regression. Often you will see methods like $k$-NN regression (where you predict at a point by averaging the $y$ values of the $k$-closest points), local polynomial regression (where you chop up the domain and fit (low-degree) polynomials in each piece of the domain) and orthogonal series estimators or projection estimators (where you expand the regression function in a orthogonal basis -- say of sine/cosine type functions -- and then estimate the coefficients in this basis).
+
+
+\end{document}
+
+
+
+
+

@@ -1,0 +1,257 @@
+\documentclass[twoside,12pt]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+\newcommand{\inprod}[2]{\ensuremath{\langle #1 , \, #2 \rangle}}
+
+
+\usepackage{amsmath,amsfonts,graphicx}
+
+
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf 36-705: Intermediate Statistics		\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+
+\begin{document}
+%FILL IN THE RIGHT INFO.
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{4}{September 6}{Siva Balakrishnan}{Siva Balakrishnan}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+% **** YOUR NOTES GO HERE:
+In this lecture we discuss the convergence of random variables. At a high-level, our first few lectures 
+focused on non-asymptotic properties of averages i.e. the tail bounds we derived applied for any fixed sample size $n$. For the next few lectures we focus on asymptotic properties, i.e. we ask the question: what happens to the average of $n$ i.i.d. random variables as $n \rightarrow \infty$.
+
+Roughly, from a theoretical perspective the idea is that many expressions will considerably simplify in the asymptotic regime. Rather than have many different tail bounds, we will derive simple ``universal results'' that hold under extremely weak conditions.
+
+From a slightly more practical perspective, asymptotic theory is often useful to obtain approximate confidence intervals (and $p$-values and other useful things) that although approximate are typically more useful.
+We will follow quite closely Section 5.5 of Casella and Berger.
+
+\section{Reminder: convergence of sequences}
+When we think of convergence of deterministic real numbers the corresponding notions are classical. 
+
+Formally, we say that a sequence of real numbers $a_1,a_2,\ldots$
+converges to a fixed real number $a$ if, for
+every positive number $\epsilon$,
+there exists a natural number $N(\epsilon)$ such that for all $n \geq N(\epsilon)$, 
+$|a_n - a| < \epsilon$. 
+We call $a$ the limit of the sequence and write $\lim_{n \rightarrow \infty} a_n = a.$
+
+Our focus today will in trying to develop analogues of this notion that apply to sequences of random variables. We will first give some definitions and then try to circle back to relate the definitions and discuss some examples.
+
+Throughout, we will focus on the setting where we have a sequence of random variables $X_1,\ldots,X_n$ and another random variable $X$, and would like to define what is means for the sequence to converge to $X$. In each case, to simplify things you should also think about the case when $X$ is deterministic, i.e. when $X = c$ with probability $1$ (for some constant $c$).
+
+Importantly, we will \emph{not assume that the RVs $X_1,\ldots,X_n$ are independent}.
+
+\section{Almost sure convergence}
+We will not use almost sure convergence in this course so you should feel free to ignore this section.
+A natural analogue of the usual convergence would be to hope that,
+\begin{align*}
+\lim_{n \rightarrow \infty} X_n = X.
+\end{align*}
+These are both however random variables so one has to at least specify on what event we are hoping for this statement to be true. 
+
+The correct analogue turns out to be to require:
+\begin{align*}
+\mathbb{P}\left(\lim_{n \rightarrow \infty} X_n = X\right) = 1.
+\end{align*}
+There are measure theoretic subtleties to be aware of here. In particular, the sample space inside the probability statement here grows with $n$ and it requires some machinery to be precise here.
+
+
+There are other equivalent (this is somewhat difficult to see) ways to define almost sure convergence.
+Equivalently, we say that $X_n$ converges almost surely to $X$ if we let $\Omega$ be a set of probability mass $1$, i.e. $\mathbb{P}(\Omega) = 1$, and for every $\omega \subseteq \Omega$, and for every $\epsilon > 0$, we have that there is some $n \geq N(\omega,\epsilon)$ such that:
+\begin{align*}
+|X_n(\omega) - X(\omega)| \leq \epsilon.
+\end{align*}
+
+Roughly, the way to think about this type of convergence is to imagine that there is some set of exceptional events on which the random variables can disagree, but these exceptional events have probability $0$ as $n \rightarrow \infty$. Barring, these exceptional events the sequence converges just like sequences of real numbers do. The exceptional events is where the ``almost'' in almost sure arises.
+
+
+
+\section{Convergence in probability}
+A sequence of random variables $X_1,\ldots,X_n$ converges in probability to a random variable $X$ if for every $\epsilon > 0$ we have that,
+\begin{align*}
+\lim_{n \rightarrow \infty} \mathbb{P}( |X_n - X| \geq \epsilon) = 0.
+\end{align*}
+To build intuition it is perhaps useful to consider the case when $X$ is deterministic, i.e. $X = c$ with probability 1. Then convergence in probability is saying that as $n$ gets large the distribution of $X_n$ gets more peaked around the value $c$.
+
+
+
+Again somewhat roughly, convergence in probability can be viewed as a statement about the convergence of probabilities, while almost sure convergence is a convergence of the values of a sequence of random variables.
+
+We will not prove this statement but convergence in probability is implied by almost sure convergence. The notes contain a counterexample to the reverse implication but we most likely will not cover this in lecture.
+
+{\bf Example: Weak Law of Large Numbers} Suppose that $Y_1,\ldots,Y_n$ are i.i.d. with $\mathbb{E}[Y_i] = \mu$ and $\text{Var}(Y_i) = \sigma^2 < \infty$. Define, for $i \in \{1,\ldots,n\}$,
+\begin{align*}
+X_i = \frac{1}{i} \sum_{j = 1}^i Y_j.
+\end{align*}
+The WLLN says that the sequence $X_1,X_2,\ldots$ converges in probability to $\mu$.
+
+{\bf Proof: } The proof is simply an application of Chebyshev's inequality. We note that by Chebyshev's inequality: 
+\begin{align*}
+\mathbb{P}(|X_n - \mathbb{E}[X]| \geq \epsilon) \leq \frac{\sigma^2}{n \epsilon^2}.
+\end{align*}
+This in turn implies that,
+\begin{align*}
+\lim_{n \rightarrow \infty} \mathbb{P}(|X_n - \mathbb{E}[X]| \geq \epsilon) = 0,
+\end{align*}
+as desired.
+
+{\bf Notes: } 
+\begin{enumerate}
+\item Strictly speaking the WLLN is true even without the assumption of finite variance, as long as the first absolute moment is finite. This proof is a bit more difficult.
+\item There is a statement that says that under similar assumptions the average converges almost surely to the expectation. This is known as the strong law of large numbers. This is actually quite a bit more difficult to prove.
+\end{enumerate}
+
+{\bf Consistency: } Convergence in probability will frequently recur in this course. Usually we will construct an estimator $\widehat{\theta}_n$ for some quantity $\theta^*$. We will then say that the estimator is \emph{consistent} if the sequence of RVs $\widehat{\theta}_n$ converges in probability to $\theta^*$.
+
+The WLLN/Chebyshev can already be used to prove some rudimentary consistency guarantees. For instance, if we consider the sample variance:
+\begin{align*}
+\widehat{S}_n = \frac{1}{n - 1} \sum_{i=1}^n (X_i - \widehat{\mu}_n)^2,
+\end{align*}
+then by Chebyshev's inequality we obtain,
+\begin{align*}
+\mathbb{P}(|\widehat{S}_n - \sigma^2| \geq \epsilon) \leq \frac{\text{Var}(S_n)}{\epsilon^2},
+\end{align*}
+so a sufficient condition for consistency is that $\text{Var}(S_n) \rightarrow 0$ as $n \rightarrow \infty$.
+
+{\bf Convergence in probability does not imply almost sure convergence: } This example is from Casella and Berger. Suppose we have a sample space $S = [0,1]$, with the uniform distribution, we draw $s \sim U[0,1]$ and define $X(s) = s$.
+
+We define the sequence as:
+\begin{align*}
+X_1(s) &= s + \mathbb{I}_{[0,1]}(s),~~~~X_2(s) = s + \mathbb{I}_{[0,1/2]}(s),~~~~X_3(s) = s + \mathbb{I}_{[1/2,1]}(s) \\
+X_4(s) &= s + \mathbb{I}_{[0,1/3]}(s),~~~~X_5(s) = s + \mathbb{I}_{[1/3,2/3]}(s),~~~~X_6(s) = s + \mathbb{I}_{[2/3,1]}(s).
+\end{align*}
+Now one can check that this sequence converges in probability but not almost surely. Roughly, the ``1 + s'' spike becomes less frequent down the sequence (allowing convergence in probability) but the limit is not well defined. For any $s$, $X_n(s)$ alternates between $1$ and $1 + s$.
+
+\section{Convergence in quadratic mean}
+An often useful way to show convergence in probability is to show something stronger known as convergence in quadratic mean. We say that a sequence converges to $X$ in quadratic mean if:
+\begin{align*}
+\mathbb{E}(X_n - X)^2 \rightarrow 0,
+\end{align*}
+as $n \rightarrow \infty$. We will return to this one when we discuss some examples.
+
+\section{Convergence in distribution}
+The other commonly encountered mode of convergence is convergence in distribution. We say that a sequence converges to $X$ in distribution if:
+\begin{align*}
+\lim_{n \rightarrow \infty} F_{X_n}(t) = F_X(t),
+\end{align*}
+for all points $t$ where the CDF $F_X$ is continuous. We will see why the exception matters in a little while but for now it is worth noting that convergence in distribution is the weakest form of convergence. 
+
+For instance, a sequence of i.i.d. $N(0,1)$ RVs converge in distribution to an independent $N(0,1)$ RV, even though the values of the random variables are not close in any meaningful sense (their distributions are however,  identical). A famous example
+that we will spend a chunk of the next lecture on is the central limit theorem. The central limit theorem says that an average of i.i.d. random variables (appropriately normalized) converges in distribution to a $N(0,1)$ random variable.
+
+The picture to keep in mind to understand the relationships is the following one:
+
+~~~~~~~~~~~~~~~~~~~~~~\includegraphics[scale=0.5]{fig1}
+
+We will re-visit this in the next lecture and perhaps try to prove some of the implications (or disprove some of the non-implications).
+
+\section{More Examples}
+
+{\bf Example 1: } Suppose we consider a sequence $X_n = N(0,1/n).$ Intuitively, it seems like this sequence converges to $0$. Let us first consider what happens in distribution.
+
+The CDF of the RV that is deterministically 0 is simply $F_X(x) = 0,$ for $x< 0$ and $F_X(x) = 1$ for $x \geq 0$. Now, let us consider,
+\begin{align*}
+F_{X_n}(x) = \mathbb{P}(Z \leq \sqrt{n} x),
+\end{align*}
+where $Z \sim N(0,1)$. If $x > 0$ this tends to 1, and if $x < 0$ this tends to 0. Interestingly, at $x = 0$, $F_{X_n}(x) = 1/2$, and does not converge to $F_X(0) = 1$. Remember, however, that we had an exception at points of discontinuity.
+
+{\bf Example 2: } Let us consider the same example and consider convergence in probability. 
+\begin{align*}
+\mathbb{P}(|X_n - X| \geq \epsilon) = \frac{\mathbb{E}[X_n^2]}{\epsilon^2} = \frac{1}{n\epsilon^2} \rightarrow 0,
+\end{align*}
+so the sequence converges to 0 in probability.
+
+{\bf Example 3: } Let us consider another example from the Casella and Berger book. Suppose $X_1,\ldots \sim U[0,1]$. Let us define $X_{(n)} = \max_{1 \leq i \leq n} X_i.$ Now, we verify two things:
+\begin{enumerate}
+\item $X_{(n)}$ converges in probability to $1$. To see this observe that,
+\begin{align*}
+\mathbb{P}(|X_{(n)} - 1| \geq \epsilon) &= \mathbb{P}(X_{(n)} \leq 1 - \epsilon) \\
+&= \prod_{i=1}^n \mathbb{P}(X_i \leq 1 - \epsilon) = (1- \epsilon)^n \\
+&\rightarrow 0.
+\end{align*}
+\item The random variable $n(1 - X_{(n)})$ converges in distribution to an Exp$(1)$ RV. To see this
+we compute:
+\begin{align*}
+F_{X_{(n)}}(t) &= \mathbb{P}(n(1 - X_{(n)}) \leq t) = 1 - \mathbb{P}(X_{(n)} \leq 1 - t/n) \\
+&= 1 - (1 - t/n)^n \rightarrow 1 - \exp(-t) = F_{X}(t).
+\end{align*}
+\end{enumerate}
+
+
+
+\end{document}
+
+
+
+
+

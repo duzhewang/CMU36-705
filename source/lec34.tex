@@ -1,0 +1,359 @@
+\documentclass[twoside,12pt]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+\newcommand{\inprod}[2]{\ensuremath{\langle #1 , \, #2 \rangle}}
+
+
+\usepackage{amsmath,amsfonts,graphicx,amssymb}
+\newcommand{\V}{\mbox{${\sf Var}$}}
+
+
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf 36-705: Intermediate Statistics		\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+\newcommand{\cdist}{\overset{d}{\rightarrow}}
+\newcommand{\edist}{\overset{d}{=}}
+
+\newcommand{\cprob}{\overset{p}{\rightarrow}}
+\newcommand{\tobs}{T(Z_{\text{obs}})}
+\newcommand{\zobs}{Z_{\text{obs}}}
+\newcommand{\permtest}{\phi_{\text{perm}}}
+
+\newcommand{\tr}{\text{tr}}
+\newcommand{\te}{\text{te}}
+
+
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+
+\begin{document}
+%FILL IN THE RIGHT INFO.
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{34}{December 1}{Siva Balakrishnan}{Siva Balakrishnan}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+Today we will discuss model selection. First, so that you have some canonical examples in mind:
+
+{\bf Example 1: } Suppose we are fitting a mixture of Gaussians, i.e. you observe data from some density and you want to estimate this density by a model of the form:
+\begin{align*}
+f(x) = \sum_{i=1}^k \pi_i N(\mu_i, \Sigma_i).
+\end{align*}
+We then need to choose the number of mixture components $k$ and this is a model selection problem where we have a sequence of models $\mathcal{M}_1, \ldots, \mathcal{M}_k$ indexed by the number of components.
+
+{\bf Example 2: } Polynomial order in regression. Suppose you use a polynomial to
+model the regression function:
+$$
+m(x) = \mathbb{E}(Y|X=x) = \beta_0 + \beta_1 x + \cdots + \beta_p x^p.
+$$
+You will need to choose the order of polynomial $p$.
+We can think of this as a sequence of models
+${\cal M}_1, \ldots, {\cal M}_p,\ldots$
+indexed by $p$.
+
+{\bf Example 3: } Model order in AR. Suppose you have time series data
+$Y_1,Y_2, \ldots$.
+A common model is the AR (autoregressive model):
+$$
+Y_t = a_1 Y_{t-1} + a_2 Y_{t-2} + \cdots + a_k Y_{t-k} + \epsilon_t
+$$
+where $\epsilon_t \sim N(0,\sigma^2)$.
+The number $k$ is called the order of the model.
+We need to choose $k$.
+
+
+
+Notice that models are often nested, i.e. for instance you can perfectly model a mixture of $k-1$ Gaussians by a mixture of $k$ Gaussians. Though this is not always the case, nested models should make the ``over-fitting'' problem clear, i.e. just picking the model with best ``fit'' would typically lead you to favor the most complex model. 
+
+There are two possible goals in model selection:
+\begin{enumerate}
+\item Find the model that gives the best prediction (without assuming that any of the models
+are correct).
+\item Assume one of the models is the true model and find the ``true'' model.
+\end{enumerate}
+
+Perhaps the only slightly counter-intuitive fact you need to remember is that when there is a true model methods like CV can fail to find it.
+
+The basic take-aways from today's lecture:
+\begin{enumerate}
+\item If your goal is prediction, you have a reasonable sample-size and you have a reasonable computation budget use cross-validation.
+\item If your goal is prediction, but you either have too small a sample or you have a very low computational budget, you should consider using AIC.
+\item If you goal is selecting the ``true'' model you should use BIC.
+\end{enumerate}
+
+\section{The procedures}
+
+{\bf CV: }Cross-validation has different versions but the procedure should be roughly familiar to you. We train our models on a subset of the data and then evaluate and choose between the models on the rest of the data. We then potentially re-shuffle the data, repeat, and combine the results in some way. We will simplify this and just suppose throughout this lecture that we do a train-test split.
+
+{\bf AIC: } AIC (Akaike Information Criterion) is a model selection rule that does not use any sample-splitting. Informally, it is best understood as an asymptotic approximation to CV. Formally, Stone showed in a classic paper that under assumptions AIC and CV are asymptotically equivalent when using the MLE for each model.
+
+Suppose we have models
+${\cal M}_1, \ldots, {\cal M}_k$
+where each model is a set of densities:
+$$
+{\cal M}_j = \Biggl\{  p(y;\theta_j):\ \theta_j\in\Theta_j \Biggr\}.
+$$
+We have data
+$Y_1,\ldots, Y_n$ drawn from some density $f$.
+{\bf We do not assume that $f$ is in any of the models.}
+
+Let $\widehat\theta_j$ be the mle from model $j$.
+An estimate of $p$, based on model $j$ is
+$\widehat p_j(y) = p(y;\widehat\theta_j)$.
+The quality of
+$\widehat p_j(y)$ as an estimate of $f$ can be measured 
+by the Kullback-Leibler distance:
+\begin{eqnarray*}
+K(p,\widehat{p}_j) &=& \int p(y) \log \left( \frac{p(y)}{\widehat p_j(y)}\right) dy\\
+&=& \int p(y) \log p(y) dy - \int p(y) \log \widehat p_j(y)  dy.
+\end{eqnarray*}
+The first term does not depend on $j$.
+So minimizing
+$K(p,\widehat{p}_j)$ over $j$ is the same as maximizing
+$$
+K_j = \int p(y) \log p(y;\widehat\theta_j)  dy.
+$$
+We need to estimate $K_j$.
+Intuitively, you might think that a good estimate of $K_j$ is
+$$
+\overline{K}_j = \frac{1}{n}\sum_{i=1}^n  \log p(Y_i;\widehat\theta_j)  = \frac{\ell_j(\widehat\theta_j)}{n}
+$$
+where
+$\ell_j(\theta_j)$ is the log-likelihood funcion for model $j$.
+However, this estimate is very biased because the
+data are being used twice: first to get the mle and second to estimate the integral.
+Akaike showed that the bias is approximately 
+$d_j/n$ where
+$d_j = {\rm dimension}(\Theta_j)$.
+Therefore we use
+$$
+\widehat K_j = \frac{\ell_j(\widehat\theta_j)}{n} - \frac{d_j}{n} = \overline{K}_j - \frac{d_j}{n}.
+$$
+Now, define
+$$
+{\rm AIC}(j) = 2n \widehat K_j = 2\ell_j(\widehat\theta_j) -  2 d_j.
+$$
+Notice that maximizing $\widehat K_j$ is the same as maximizing
+${\rm AIC}(j)$ over $j$.
+Why do we multiply by $2n$?
+Just for historical reasons.
+We can multiply by any constant; it won't change which model we pick.
+
+{\bf BIC: } BIC (Bayesian Information Criterion) is similar to AIC except we use the criterion:
+$$
+{\rm BIC}(j) = 2 \ell_j(\widehat\theta_j) -  d_j \log (n).
+$$
+
+The main thing to observe is that BIC uses a harsher penalty for model complexity. Roughly in order to prefer a model with dimension $d+1$ to one of dimension $d$ we need the log-likelihood to be much better for BIC while we only need it to be slightly better for AIC. In practice, BIC will tend to select much simpler/sparser/smaller models than AIC.
+
+\section{Prediction consistency of CV}
+Lets try to understand cross-validation in a simple scenario. We will not analyze AIC but you should note that in practice it is often quite similar to CV (and this can be formally shown under assumptions).
+We will do this in the context of point estimation, but one could use \emph{exactly} the same argument for bandwidth selection.
+
+Say we have 
+models $\mathcal{M}_1, \ldots, \mathcal{M}_M$. These are different models that we think might be reasonable fits to the data. Now, we observe our data $(X_1,\ldots,X_{2n})$ and randomly 
+split it into train and test sets of size $n$ each. We really should refer to the test set as a validation set but we will ignore this for today. 
+
+On the train set, we fit our models (say using the MLE), and compute point estimates $\widehat{\theta}_1,\ldots,\widehat{\theta}_M$. Now, suppose that we want to select the model/estimate that fits the
+data well. We will use the negative log-likelihood as our measure, i.e., we want an estimate
+that has low negative log-likelihood. This is the same as using the KL divergence as our loss function. 
+
+We can use the test set to estimate the negative log-likelihood:
+\begin{align*}
+R_i = \frac{- 1}{n} \sum_{i=1}^n \log f_{\widehat{\theta}_i}(X_{n+i}).
+\end{align*} 
+Note that:
+\begin{align*}
+\mathbb{E}(R_i) =  - \mathbb{E}_{f_{\theta^*}} \log f_{\widehat{\theta}_i}(X) = KL ( f_{\theta^*} || f_{\widehat{\theta}_i}) -  \mathbb{E}_{f_{\theta^*}}\log f_{\theta^*}(X),
+\end{align*}
+so we are estimating the KL divergence upto some term that does not depend on $\widehat{\theta}_i$. So minimizing $\mathbb{E}(R_i)$ is equivalent to minimizing the KL divergence. 
+
+We can now use the LLN to argue that if the test-set size goes to $\infty$ then our risk estimates converge to their expectations, and then we will find the model/estimate with the lowest KL to the true model.
+
+Suppose however we wanted to be more precise, and try to understand the role of the test set size
+and the number of models $M$?
+
+We could use Hoeffding's inequality. This will need an assumption that $|\log f_{\theta}(X)| \leq B$
+for every $\theta$ and $X$ that we care about (this can be relaxed using more complex techniques).
+Now, notice that the following is an important but straightforward consequence of Hoeffding's inequality:
+\begin{align*}
+\mathbb{P}(\max | R_i - \mathbb{E} (R_i) | \geq \epsilon) \leq 2M \exp (-2n\epsilon^2/(4B^2)).
+\end{align*}
+This is true since for each $i$ we know that 
+\begin{align*}
+\mathbb{P}(| R_i - \mathbb{E} (R_i) | \geq \epsilon) \leq 2 \exp (-2n\epsilon^2/(4B^2)).
+\end{align*}
+so we can obtain the desired inequality via a union bound (if the max exceeds $\epsilon$ at least one 
+of the terms must exceed $\epsilon$).
+
+Define, 
+\begin{align*}
+\epsilon_n = \sqrt{ \frac{ 4B^2 \log (2M/\alpha)}{n}},
+\end{align*}
+then we know that 
+\begin{align*}
+\mathbb{P}(\max | R_i - \mathbb{E} (R_i) | \geq \epsilon_n) \leq \alpha.
+\end{align*}
+
+Suppose we select the model $\widehat{i} = \arg \min_i R_i$, 
+and let $i^* = \arg \min_i \mathbb{E}(R_i)$, then we have that with probability
+at least $1 - \alpha$:
+\begin{align*}
+\mathbb{E}(R_{\widehat{i}}) \leq R_{\widehat{i}} + \epsilon_n \leq R_{i^*} + \epsilon_n \leq
+\mathbb{E}(R_{i^*}) + 2 \epsilon_n.
+\end{align*}
+So the model we select will be sub-optimal by at most $2\epsilon_n$. In regression, we would use exactly the same reasoning, but just replace the risk with the squared loss. 
+
+Reasoning about $K$-fold  cross-validation turns out to be much more challenging, because  the data re-use breaks independence assumptions. 
+
+The analysis above should remind you of the analysis we did before of Empirical Risk Minimization. The goals are slightly different, as is the final guarantee. It is worth thinking about what exactly the data splitting buys you. In particular, we do not require uniform convergence of the empirical to the true risk over all the model classes $\mathcal{M}_1,\ldots,\mathcal{M}_M$, rather we only require a good estimate of the risk for the \emph{fixed} models indexed by $\widehat{\theta}_1,\ldots,\widehat{\theta}_M$.
+
+
+\section{Model selection}
+Now, we switch gears and consider the case when there is in fact a true model, and our goal is to select it (say with high-probability as the sample-size grows).
+\section{A basic test problem}
+Let us consider the simplest model selection problem. We observe samples $$X_1,\ldots,X_n \sim N(\theta,1),$$ and our two models are:
+\begin{align*}
+\mathcal{M}_1 &= \{\theta: \theta = 0\}, \\
+\mathcal{M}_2 &= \{\theta: \theta \in \mathbb{R}\}.
+\end{align*}
+Our goal is to select one of these models (note that they are nested). Let us assume that $\theta = 0$ so the first model is indeed correct. We use the $\ell_2$ loss. For an estimate $\widehat{\theta}$ the true prediction error is $\mathbb{E}(X - \widehat{\theta})^2 = \widehat{\theta}^2 + 1.$
+
+{\bf Train error ``overfits'': } The first thing to note is that using the train error results in us always selecting the wrong model. For the first model we use the estimate $\widehat{\theta}_1 = 0$ and for the second model we use the estimate that is $\widehat{\theta}_2 = \frac{1}{n} \sum_{i=1}^n X_i$.
+
+Notice that with probability $1$, 
+\begin{align*}
+\frac{1}{n} \sum_{i=1}^n (X_i - \widehat{\theta}_2)^2 < \frac{1}{n} \sum_{i=1}^n (X_i - \widehat{\theta}_1)^2,
+\end{align*}
+so the train error would always select the more complex model (which in this case is also the wrong model).
+
+\section{Cross validation may not select the correct model}
+The next perhaps more surprising fact is that \emph{no matter how large the sample size is}, there is a non-trivial chance that cross-validation does not select the correct model. Colloquially people say that cross-validation overfits or that cross-validation is not model-selection consistent.
+
+We will again, analyze a simple train-test split version. We assume that the train and test sample sizes are each $n_{\text{tr}} = n_{\text{te}} = n/2$, and discuss this choice at the end.
+
+Let us denote the mean of the training samples as $\widehat{\mu}_{\tr}$ and the mean of the testing samples as $\widehat{\mu}_{\te}$. Then notice that $\widehat{\theta}_2 = \widehat{\mu}_{\tr}$, and further the difference between the test/cross-validation loss for the two models is simply:
+\begin{align*}
+\frac{1}{n_\te} \sum_{i=1}^{n_\te} X_i^2 - \frac{1}{n_\te} \sum_{i=1}^{n_\te} (X_i - \widehat{\mu}_{\tr})^2 =  - \widehat{\mu}_{\tr}^2 + 2 \widehat{\mu}_{\tr} \widehat{\mu}_{\te},
+\end{align*}
+so we select the wrong model if this quantity is greater than 0. Noting that we chose $n_{\text{tr}} = n_{\text{te}} = n/2$, we could re-write this as: we select the wrong model if
+\begin{align*}
+(\sqrt{n_{\tr}} \widehat{\mu}_{\tr})^2 - 2 (\sqrt{n_{\tr}}\widehat{\mu}_{\tr}) (\sqrt{n_{\te}} \widehat{\mu}_{\te}) < 0.
+\end{align*}
+Now we observe that, $\sqrt{n_{\tr}}  \widehat{\mu}_{\tr}$ and $\sqrt{n_\te} \widehat{\mu}_{\te}$ are each independent $N(0,1)$ variables, so this happens with a reasonable probability (whenever the train and test averages share the same sign and the test average is at least half the train average). So more than 25\% of the time CV will select the wrong model, no matter how large $n$ is.
+
+Observe that one could fix this problem by making the test set much larger than the train set, but you then sacrifice model fit (i.e. your estimate of $\theta$ will be quite bad) and as a result you will not predict as well. BIC is a much better way to fix cross-validation.
+
+\section{AIC also often selects the wrong model}
+Now, let us consider what AIC would do in our test problem. The log-likelihood in this case is simply half the $\ell_2$ loss and so we select Model 2 if:
+\begin{align*}
+\frac{1}{2n} \sum_{i=1}^n X_i^2 \geq \frac{1}{2n} \sum_{i=1}^n (X_i - \widehat{\mu})^2 + \frac{1}{n}.
+\end{align*}
+Re-arranging this we see that we would select the wrong model (i.e. Model 2) if, 
+\begin{align*}
+\widehat{\mu}^2 \geq \frac{2}{n}.
+\end{align*}
+This should intuitively make sense (if the mean is small in absolute value we select Model 1 and otherwise we select Model 2). The key point once again is that $n \widehat{\mu}^2$ is the square of a standard normal variable, and is larger than $2$ with some fixed probability (roughly 0.16). So once again no matter how large the sample size is AIC will select the wrong model with a fixed probability, i.e. it is not model selection consistent.
+
+Roughly, the problem is that there is a penalty for selecting a more complex model but it is not ``strong enough''. BIC inflates this penalty to ensure that the probability of selecting the wrong model $\rightarrow 0$ as $n \rightarrow \infty$.
+
+
+\section{BIC selects the correct model}
+You can go through exactly the same calculation as above and see that BIC would select the wrong model if,
+\begin{align*}
+\widehat{\mu}^2 \geq \frac{\log n}{n},
+\end{align*}
+i.e. we select the wrong model if a $\chi^2_1$ random variable exceeds $\log n$, and the probability of this $\rightarrow 0$ as $n \rightarrow \infty$ (for instance by applying Chebyshev).
+
+It is also easy to verify that if the population mean was not 0, then as $n \rightarrow \infty$ BIC would correctly choose Model 2. More generally, BIC is known to be model selection consistent (see the original paper of Schwarz) in choosing between a fixed number of fixed-dimension models. 
+
+\section{Hypothesis testing}
+Notice that one could also phrase model selection as a sequence of hypothesis testing problems. For our test problem it is natural to consider testing:
+\begin{align*}
+H_0:&~~~ \theta = 0 \\
+H_1:&~~~ \theta \neq 0.
+\end{align*}
+In this case, we would reject the null if
+\begin{align*}
+n \widehat{\mu}^2 \geq \chi_{1,\alpha}^2,
+\end{align*}
+and this would control the Type I error (i.e. the error of incorrectly selecting the more complex model) at $\alpha$. More generally, we could imagine testing between pairs of models using the LRT (using Wilks result for the asymptotic distributions). This procedure is very similar to AIC but inflates the penalty just enough to ensure that we have some specified error control. 
+
+\section{Is it worth the fuss?}
+Notice that even when CV/AIC selects the wrong model, they are not off my much in terms of prediction error. In particular, even when we incorrectly select Model 2 in our example, we estimate the mean to be roughly $1/\sqrt{n}$ which is quite close to 0 (the true mean). In essence, we are choosing a parameter for Model 2 that is very close to Model 1.
+
+From a practical standpoint however, this can affect interpretability, i.e. typically in linear regression for instance the model selected by CV will tend to have many small coefficients while the model selected by BIC will tend to be much more parsimonious/interpretable.
+
+\end{document}
+
+
+
+
+

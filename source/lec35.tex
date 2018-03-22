@@ -1,0 +1,336 @@
+\documentclass[twoside,12pt]{article}
+\setlength{\oddsidemargin}{0.25 in}
+\setlength{\evensidemargin}{-0.25 in}
+\setlength{\topmargin}{-0.6 in}
+\setlength{\textwidth}{6.5 in}
+\setlength{\textheight}{8.5 in}
+\setlength{\headsep}{0.75 in}
+\setlength{\parindent}{0 in}
+\setlength{\parskip}{0.1 in}
+\newcommand{\inprod}[2]{\ensuremath{\langle #1 , \, #2 \rangle}}
+
+
+\usepackage{amsmath,amsfonts,graphicx,amssymb}
+\newcommand{\V}{\mbox{${\sf Var}$}}
+
+
+\newcounter{lecnum}
+\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[4]{
+   \pagestyle{myheadings}
+   \thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf 36-705: Intermediate Statistics		\hfill Fall 2017} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill Lecture #1: #2  \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Lecturer: #3 \hfill} }
+      \vspace{2mm}}
+   }
+   \end{center}
+   \markboth{Lecture #1: #2}{Lecture #1: #2}
+}
+%
+% Convention for citations is authors' initials followed by the year.
+% For example, to cite a paper by Leighton and Maggs you would type
+% \cite{LM89}, and to cite a paper by Strassen you would type \cite{S69}.
+% (To avoid bibliography problems, for now we redefine the \cite command.)
+% Also commands that create a suitable format for the reference list.
+\renewcommand{\cite}[1]{[#1]}
+\def\beginrefs{\begin{list}%
+        {[\arabic{equation}]}{\usecounter{equation}
+         \setlength{\leftmargin}{2.0truecm}\setlength{\labelsep}{0.4truecm}%
+         \setlength{\labelwidth}{1.6truecm}}}
+\def\endrefs{\end{list}}
+\def\bibentry#1{\item[\hbox{[#1]}]}
+
+%Use this command for a figure; it puts a figure in wherever you want it.
+%usage: \fig{NUMBER}{SPACE-IN-INCHES}{CAPTION}
+\newcommand{\fig}[3]{
+			\vspace{#2}
+			\begin{center}
+			Figure \thelecnum.#1:~#3
+			\end{center}
+	}
+% Use these for theorems, lemmas, proofs, etc.
+\newtheorem{theorem}{Theorem}[lecnum]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{definition}[theorem]{Definition}
+\newenvironment{proof}{{\bf Proof:}}{\hfill\rule{2mm}{2mm}}
+
+\newcommand{\cdist}{\overset{d}{\rightarrow}}
+\newcommand{\edist}{\overset{d}{=}}
+
+\newcommand{\cprob}{\overset{p}{\rightarrow}}
+\newcommand{\tobs}{T(Z_{\text{obs}})}
+\newcommand{\zobs}{Z_{\text{obs}}}
+\newcommand{\permtest}{\phi_{\text{perm}}}
+
+\newcommand{\tr}{\text{tr}}
+\newcommand{\te}{\text{te}}
+
+
+
+% **** IF YOU WANT TO DEFINE ADDITIONAL MACROS FOR YOURSELF, PUT THEM HERE:
+
+\newcommand\E{\mathbb{E}}
+\newcommand{\PP}{\mathbb{P}}
+
+\begin{document}
+%FILL IN THE RIGHT INFO.
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{35}{December 4}{Siva Balakrishnan}{Siva Balakrishnan}
+%\footnotetext{These notes are partially based on those of Nigel Mansell.}
+
+Today we will discuss distances and metrics between distributions that are useful in statistics. I will be lose in distinguishing metrics, distances and divergences (i.e. some of these are not symmetric, and some do not satisfy triangle inequality).
+We will discuss them in two contexts: (1) there are metrics that are analytically useful in a variety of statistical problems, i.e. they have intimate connections with estimation and testing, (2) there are metrics that are useful in data analysis, i.e. given data we want to measure some notion of distance between (the distribution of) subsets of the data and use this in some way.
+
+There is of course overlap between these contexts and so there are distances that are useful in both, but they are motivated by slightly different considerations.
+
+\section{The fundamental statistical distances}
+There are four notions of distance that have an elevated status in statistical theory. I will define them a bit crudely (trying to avoid some basic measure theory that is necessary) to try to focus on the main ideas. Throughout, we will let $P, Q$ be two probability measures on some sample space, and we denote their densities with respect to some common underlying dominating measure be $p$ and $q$. To further simplify things, I will assume that this common measure is the Lebesgue measure.
+
+\begin{enumerate}
+\item Total Variation: The TV distance between two distributions is:
+\begin{align*}
+\text{TV}(P,Q) = \sup_{A} |P(A) - Q(A)| = \sup_{A} |\int (p(x) - q(x)) dx|,
+\end{align*}
+where $A$ is just any measurable subset of the sample space, i.e. the TV distance is measuring the maximal difference between the probability of an event under $P$ versus under $Q$.
+
+The TV distance is equivalent to the $\ell_1$ distance between the densities, i.e. one can show that:
+\begin{align*}
+\text{TV}(P,Q) = \frac{1}{2} \int |p(x) - q(x)| dx. 
+\end{align*}
+
+One can also write the TV distance as:
+\begin{align*}
+\text{TV}(P,Q) = \sup_{\|f\|_{\infty} \leq 1} \left| \mathbb{E}_P [f] - \mathbb{E}_Q [f] \right|.
+\end{align*}
+We will return to this form later on in the lecture.
+\item The $\chi^2$ divergence: The $\chi^2$ divergence is defined for distributions $P$ and $Q$ such that $Q$ dominates $P$, i.e. if $Q(A) = 0$ for some set $A$ then it has to be the case that $P(A)$ is also 0. For such distributions:
+\begin{align*}
+\chi^2(P,Q) = \int_{\{x: q(x) > 0\}} \frac{p^2(x)}{q(x)}dx - 1.
+\end{align*}
+Alternatively, one can write this as:
+\begin{align*}
+\chi^2(P,Q) = \int_{\{x: q(x) > 0\}}  \frac{(p(x) - q(x))^2}{q(x)} dx. 
+\end{align*}
+\item Kullback-Leibler divergence: Again we suppose that $Q$ dominates $P$. The KL divergence between two distributions:
+\begin{align*}
+\text{KL}(P,Q) = \int \log \frac{p(x)}{q(x)} p(x) dx.
+\end{align*}
+\item Hellinger distance: The Hellinger distance between two distributions is,
+\begin{align*}
+H(P,Q) =\left[ \int ( \sqrt{p(x)} - \sqrt{q(x)})^2 dx\right]^{1/2},
+\end{align*}
+i.e. the Hellinger distance is the $\ell_2$ norm between $\sqrt{p}$ and $\sqrt{q}$. It might seem at first a bit weird to consider the $\ell_2$ norm between $\sqrt{p}$ and $\sqrt{q}$ rather than $p$ and $q$, but this turns out to be the right thing to do for statistical applications. The use of Hellinger is various statistical contexts was popularized by Lucien Le Cam, who advocated strongly (and convincingly) for thinking of square-root of the density as the central object of interest.
+
+The Hellinger distance is also closely related to what is called the \emph{affinity} (or Bhattacharya coefficient):
+\begin{align*}
+\rho(P,Q) = \int \sqrt{p(x)q(x)} dx. 
+\end{align*}
+In particular, note the equality:
+\begin{align*}
+H^2(P,Q) = 2 \left( 1 - \rho(P,Q) \right).
+\end{align*}
+\end{enumerate}
+
+All of these fundamental statistical distances are special cases of what are known as $f$-divergences. The field of information theory has devoted considerable effort to studying families of distances ($\alpha$, $\beta$, $\phi$, $f$-divergences) and so on, and this has led to a fruitful interface between statistics and information theory. An $f$-divergence is defined for a \emph{convex} function $f$ with $f(1) = 0$: 
+\begin{align*}
+D_f(P,Q) = \int q(x) f\left(\frac{p(x)}{q(x)} \right) dx.
+\end{align*}
+You can look up (for instance on Wikipedia) which functions lead to each of the divergences we defined above.
+
+\section{Le Cam's Lemma}
+When we started this piece of the lecture we discussed that the above divergences are central in statistics. Let us try to substantiate this statement.
+
+A basic hypothesis testing problem is the following: suppose that we have two distributions $P_0$ and $P_1$, and we consider the following experiment: I toss a fair coin and if it comes up heads I give you a sample from $P_0$ and if it comes up tails I give you a sample from $P_1$. Let $T = 0$ if the coin comes up heads and $T = 1$ otherwise. You only observe the sample $X$, and need to tell me which distribution it came from.
+
+This is exactly like our usual simple versus simple hypothesis testing problem, except I pick each hypothesis with probability $1/2$ (formally this is what would be called a Bayesian hypothesis testing problem).
+
+Now, suppose you have a test $\Psi: X \mapsto \{0,1\}$, then I can define its error rate as:
+\begin{align*}
+\mathbb{P}(\Psi(X) \neq T) = \frac{1}{2} \left[ \mathbb{P}_0 (\Psi(X) \neq 0) + \mathbb{P}_1 (\Psi(X) \neq 1) \right].
+\end{align*}
+
+Roughly, we might believe that if $P_0$ and $P_1$ are close in an appropriate distance measure then the error rate of the best possible test should be high and otherwise the error rate should be low. This is known an Le Cam's Lemma.
+
+\begin{lemma}
+For any two distributions $P_0, P_1$, we have that,
+\begin{align*}
+\inf_{\Psi} \mathbb{P}(\Psi(X) \neq T) = \frac{1}{2} \left( 1 - \text{TV}(P_0,P_1)\right).
+\end{align*}
+\end{lemma}
+Before we prove this result we should take some time to appreciate it. What Le Cam's Lemma tells us is that if two distributions are close in TV then \emph{no test} can distinguish them. In some sense TV is the right notion of distance for statistical applications. In fact, in theoretical CS, the TV distance is sometimes referred to as the \emph{statistical distance} (I do not endorse this terminology). 
+It is also the case that the likelihood ratio test achieves this bound exactly (should not surprise you since it is a simple-vs-simple hypothesis test). 
+
+{\bf Proof: } For any test $\Psi$ we can denote its acceptance region $A$, i.e. if $X \in A$ then $\Psi(X) = 0$. Then,
+\begin{align*}
+\frac{1}{2} \left[ \mathbb{P}_0 (\Psi(X) \neq 0) + \mathbb{P}_1 (\Psi(X) \neq 1) \right] &= \frac{1}{2} \left[ 
+ \mathbb{P}_0 (X \notin A) + \mathbb{P}_1 (X \in A) \right] \\
+ &= \frac{1}{2} \left[ 1 - (\mathbb{P}_0 (X \in A) - \mathbb{P}_1 (X \in A))\right].
+\end{align*}
+So to find the best test we simply minimize the RHS or equivalently:
+\begin{align*}
+\frac{1}{2} \left[ \mathbb{P}_0 (\Psi(X) \neq 0) + \mathbb{P}_1 (\Psi(X) \neq 1) \right] &=
+\frac{1}{2} \left[ 1 - \sup_{A} (\mathbb{P}_0 (X \in A) - \mathbb{P}_1 (X \in A))\right] \\
+&= \frac{1}{2} \left( 1 - \text{TV}(P_0,P_1)\right).
+\end{align*}
+
+
+As another quick aside this is the basic way to prove more sophisticated minimax lower bounds in estimation. Roughly, the argument is simply suppose we wanted to estimate the parameter $\theta$ from samples from a distribution $P_{\theta}$, for $\theta \in \Theta$. We then consider the following exercise: find two distributions $P_{\theta_1}$ and $P_{\theta_2}$ that have:
+\begin{align*}
+\text{TV}(P_{\theta_1}, P_{\theta_2}) \leq \frac{1}{2},
+\end{align*}
+but that have some distance $d(\theta_1,\theta_2) \geq \delta$. Then it is not too hard to show that the minimax risk:
+\begin{align*}
+\inf_{\widehat{\theta}} \sup_{\theta \in \Theta} \mathbb{E}[d(\widehat{\theta},\theta)] &\geq \inf_{\widehat{\theta}} \sup_{\theta \in \{\theta_1,\theta_2\}} \mathbb{E} [d(\widehat{\theta},\theta)] \\
+&\geq c \delta,
+\end{align*}
+for some constant $c > 0$. This should be intuitive, i.e. if there are two distributions for which the parameter distance is $\delta$ but we cannot reliably tell them apart then the expected error of any estimator should be at least (roughly) $\delta$. 
+
+Close analogues of Le Cam's Lemma hold for all of the other divergences above, i.e. roughly, if any of the $\chi^2$, Hellinger or KL divergences are small then we cannot reliably distinguish between the two distributions. If you want a formal statement see Theorem 2.2 in Tsybakov's book.
+
+\section{Tensorization}
+Given the above fact, that all of the distances we defined so far are in some sense ``fundamental'' in hypothesis testing, a natural question is why do we need all these different distances?
+
+The answer is a bit technical, but roughly, when we want to compute a lower bound (i.e. understand the fundamental statistical difficulty of our problem) some divergences might be easier to compute than others. For instance, it is often the case that for mixture distributions the $\chi^2$ is easy to compute, while for many parametric models the KL divergence is natural (in part because it is closely related to the Fisher distance as you have seen in some earlier HW). Knowing which divergence to use when is a bit of an art but having many tools in your toolbox is always useful.
+
+One natural thing that will arise in statistical applications is that unlike the above setting of Le Cam's Lemma we will observe $n$ i.i.d. samples $X_1,\ldots,X_n \sim P$, rather than just one sample. Everything we have said so far works in exactly the same way, except we need to calculate the distance between the product measures, i.e. $d(P^n, Q^n)$, which is just the distance between the distributions:
+\begin{align*}
+p(X_1,\ldots,X_n) = \prod_{i=1}^n p(X_i).
+\end{align*}
+For the TV distance this turns out to be quite difficult to do directly. However, one of the most useful properties of the Hellinger and KL distance is that they \emph{tensorize}, i.e. they behave nicely with respect to product distributions. In particular, we have the following useful relationships:
+\begin{align*}
+\text{KL}(P^n, Q^n) &= n \text{KL}(P,Q) \\
+H^2(P^n,Q^n) &= 2\left( 1 - \left(1 - \frac{H^2(P,Q)}{2} \right)^n \right) = 2\left( 1 - \rho(P,Q)^n \right),
+\end{align*}
+where $\rho$ is the affinity defined earlier. The key point is that when we see $n$ i.i.d samples it is easy to compute the KL and Hellinger. 
+
+\section{Inequalities}
+Given the fact that these four distances are fundamental and that they have potentially different settings where they are easy to use it is also useful to have inequalities that relate these distances. There are many (I refer to them as Pinsker-type inequalities) and many textbooks will list them all.
+
+The following inequalities reveal a sort of hierarchy between the distances:
+\begin{align*}
+\text{TV}(P,Q) \leq H(P,Q) \leq \sqrt{\text{KL}(P,Q)} \leq \sqrt{\chi^2(P,Q)}.
+\end{align*}
+This chain of inequalities should explain why it is the case that if any of these distances are too small we cannot distinguish the distributions. In particular, if any distance is too small then the TV must be small and we then use Le Cam's Lemma.
+
+There are also reverse inequalities in some cases (but not all). For instance:
+\begin{align*}
+\frac{1}{2} H^2(P,Q) \leq \text{TV}(P,Q) \leq H(P,Q),
+\end{align*}
+so up to the square factor Hellinger and TV are closely related.
+
+\section{Distances from parametric families}
+We have encountered these before: they are usually only defined for parametric families:
+\begin{enumerate}
+\item Fisher information distance: for two distributions $P_{\theta_1}, P_{\theta_2}$ we have that,
+\begin{align*}
+d(P_{\theta_1},P_{\theta_2}) = (\theta_1 - \theta_2)^T I(\theta_1)^{-1} (\theta_1 - \theta_2).
+\end{align*}
+\item Mahalanobis distance: for two distributions $P_{\theta_1}, P_{\theta_2}$, with means $\mu_1, \mu_2$ and covariances $\Sigma_1, \Sigma_2$, the Mahalanobis distance would be:
+\begin{align*}
+d(P_{\theta_1},P_{\theta_2}) = (\mu_1 - \mu_2)^T \Sigma_1^{-1} (\mu_1 - \mu_2).
+\end{align*}
+This is just the Fisher distance for the Gaussian family with known covariance.
+\end{enumerate}
+
+\section{Distances for data analysis}
+Although the distances we have discussed so far are fundamental for many analytic purposes, we do not often use them in data analysis. This is because they can be difficult to estimate in practice.  Ideally, we want to roughly be able to trade-off how ``expressive'' the distance is versus how easy it is to estimate (and the distances so far are on one end of the spectrum).
+
+To be a bit more concrete lets think about a typical setting (closely related to two-sample testing that we have discussed earlier): we observe samples $X_1,\ldots,X_n \sim P$ and $Y_1,\ldots,Y_n \sim Q$, and we want to know how different the two distributions are, i.e. we want to \emph{estimate} some divergence between $P$ and $Q$ given samples.
+
+This idea has caught on again recently because of GANs, where roughly we want to generate samples that come from a distribution that is close to the distribution that generated the training samples, and often we do this by estimating a distance between the training and generated distributions and then trying to make it small.
+
+Another popular task is \emph{independence testing} or \emph{measuring dependence} where we are given samples $(X_1,Y_1), \ldots, (X_n,Y_n) \sim P_{XY}$ and we want to estimate/test how far apart $P_{XY}$ and $P_X P_Y$ are (i.e. we want to know how far apart the joint and product of marginals are).
+
+\section{Integral Probability Metrics}
+If two distributions $P,Q$ are identical then it should be clear that for any (measurable) function $f$, it must be the case that:
+\begin{align*}
+\mathbb{E}_{X \sim P} [f(X)] = \mathbb{E}_{Y \sim Q} [f(Y)].
+\end{align*}
+One might wonder if the reverse implication is true, i.e. is it that if $P \neq Q$ then there must be some \emph{witness} function $f$ such that:
+\begin{align*}
+\mathbb{E}_{X \sim P} [f(X)] \neq \mathbb{E}_{Y \sim Q} [f(Y)].
+\end{align*}
+It turns out that this statement is indeed true. In particular, we have the following classical lemma.
+\begin{lemma}
+Two distributions $P,Q$ are identical if and only if for every continuous function $f \in C(\mathcal{X})$
+\begin{align*}
+\mathbb{E}_{X \sim P} [f(X)] = \mathbb{E}_{Y \sim Q} [f(Y)].
+\end{align*}
+\end{lemma}
+
+This result suggests that to measure the distance between two distributions we could use a so-called integral probability metric (IPM):
+\begin{align*}
+d_{\mathcal{F}}(P,Q) = \sup_{f \in \mathcal{F}} |\mathbb{E}_{X \sim P} [f(X)] - \mathbb{E}_{Y \sim Q} [f(Y)]|,
+\end{align*}
+where $\mathcal{F}$ is a class of functions. We note that the TV distance is thus just an IPM with 
+$\mathcal{F} = \{f: \|f\|_{\infty} \leq 1\}.$
+This class of functions (as well as the class of all continuous functions)
+is too large to be useful statistically, i.e. it is the case that these IPMs are not easy to estimate from data, so we instead use function classes that have \emph{smooth} functions.
+
+\section{Wasserstein distance}
+A natural class of smooth functions is the class of 1-Lipschitz functions, i.e.
+\begin{align*}
+\mathcal{F}_L = \{f: f \text{continous }, |f(x) - f(y)| \leq \|x - y\| \}.
+\end{align*}
+The corresponding IPM is known as the Wasserstein 1 distance:
+\begin{align*}
+W_1(P,Q) = \sup_{f \in \mathcal{F}_L} |\mathbb{E}_{X \sim P} [f(X)] - \mathbb{E}_{Y \sim Q} [f(Y)]|.
+\end{align*}
+As with the TV there are many alternative ways of defining the Wasserstein distance. In particular, there are very nice interpretations of Wasserstein as a distance between ``couplings'' and as a so-called transportation distance.
+
+The Wasserstein distance has the somewhat nice property of being well-defined between a discrete and continuous distribution, i.e. the two distributions you are comparing do not need to have the same support. This is one of the big reasons why they are popular in ML.
+
+\section{Maximum Mean Discrepancy}
+Another natural class of IPMs is where we restrict $\mathcal{F}$ to be a unit ball in a Reproducing Kernel Hilbert Space (RKHS). An RKHS is a function space associated with a kernel function $k$ that satisfies some regularity conditions. We will not be too formal about this but you should think of an RKHS as another class of smooth functions (just like the 1-Lipschitz functions) that has some very convenient properties. A kernel is some measure of similarity, a commonly used one if the RBF kernel:
+\begin{align*}
+k(X,Y) = \exp \left[ -  \frac{\|X - Y\|_2^2}{2\sigma^2} \right]
+\end{align*}
+
+The MMD is a typical IPM:
+\begin{align*}
+\text{MMD}(P,Q) = \sup_{f \in \mathcal{F}_k} |\mathbb{E}_{X \sim P} [f(X)] - \mathbb{E}_{Y \sim Q} [f(Y)]|,
+\end{align*}
+but because the space is an RKHS with a kernel $k$, it turns out we can write this distance as:
+\begin{align*}
+\text{MMD}(P,Q) = \mathbb{E}_{X,X' \sim P} k(X,X') + \mathbb{E}_{Y,Y' \sim Q} k(Y,Y')
+- 2 \mathbb{E}_{X \sim P, Y \sim Q} k(X,Y).
+\end{align*}
+Intuitively, we are contrasting how similar the samples from $P$ look to each other and $Q$ look to each other to how similar the samples of $P$ are to $Q$. If $P$ and $Q$ are the same then all of these expectations should be the same and the MMD will be 0.
+
+The key point that makes the MMD so popular is that it is completely trivial to estimate the MMD since it is a bunch of expected values for which we can use the empirical expectations. We have discussed U-statistics before, the MMD can be estimated by a simple U-statistic:
+\begin{align*}
+\widehat{MMD}(P,Q) = \frac{1}{n(n-1)} \sum_{i=1}^n \sum_{j \neq i} k(X_i,X_j) +  \frac{1}{n(n-1)} \sum_{i=1}^n \sum_{j \neq i} k(Y_i,Y_j) - \frac{2}{n^2} \sum_{i=1}^n \sum_{j=1}^n k(X_i,Y_j).
+\end{align*}
+
+In particular, if the kernel is bounded then we can use a Hoeffding-style bound to conclude that we can estimate the MMD at $1/\sqrt{n}$ rates.
+
+However, the usefulness of the MMD hinges not on how well we can estimate it but on how strong a notion of distance it is, i.e. for distributions that are quite different (say in the TV/Hellinger/\ldots distances), is it the case that the MMD is large? This turns out to be quite a difficult question to answer.
+
+\end{document}
+
+
+
+
+
